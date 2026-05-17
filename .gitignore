@@ -17,16 +17,26 @@ coverage.*
 *.coverprofile
 profile.cov
 
-# Dependency directories (remove the comment below to include it)
-# vendor/
-
 # Go workspace file
 go.work
 go.work.sum
 
-# env file
+# Environment
 .env
 
-# Editor/IDE
-# .idea/
-# .vscode/
+# Go
+bin/
+*.exe
+*.test
+*.out
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+
+# App data
+*.db
+*.sqlite
