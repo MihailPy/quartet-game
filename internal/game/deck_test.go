@@ -144,3 +144,106 @@ func TestNewQuartetInvalid(t *testing.T) {
 		})
 	}
 }
+
+func TestNewDeck(t *testing.T) {
+	quartet := Quartet{
+		ID:    "quartet_1",
+		Title: "Самолёты",
+		Cards: []Card{
+			{ID: "card_1", QuartetID: "quartet_1", Title: "Boeing 747"},
+			{ID: "card_2", QuartetID: "quartet_1", Title: "Airbus A380"},
+			{ID: "card_3", QuartetID: "quartet_1", Title: "Concorde"},
+			{ID: "card_4", QuartetID: "quartet_1", Title: "Ан-225"},
+		},
+	}
+
+	deck, err := NewDeck("deck_1", "Транспорт", []Quartet{quartet})
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	if deck.ID != "deck_1" {
+		t.Fatalf("expected deck ID deck_1, got %s", deck.ID)
+	}
+
+	if deck.Title != "Транспорт" {
+		t.Fatalf("expected title Транспорт, got %s", deck.Title)
+	}
+
+	if len(deck.Quartets) != 1 {
+		t.Fatalf("expected 1 quartet, got %d", len(deck.Quartets))
+	}
+}
+
+func TestNewDeckInvalid(t *testing.T) {
+	quartet := Quartet{
+		ID:    "quartet_1",
+		Title: "Самолёты",
+		Cards: []Card{
+			{ID: "card_1", QuartetID: "quartet_1", Title: "Boeing 747"},
+			{ID: "card_2", QuartetID: "quartet_1", Title: "Airbus A380"},
+			{ID: "card_3", QuartetID: "quartet_1", Title: "Concorde"},
+			{ID: "card_4", QuartetID: "quartet_1", Title: "Ан-225"},
+		},
+	}
+
+	tests := []struct {
+		name     string
+		id       DeckID
+		title    string
+		quartets []Quartet
+	}{
+		{
+			name:     "empty id",
+			id:       "",
+			title:    "Транспорт",
+			quartets: []Quartet{quartet},
+		},
+		{
+			name:     "empty title",
+			id:       "deck_1",
+			title:    "",
+			quartets: []Quartet{quartet},
+		},
+		{
+			name:     "empty quartets",
+			id:       "deck_1",
+			title:    "Транспорт",
+			quartets: nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, err := NewDeck(tt.id, tt.title, tt.quartets)
+			if err == nil {
+				t.Fatal("expected error, got nil")
+			}
+		})
+	}
+}
+
+func TestDeckCards(t *testing.T) {
+	quartet := Quartet{
+		ID:    "quartet_1",
+		Title: "Самолёты",
+		Cards: []Card{
+			{ID: "card_1", QuartetID: "quartet_1", Title: "Boeing 747"},
+			{ID: "card_2", QuartetID: "quartet_1", Title: "Airbus A380"},
+			{ID: "card_3", QuartetID: "quartet_1", Title: "Concorde"},
+			{ID: "card_4", QuartetID: "quartet_1", Title: "Ан-225"},
+		},
+	}
+
+	deck := Deck{
+		ID:       "deck_1",
+		Title:    "Транспорт",
+		Quartets: []Quartet{quartet},
+	}
+
+	cards := deck.Cards()
+
+	if len(cards) != 4 {
+		t.Fatalf("expected 4 cards, got %d", len(cards))
+	}
+}

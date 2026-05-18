@@ -66,3 +66,43 @@ func NewQuartet(id QuartetID, title string, cards []Card) (Quartet, error) {
 		Cards: cards,
 	}, nil
 }
+
+var ErrInvalidDeck = errors.New("invalid deck")
+
+type DeckID string
+
+type Deck struct {
+	ID       DeckID
+	Title    string
+	Quartets []Quartet
+}
+
+func NewDeck(id DeckID, title string, quartets []Quartet) (Deck, error) {
+	if id == "" {
+		return Deck{}, ErrInvalidDeck
+	}
+
+	if title == "" {
+		return Deck{}, ErrInvalidDeck
+	}
+
+	if len(quartets) == 0 {
+		return Deck{}, ErrInvalidDeck
+	}
+
+	return Deck{
+		ID:       id,
+		Title:    title,
+		Quartets: quartets,
+	}, nil
+}
+
+func (d Deck) Cards() []Card {
+	cards := make([]Card, 0, len(d.Quartets)*4)
+
+	for _, quartet := range d.Quartets {
+		cards = append(cards, quartet.Cards...)
+	}
+
+	return cards
+}
