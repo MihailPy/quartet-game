@@ -57,3 +57,90 @@ func TestNewCardInvalid(t *testing.T) {
 		})
 	}
 }
+
+func TestNewQuartet(t *testing.T) {
+	cards := []Card{
+		{ID: "card_1", QuartetID: "quartet_1", Title: "Boeing 747"},
+		{ID: "card_2", QuartetID: "quartet_1", Title: "Airbus A380"},
+		{ID: "card_3", QuartetID: "quartet_1", Title: "Concorde"},
+		{ID: "card_4", QuartetID: "quartet_1", Title: "Ан-225"},
+	}
+
+	quartet, err := NewQuartet("quartet_1", "Самолёты", cards)
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	if quartet.ID != "quartet_1" {
+		t.Fatalf("expected quartet ID quartet_1, got %s", quartet.ID)
+	}
+
+	if quartet.Title != "Самолёты" {
+		t.Fatalf("expected title Самолёты, got %s", quartet.Title)
+	}
+
+	if len(quartet.Cards) != 4 {
+		t.Fatalf("expected 4 cards, got %d", len(quartet.Cards))
+	}
+}
+
+func TestNewQuartetInvalid(t *testing.T) {
+	validCards := []Card{
+		{ID: "card_1", QuartetID: "quartet_1", Title: "Boeing 747"},
+		{ID: "card_2", QuartetID: "quartet_1", Title: "Airbus A380"},
+		{ID: "card_3", QuartetID: "quartet_1", Title: "Concorde"},
+		{ID: "card_4", QuartetID: "quartet_1", Title: "Ан-225"},
+	}
+
+	tests := []struct {
+		name  string
+		id    QuartetID
+		title string
+		cards []Card
+	}{
+		{
+			name:  "empty id",
+			id:    "",
+			title: "Самолёты",
+			cards: validCards,
+		},
+		{
+			name:  "empty title",
+			id:    "quartet_1",
+			title: "",
+			cards: validCards,
+		},
+		{
+			name:  "less than 4 cards",
+			id:    "quartet_1",
+			title: "Самолёты",
+			cards: validCards[:3],
+		},
+		{
+			name:  "more than 4 cards",
+			id:    "quartet_1",
+			title: "Самолёты",
+			cards: append(validCards, Card{ID: "card_5", QuartetID: "quartet_1", Title: "Extra"}),
+		},
+		{
+			name:  "card from another quartet",
+			id:    "quartet_1",
+			title: "Самолёты",
+			cards: []Card{
+				{ID: "card_1", QuartetID: "quartet_1", Title: "Boeing 747"},
+				{ID: "card_2", QuartetID: "quartet_1", Title: "Airbus A380"},
+				{ID: "card_3", QuartetID: "quartet_1", Title: "Concorde"},
+				{ID: "card_4", QuartetID: "quartet_2", Title: "Ан-225"},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, err := NewQuartet(tt.id, tt.title, tt.cards)
+			if err == nil {
+				t.Fatal("expected error, got nil")
+			}
+		})
+	}
+}
