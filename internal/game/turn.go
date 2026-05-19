@@ -35,3 +35,23 @@ func EnsurePlayerTurn(state *GameState, playerID PlayerID) error {
 
 	return nil
 }
+
+var ErrCannotChangeTurn = errors.New("cannot change turn")
+
+func ChangeTurnTo(state *GameState, playerID PlayerID) error {
+	if state == nil {
+		return ErrCannotChangeTurn
+	}
+
+	if playerID == "" {
+		return ErrCannotChangeTurn
+	}
+
+	if !PlayerExists(state, playerID) {
+		return ErrCannotChangeTurn
+	}
+
+	state.CurrentPlayerID = playerID
+
+	return nil
+}
