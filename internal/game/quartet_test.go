@@ -234,3 +234,99 @@ func TestCheckCompletedQuartetsAfterReceivingFourthCard(t *testing.T) {
 		t.Fatalf("expected player_2 hand to be empty after transfer, got %d cards", len(state.Hands["player_2"]))
 	}
 }
+
+func TestCompleteQuartet(t *testing.T) {
+	deck := testDeck()
+
+	players := []Player{
+		{ID: "player_1", Name: "Mihail"},
+		{ID: "player_2", Name: "Anna"},
+	}
+
+	state, err := NewGame("game_1", deck, players)
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	state.Hands["player_1"] = deck.Cards()
+
+	err = CompleteQuartet(&state, "player_1", "quartet_1")
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	if len(state.Completed["player_1"]) != 1 {
+		t.Fatalf("expected 1 completed quartet, got %d", len(state.Completed["player_1"]))
+	}
+
+	if state.Completed["player_1"][0] != "quartet_1" {
+		t.Fatalf("expected quartet_1, got %s", state.Completed["player_1"][0])
+	}
+
+	if len(state.Hands["player_1"]) != 0 {
+		t.Fatalf("expected empty hand, got %d cards", len(state.Hands["player_1"]))
+	}
+}
+
+func TestCompleteQuartetInvalid(t *testing.T) {
+	deck := testDeck()
+
+	players := []Player{
+		{ID: "player_1", Name: "Mihail"},
+		{ID: "player_2", Name: "Anna"},
+	}
+
+	state, err := NewGame("game_1", deck, players)
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	state.Hands["player_1"] = deck.Cards()[:3]
+
+	tests := []struct {
+		name      string
+		state     *GameState
+		playerID  PlayerID
+		quartetID QuartetID
+	}{
+		{
+			name:      "nil state",
+			state:     nil,
+			playerID:  "player_1",
+			quartetID: "quartet_1",
+		},
+		{
+			name:      "empty player id",
+			state:     &state,
+			playerID:  "",
+			quartetID: "quartet_1",
+		},
+		{
+			name:      "empty quartet id",
+			state:     &state,
+			playerID:  "player_1",
+			quartetID: "",
+		},
+		{
+			name:      "not enough cards",
+			state:     &state,
+			playerID:  "player_1",
+			quartetID: "quartet_1",
+		},
+		{
+			name:      "unknown quartet",
+			state:     &state,
+			playerID:  "player_1",
+			quartetID: "unknown_quartet",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := CompleteQuartet(tt.state, tt.playerID, tt.quartetID)
+			if err == nil {
+				t.Fatal("expected error, got nil")
+			}
+		})
+	}
+}

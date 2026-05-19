@@ -14,9 +14,12 @@ func CheckCompletedQuartets(state *GameState, playerID PlayerID) []QuartetID {
 
 	for quartetID, cards := range grouped {
 		if len(cards) == 4 {
+			err := CompleteQuartet(state, playerID, quartetID)
+			if err != nil {
+				continue
+			}
+
 			completed = append(completed, quartetID)
-			state.Completed[playerID] = append(state.Completed[playerID], quartetID)
-			removeCardsFromHand(state, playerID, cards)
 		}
 	}
 
@@ -74,4 +77,33 @@ func EnsurePlayerHasCardFromQuartet(state *GameState, playerID PlayerID, quartet
 	}
 
 	return ErrPlayerHasNoCardFromQuartet
+}
+
+var ErrCannotCompleteQuartet = errors.New("cannot complete quartet")
+
+func CompleteQuartet(state *GameState, playerID PlayerID, quartetID QuartetID) error {
+	if state == nil {
+		return ErrCannotCompleteQuartet
+	}
+
+	if playerID == "" || quartetID == "" {
+		return ErrCannotCompleteQuartet
+	}
+
+	cards := []Card{}
+
+	for _, card := range state.Hands[playerID] {
+		if card.QuartetID == quartetID {
+			cards = append(cards, card)
+		}
+	}
+
+	if len(cards) != 4 {
+		return ErrCannotCompleteQuartet
+	}
+
+	state.Completed[playerID] = append(state.Completed[playerID], quartetID)
+	removeCardsFromHand(state, playerID, cards)
+
+	return nil
 }
