@@ -17,3 +17,21 @@ func ChooseFirstPlayer(state *GameState) error {
 
 	return nil
 }
+
+var ErrNotPlayerTurn = errors.New("not player turn")
+
+func EnsurePlayerTurn(state *GameState, playerID PlayerID) error {
+	if state == nil {
+		return ErrNotPlayerTurn
+	}
+
+	if playerID == "" {
+		return ErrNotPlayerTurn
+	}
+
+	if state.CurrentPlayerID != playerID {
+		return ErrNotPlayerTurn
+	}
+
+	return nil
+}

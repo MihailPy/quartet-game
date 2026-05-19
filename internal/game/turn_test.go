@@ -31,3 +31,71 @@ func TestChooseFirstPlayerInvalid(t *testing.T) {
 		t.Fatal("expected error, got nil")
 	}
 }
+
+func TestEnsurePlayerTurn(t *testing.T) {
+	deck := testDeck()
+
+	players := []Player{
+		{ID: "player_1", Name: "Mihail"},
+		{ID: "player_2", Name: "Anna"},
+	}
+
+	state, err := NewGame("game_1", deck, players)
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	state.CurrentPlayerID = "player_1"
+
+	err = EnsurePlayerTurn(&state, "player_1")
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+}
+
+func TestEnsurePlayerTurnInvalid(t *testing.T) {
+	deck := testDeck()
+
+	players := []Player{
+		{ID: "player_1", Name: "Mihail"},
+		{ID: "player_2", Name: "Anna"},
+	}
+
+	state, err := NewGame("game_1", deck, players)
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	state.CurrentPlayerID = "player_1"
+
+	tests := []struct {
+		name     string
+		state    *GameState
+		playerID PlayerID
+	}{
+		{
+			name:     "nil state",
+			state:    nil,
+			playerID: "player_1",
+		},
+		{
+			name:     "empty player id",
+			state:    &state,
+			playerID: "",
+		},
+		{
+			name:     "wrong player turn",
+			state:    &state,
+			playerID: "player_2",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := EnsurePlayerTurn(tt.state, tt.playerID)
+			if err == nil {
+				t.Fatal("expected error, got nil")
+			}
+		})
+	}
+}
