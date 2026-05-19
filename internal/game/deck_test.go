@@ -247,3 +247,47 @@ func TestDeckCards(t *testing.T) {
 		t.Fatalf("expected 4 cards, got %d", len(cards))
 	}
 }
+
+func TestDeckFindCard(t *testing.T) {
+	deck := testDeck()
+
+	card, err := deck.FindCard("card_1")
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	if card.ID != "card_1" {
+		t.Fatalf("expected card card_1, got %s", card.ID)
+	}
+
+	if card.Title != "Boeing 747" {
+		t.Fatalf("expected title Boeing 747, got %s", card.Title)
+	}
+}
+
+func TestDeckFindCardInvalid(t *testing.T) {
+	deck := testDeck()
+
+	tests := []struct {
+		name   string
+		cardID CardID
+	}{
+		{
+			name:   "empty card id",
+			cardID: "",
+		},
+		{
+			name:   "unknown card id",
+			cardID: "unknown_card",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, err := deck.FindCard(tt.cardID)
+			if err == nil {
+				t.Fatal("expected error, got nil")
+			}
+		})
+	}
+}
