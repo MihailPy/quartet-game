@@ -106,3 +106,19 @@ func (d Deck) Cards() []Card {
 
 	return cards
 }
+
+var ErrCardNotFound = errors.New("card not found")
+
+func (d Deck) FindCard(cardID CardID) (Card, error) {
+	if cardID == "" {
+		return Card{}, ErrCardNotFound
+	}
+
+	for _, card := range d.Cards() {
+		if card.ID == cardID {
+			return card, nil
+		}
+	}
+
+	return Card{}, ErrCardNotFound
+}
