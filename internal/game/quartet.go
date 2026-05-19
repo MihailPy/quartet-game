@@ -1,5 +1,7 @@
 package game
 
+import "errors"
+
 func CheckCompletedQuartets(state *GameState, playerID PlayerID) []QuartetID {
 	completed := []QuartetID{}
 
@@ -48,4 +50,28 @@ func removeCardsFromHand(state *GameState, playerID PlayerID, cardsToRemove []Ca
 	}
 
 	state.Hands[playerID] = newHand
+}
+
+var ErrPlayerHasNoCardFromQuartet = errors.New("player has no card from quartet")
+
+func EnsurePlayerHasCardFromQuartet(state *GameState, playerID PlayerID, quartetID QuartetID) error {
+	if state == nil {
+		return ErrPlayerHasNoCardFromQuartet
+	}
+
+	if playerID == "" {
+		return ErrPlayerHasNoCardFromQuartet
+	}
+
+	if quartetID == "" {
+		return ErrPlayerHasNoCardFromQuartet
+	}
+
+	for _, card := range state.Hands[playerID] {
+		if card.QuartetID == quartetID {
+			return nil
+		}
+	}
+
+	return ErrPlayerHasNoCardFromQuartet
 }
