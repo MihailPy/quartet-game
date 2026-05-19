@@ -179,3 +179,58 @@ func TestEnsurePlayerHasCardFromQuartetInvalid(t *testing.T) {
 		})
 	}
 }
+
+func TestCheckCompletedQuartetsAfterReceivingFourthCard(t *testing.T) {
+	deck := testDeck()
+
+	players := []Player{
+		{ID: "player_1", Name: "Mihail"},
+		{ID: "player_2", Name: "Anna"},
+	}
+
+	state, err := NewGame("game_1", deck, players)
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	state.Hands["player_1"] = []Card{
+		{ID: "card_1", QuartetID: "quartet_1", Title: "Boeing 747"},
+		{ID: "card_2", QuartetID: "quartet_1", Title: "Airbus A380"},
+		{ID: "card_3", QuartetID: "quartet_1", Title: "Concorde"},
+	}
+
+	state.Hands["player_2"] = []Card{
+		{ID: "card_4", QuartetID: "quartet_1", Title: "Ан-225"},
+	}
+
+	err = TransferCard(&state, "player_2", "player_1", "card_4")
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	completed := CheckCompletedQuartets(&state, "player_1")
+
+	if len(completed) != 1 {
+		t.Fatalf("expected 1 completed quartet, got %d", len(completed))
+	}
+
+	if completed[0] != "quartet_1" {
+		t.Fatalf("expected completed quartet quartet_1, got %s", completed[0])
+	}
+
+	if len(state.Completed["player_1"]) != 1 {
+		t.Fatalf("expected player_1 to have 1 completed quartet, got %d", len(state.Completed["player_1"]))
+	}
+
+	if state.Completed["player_1"][0] != "quartet_1" {
+		t.Fatalf("expected completed quartet quartet_1, got %s", state.Completed["player_1"][0])
+	}
+
+	if len(state.Hands["player_1"]) != 0 {
+		t.Fatalf("expected player_1 hand to be empty after completing quartet, got %d cards", len(state.Hands["player_1"]))
+	}
+
+	if len(state.Hands["player_2"]) != 0 {
+		t.Fatalf("expected player_2 hand to be empty after transfer, got %d cards", len(state.Hands["player_2"]))
+	}
+}
