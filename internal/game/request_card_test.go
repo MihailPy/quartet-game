@@ -109,3 +109,39 @@ func TestRequestCardFailureChangesTurn(t *testing.T) {
 		t.Fatal("expected player_2 not to have card_1")
 	}
 }
+
+func TestRequestCardInvalidWithoutQuartetCard(t *testing.T) {
+	deck := testDeck()
+	players := testPlayers()
+
+	state, err := NewGame("game_1", deck, players)
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	state.Status = GameStatusPlaying
+	state.CurrentPlayerID = "player_1"
+
+	state.Hands["player_1"] = []Card{}
+	state.Hands["player_2"] = []Card{
+		{ID: "card_1", QuartetID: "quartet_1", Title: "Boeing 747"},
+	}
+
+	command, err := NewRequestCardCommand("player_1", "player_2", "card_1")
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	_, err = RequestCard(&state, command)
+	if err == nil {
+		t.Fatal("expected error, got nil")
+	}
+
+	if state.CurrentPlayerID != "player_1" {
+		t.Fatalf("expected current player to stay player_1, got %s", state.CurrentPlayerID)
+	}
+
+	if !PlayerHasCard(&state, "player_2", "card_1") {
+		t.Fatal("expected player_2 to keep card_1")
+	}
+}
