@@ -5,10 +5,7 @@ import "testing"
 func TestDealCards(t *testing.T) {
 	deck := testDeck()
 
-	players := []Player{
-		{ID: "player_1", Name: "Mihail"},
-		{ID: "player_2", Name: "Anna"},
-	}
+	players := testPlayers()
 
 	state, err := NewGame("game_1", deck, players)
 	if err != nil {
@@ -32,11 +29,8 @@ func TestDealCards(t *testing.T) {
 func TestDealCardsWithThreePlayers(t *testing.T) {
 	deck := testDeck()
 
-	players := []Player{
-		{ID: "player_1", Name: "Mihail"},
-		{ID: "player_2", Name: "Anna"},
-		{ID: "player_3", Name: "Bob"},
-	}
+	players := testPlayers()
+	players = append(players, Player{ID: "player_3", Name: "Bob"})
 
 	state, err := NewGame("game_1", deck, players)
 	if err != nil {

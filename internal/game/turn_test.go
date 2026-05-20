@@ -5,10 +5,7 @@ import "testing"
 func TestChooseFirstPlayer(t *testing.T) {
 	deck := testDeck()
 
-	players := []Player{
-		{ID: "player_1", Name: "Mihail"},
-		{ID: "player_2", Name: "Anna"},
-	}
+	players := testPlayers()
 
 	state, err := NewGame("game_1", deck, players)
 	if err != nil {
@@ -35,10 +32,7 @@ func TestChooseFirstPlayerInvalid(t *testing.T) {
 func TestEnsurePlayerTurn(t *testing.T) {
 	deck := testDeck()
 
-	players := []Player{
-		{ID: "player_1", Name: "Mihail"},
-		{ID: "player_2", Name: "Anna"},
-	}
+	players := testPlayers()
 
 	state, err := NewGame("game_1", deck, players)
 	if err != nil {
@@ -56,10 +50,7 @@ func TestEnsurePlayerTurn(t *testing.T) {
 func TestEnsurePlayerTurnInvalid(t *testing.T) {
 	deck := testDeck()
 
-	players := []Player{
-		{ID: "player_1", Name: "Mihail"},
-		{ID: "player_2", Name: "Anna"},
-	}
+	players := testPlayers()
 
 	state, err := NewGame("game_1", deck, players)
 	if err != nil {
@@ -103,10 +94,7 @@ func TestEnsurePlayerTurnInvalid(t *testing.T) {
 func TestChangeTurnTo(t *testing.T) {
 	deck := testDeck()
 
-	players := []Player{
-		{ID: "player_1", Name: "Mihail"},
-		{ID: "player_2", Name: "Anna"},
-	}
+	players := testPlayers()
 
 	state, err := NewGame("game_1", deck, players)
 	if err != nil {
@@ -128,10 +116,7 @@ func TestChangeTurnTo(t *testing.T) {
 func TestChangeTurnToInvalid(t *testing.T) {
 	deck := testDeck()
 
-	players := []Player{
-		{ID: "player_1", Name: "Mihail"},
-		{ID: "player_2", Name: "Anna"},
-	}
+	players := testPlayers()
 
 	state, err := NewGame("game_1", deck, players)
 	if err != nil {

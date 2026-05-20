@@ -5,10 +5,7 @@ import "testing"
 func TestIsGameFinished(t *testing.T) {
 	deck := testDeck()
 
-	players := []Player{
-		{ID: "player_1", Name: "Mihail"},
-		{ID: "player_2", Name: "Anna"},
-	}
+	players := testPlayers()
 
 	state, err := NewGame("game_1", deck, players)
 	if err != nil {
@@ -25,10 +22,7 @@ func TestIsGameFinished(t *testing.T) {
 func TestIsGameFinishedFalse(t *testing.T) {
 	deck := testDeck()
 
-	players := []Player{
-		{ID: "player_1", Name: "Mihail"},
-		{ID: "player_2", Name: "Anna"},
-	}
+	players := testPlayers()
 
 	state, err := NewGame("game_1", deck, players)
 	if err != nil {
@@ -43,10 +37,7 @@ func TestIsGameFinishedFalse(t *testing.T) {
 func TestFinishGame(t *testing.T) {
 	deck := testDeck()
 
-	players := []Player{
-		{ID: "player_1", Name: "Mihail"},
-		{ID: "player_2", Name: "Anna"},
-	}
+	players := testPlayers()
 
 	state, err := NewGame("game_1", deck, players)
 	if err != nil {
@@ -66,10 +57,7 @@ func TestFinishGame(t *testing.T) {
 func TestFinishGameDoesNothingWhenNotFinished(t *testing.T) {
 	deck := testDeck()
 
-	players := []Player{
-		{ID: "player_1", Name: "Mihail"},
-		{ID: "player_2", Name: "Anna"},
-	}
+	players := testPlayers()
 
 	state, err := NewGame("game_1", deck, players)
 	if err != nil {

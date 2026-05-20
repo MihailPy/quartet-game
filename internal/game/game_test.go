@@ -5,10 +5,7 @@ import "testing"
 func TestNewGame(t *testing.T) {
 	deck := testDeck()
 
-	players := []Player{
-		{ID: "player_1", Name: "Mihail"},
-		{ID: "player_2", Name: "Anna"},
-	}
+	players := testPlayers()
 
 	state, err := NewGame("game_1", deck, players)
 	if err != nil {
@@ -31,7 +28,8 @@ func TestNewGame(t *testing.T) {
 func TestNewGameInvalid(t *testing.T) {
 	deck := testDeck()
 
-	players := []Player{
+	players := testPlayers()
+	players = []Player{
 		{ID: "player_1", Name: "Mihail"},
 	}
 
