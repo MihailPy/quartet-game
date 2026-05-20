@@ -145,3 +145,64 @@ func TestRequestCardInvalidWithoutQuartetCard(t *testing.T) {
 		t.Fatal("expected player_2 to keep card_1")
 	}
 }
+
+func TestRequestCardCompletesQuartet(t *testing.T) {
+	deck := testDeck()
+	players := testPlayers()
+
+	state, err := NewGame("game_1", deck, players)
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	state.Status = GameStatusPlaying
+	state.CurrentPlayerID = "player_1"
+
+	state.Hands["player_1"] = []Card{
+		{ID: "card_1", QuartetID: "quartet_1", Title: "Boeing 747"},
+		{ID: "card_2", QuartetID: "quartet_1", Title: "Airbus A380"},
+		{ID: "card_3", QuartetID: "quartet_1", Title: "Concorde"},
+	}
+
+	state.Hands["player_2"] = []Card{
+		{ID: "card_4", QuartetID: "quartet_1", Title: "Ан-225"},
+	}
+
+	command, err := NewRequestCardCommand("player_1", "player_2", "card_4")
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	result, err := RequestCard(&state, command)
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	if !result.Success {
+		t.Fatal("expected request to be successful")
+	}
+
+	if len(result.CompletedQuartets) != 1 {
+		t.Fatalf("expected 1 completed quartet, got %d", len(result.CompletedQuartets))
+	}
+
+	if result.CompletedQuartets[0] != "quartet_1" {
+		t.Fatalf("expected completed quartet quartet_1, got %s", result.CompletedQuartets[0])
+	}
+
+	if len(state.Completed["player_1"]) != 1 {
+		t.Fatalf("expected player_1 to have 1 completed quartet, got %d", len(state.Completed["player_1"]))
+	}
+
+	if state.Completed["player_1"][0] != "quartet_1" {
+		t.Fatalf("expected player_1 completed quartet quartet_1, got %s", state.Completed["player_1"][0])
+	}
+
+	if len(state.Hands["player_1"]) != 0 {
+		t.Fatalf("expected player_1 hand to be empty after completing quartet, got %d cards", len(state.Hands["player_1"]))
+	}
+
+	if len(state.Hands["player_2"]) != 0 {
+		t.Fatalf("expected player_2 hand to be empty after giving card, got %d cards", len(state.Hands["player_2"]))
+	}
+}
