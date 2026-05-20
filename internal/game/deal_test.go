@@ -61,3 +61,34 @@ func TestDealCardsInvalid(t *testing.T) {
 		t.Fatal("expected error, got nil")
 	}
 }
+
+func TestDealCardsDoesNotDuplicateCards(t *testing.T) {
+	deck := testDeck()
+	players := testPlayers()
+
+	state, err := NewGame("game_1", deck, players)
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	err = DealCards(&state, deck.Cards())
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	seen := make(map[CardID]bool)
+
+	for _, player := range players {
+		for _, card := range state.Hands[player.ID] {
+			if seen[card.ID] {
+				t.Fatalf("card %s was dealt more than once", card.ID)
+			}
+
+			seen[card.ID] = true
+		}
+	}
+
+	if len(seen) != len(deck.Cards()) {
+		t.Fatalf("expected %d unique dealt cards, got %d", len(deck.Cards()), len(seen))
+	}
+}
