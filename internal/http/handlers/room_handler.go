@@ -97,3 +97,40 @@ func (h *RoomHandler) GetRoom(w http.ResponseWriter, r *http.Request, roomID roo
 
 	_ = json.NewEncoder(w).Encode(foundRoom)
 }
+
+type ReadyRoomRequest struct {
+	PlayerID room.PlayerID `json:"player_id"`
+}
+
+func (h *RoomHandler) MarkPlayerReady(w http.ResponseWriter, r *http.Request, roomID room.RoomID) {
+	if r.Method != http.MethodPost {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+
+	var req ReadyRoomRequest
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	updatedRoom, err := h.manager.MarkPlayerReady(roomID, req.PlayerID)
+	if err != nil {
+		switch err {
+		case room.ErrRoomNotFound:
+			w.WriteHeader(http.StatusNotFound)
+		case room.ErrPlayerNotFound:
+			w.WriteHeader(http.StatusBadRequest)
+		default:
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	_ = json.NewEncoder(w).Encode(updatedRoom)
+}
