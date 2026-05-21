@@ -2,6 +2,7 @@ package http
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/MihailPy/quartet-game/internal/http/handlers"
 	"github.com/MihailPy/quartet-game/internal/room"
@@ -15,6 +16,24 @@ func NewRouter() http.Handler {
 
 	mux.HandleFunc("/health", healthHandler)
 	mux.HandleFunc("/rooms", roomHandler.CreateRoom)
+
+	mux.HandleFunc("/rooms/", func(w http.ResponseWriter, r *http.Request) {
+
+		path := strings.TrimPrefix(r.URL.Path, "/rooms/")
+		parts := strings.Split(path, "/")
+		if len(parts) != 2 {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+		roomID := room.RoomID(parts[0])
+		action := parts[1]
+		switch action {
+		case "join":
+			roomHandler.JoinRoom(w, r, roomID)
+		default:
+			w.WriteHeader(http.StatusNotFound)
+		}
+	})
 
 	return mux
 }

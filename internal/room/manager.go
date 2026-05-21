@@ -8,6 +8,7 @@ import (
 )
 
 var ErrRoomNotFound = errors.New("room not found")
+var ErrInvalidPlayerName = errors.New("invalid player name")
 
 type Manager struct {
 	mu    sync.RWMutex
@@ -25,8 +26,9 @@ func (m *Manager) CreateRoom() Room {
 	defer m.mu.Unlock()
 
 	room := Room{
-		ID:     RoomID(generateID()),
-		Status: RoomStatusWaiting,
+		ID:      RoomID(generateID()),
+		Status:  RoomStatusWaiting,
+		Players: []Player{},
 	}
 
 	m.rooms[room.ID] = room
@@ -55,4 +57,28 @@ func generateID() string {
 	}
 
 	return hex.EncodeToString(bytes)
+}
+
+func (m *Manager) JoinRoom(roomID RoomID, playerName string) (Player, Room, error) {
+	if playerName == "" {
+		return Player{}, Room{}, ErrInvalidPlayerName
+	}
+
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	currentRoom, ok := m.rooms[roomID]
+	if !ok {
+		return Player{}, Room{}, ErrRoomNotFound
+	}
+
+	player := Player{
+		ID:   PlayerID(generateID()),
+		Name: playerName,
+	}
+
+	currentRoom.Players = append(currentRoom.Players, player)
+	m.rooms[roomID] = currentRoom
+
+	return player, currentRoom, nil
 }

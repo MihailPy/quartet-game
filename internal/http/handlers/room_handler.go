@@ -30,3 +30,47 @@ func (h *RoomHandler) CreateRoom(w http.ResponseWriter, r *http.Request) {
 
 	_ = json.NewEncoder(w).Encode(createdRoom)
 }
+
+type JoinRoomRequest struct {
+	Name string `json:"name"`
+}
+
+type JoinRoomResponse struct {
+	Player room.Player `json:"player"`
+	Room   room.Room   `json:"room"`
+}
+
+func (h *RoomHandler) JoinRoom(w http.ResponseWriter, r *http.Request, roomID room.RoomID) {
+	if r.Method != http.MethodPost {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+
+	var req JoinRoomRequest
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	player, joinedRoom, err := h.manager.JoinRoom(roomID, req.Name)
+	if err != nil {
+		if err == room.ErrRoomNotFound {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	response := JoinRoomResponse{
+		Player: player,
+		Room:   joinedRoom,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+
+	_ = json.NewEncoder(w).Encode(response)
+}
