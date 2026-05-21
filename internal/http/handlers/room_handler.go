@@ -134,3 +134,29 @@ func (h *RoomHandler) MarkPlayerReady(w http.ResponseWriter, r *http.Request, ro
 
 	_ = json.NewEncoder(w).Encode(updatedRoom)
 }
+
+func (h *RoomHandler) StartRoom(w http.ResponseWriter, r *http.Request, roomID room.RoomID) {
+	if r.Method != http.MethodPost {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+
+	startedRoom, err := h.manager.StartRoom(roomID)
+	if err != nil {
+		switch err {
+		case room.ErrRoomNotFound:
+			w.WriteHeader(http.StatusNotFound)
+		case room.ErrNotEnoughPlayers, room.ErrNotAllPlayersReady, room.ErrRoomAlreadyStarted:
+			w.WriteHeader(http.StatusBadRequest)
+		default:
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	_ = json.NewEncoder(w).Encode(startedRoom)
+}

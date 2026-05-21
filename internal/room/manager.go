@@ -10,6 +10,9 @@ import (
 var ErrRoomNotFound = errors.New("room not found")
 var ErrInvalidPlayerName = errors.New("invalid player name")
 var ErrPlayerNotFound = errors.New("player not found")
+var ErrNotEnoughPlayers = errors.New("not enough players")
+var ErrNotAllPlayersReady = errors.New("not all players ready")
+var ErrRoomAlreadyStarted = errors.New("room already started")
 
 type Manager struct {
 	mu    sync.RWMutex
@@ -107,4 +110,33 @@ func (m *Manager) MarkPlayerReady(roomID RoomID, playerID PlayerID) (Room, error
 	}
 
 	return Room{}, ErrPlayerNotFound
+}
+
+func (m *Manager) StartRoom(roomID RoomID) (Room, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	currentRoom, ok := m.rooms[roomID]
+	if !ok {
+		return Room{}, ErrRoomNotFound
+	}
+
+	if currentRoom.Status == RoomStatusPlaying {
+		return Room{}, ErrRoomAlreadyStarted
+	}
+
+	if len(currentRoom.Players) < 2 {
+		return Room{}, ErrNotEnoughPlayers
+	}
+
+	for _, player := range currentRoom.Players {
+		if !player.IsReady {
+			return Room{}, ErrNotAllPlayersReady
+		}
+	}
+
+	currentRoom.Status = RoomStatusPlaying
+	m.rooms[roomID] = currentRoom
+
+	return currentRoom, nil
 }

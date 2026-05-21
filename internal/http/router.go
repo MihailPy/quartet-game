@@ -40,6 +40,8 @@ func NewRouter() http.Handler {
 			roomHandler.JoinRoom(w, r, roomID)
 		case "ready":
 			roomHandler.MarkPlayerReady(w, r, roomID)
+		case "start":
+			roomHandler.StartRoom(w, r, roomID)
 		default:
 			w.WriteHeader(http.StatusNotFound)
 		}
