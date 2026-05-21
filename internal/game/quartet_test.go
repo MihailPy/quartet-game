@@ -5,10 +5,7 @@ import "testing"
 func TestCheckCompletedQuartets(t *testing.T) {
 	deck := testDeck()
 
-	players := []Player{
-		{ID: "player_1", Name: "Mihail"},
-		{ID: "player_2", Name: "Anna"},
-	}
+	players := testPlayers()
 
 	state, err := NewGame("game_1", deck, players)
 	if err != nil {
@@ -39,10 +36,7 @@ func TestCheckCompletedQuartets(t *testing.T) {
 func TestCheckCompletedQuartetsNoQuartet(t *testing.T) {
 	deck := testDeck()
 
-	players := []Player{
-		{ID: "player_1", Name: "Mihail"},
-		{ID: "player_2", Name: "Anna"},
-	}
+	players := testPlayers()
 
 	state, err := NewGame("game_1", deck, players)
 	if err != nil {
@@ -69,10 +63,7 @@ func TestCheckCompletedQuartetsNoQuartet(t *testing.T) {
 func TestCheckAllCompletedQuartets(t *testing.T) {
 	deck := testDeck()
 
-	players := []Player{
-		{ID: "player_1", Name: "Mihail"},
-		{ID: "player_2", Name: "Anna"},
-	}
+	players := testPlayers()
 
 	state, err := NewGame("game_1", deck, players)
 	if err != nil {
@@ -95,10 +86,7 @@ func TestCheckAllCompletedQuartets(t *testing.T) {
 func TestEnsurePlayerHasCardFromQuartet(t *testing.T) {
 	deck := testDeck()
 
-	players := []Player{
-		{ID: "player_1", Name: "Mihail"},
-		{ID: "player_2", Name: "Anna"},
-	}
+	players := testPlayers()
 
 	state, err := NewGame("game_1", deck, players)
 	if err != nil {
@@ -118,10 +106,7 @@ func TestEnsurePlayerHasCardFromQuartet(t *testing.T) {
 func TestEnsurePlayerHasCardFromQuartetInvalid(t *testing.T) {
 	deck := testDeck()
 
-	players := []Player{
-		{ID: "player_1", Name: "Mihail"},
-		{ID: "player_2", Name: "Anna"},
-	}
+	players := testPlayers()
 
 	state, err := NewGame("game_1", deck, players)
 	if err != nil {
@@ -183,10 +168,7 @@ func TestEnsurePlayerHasCardFromQuartetInvalid(t *testing.T) {
 func TestCheckCompletedQuartetsAfterReceivingFourthCard(t *testing.T) {
 	deck := testDeck()
 
-	players := []Player{
-		{ID: "player_1", Name: "Mihail"},
-		{ID: "player_2", Name: "Anna"},
-	}
+	players := testPlayers()
 
 	state, err := NewGame("game_1", deck, players)
 	if err != nil {
@@ -238,10 +220,7 @@ func TestCheckCompletedQuartetsAfterReceivingFourthCard(t *testing.T) {
 func TestCompleteQuartet(t *testing.T) {
 	deck := testDeck()
 
-	players := []Player{
-		{ID: "player_1", Name: "Mihail"},
-		{ID: "player_2", Name: "Anna"},
-	}
+	players := testPlayers()
 
 	state, err := NewGame("game_1", deck, players)
 	if err != nil {
@@ -271,10 +250,7 @@ func TestCompleteQuartet(t *testing.T) {
 func TestCompleteQuartetInvalid(t *testing.T) {
 	deck := testDeck()
 
-	players := []Player{
-		{ID: "player_1", Name: "Mihail"},
-		{ID: "player_2", Name: "Anna"},
-	}
+	players := testPlayers()
 
 	state, err := NewGame("game_1", deck, players)
 	if err != nil {
