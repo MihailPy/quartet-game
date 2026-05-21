@@ -21,10 +21,18 @@ func NewRouter() http.Handler {
 
 		path := strings.TrimPrefix(r.URL.Path, "/rooms/")
 		parts := strings.Split(path, "/")
+
+		if len(parts) == 1 {
+			roomID := room.RoomID(parts[0])
+			roomHandler.GetRoom(w, r, roomID)
+			return
+		}
+
 		if len(parts) != 2 {
 			w.WriteHeader(http.StatusNotFound)
 			return
 		}
+
 		roomID := room.RoomID(parts[0])
 		action := parts[1]
 		switch action {
