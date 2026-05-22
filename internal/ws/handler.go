@@ -9,11 +9,13 @@ import (
 
 type Handler struct {
 	roomManager *room.Manager
+	hub         *Hub
 }
 
-func NewHandler(roomManager *room.Manager) *Handler {
+func NewHandler(roomManager *room.Manager, hub *Hub) *Handler {
 	return &Handler{
 		roomManager: roomManager,
+		hub:         hub,
 	}
 }
 
@@ -47,16 +49,16 @@ func (h *Handler) HandleConnection(w http.ResponseWriter, r *http.Request, roomI
 	}
 
 	defer conn.Close()
+	h.hub.AddConnection(roomID, playerID, conn)
+	defer h.hub.RemoveConnection(roomID, playerID)
 
-	err = conn.WriteJSON(map[string]string{
-		"type":      "connected",
-		"room_id":   string(roomID),
-		"player_id": string(playerID),
-		"message":   "player connected to room websocket",
+	h.hub.BroadcastToRoom(roomID, Event{
+		Type: "player_connected",
+		Payload: map[string]string{
+			"room_id":   string(roomID),
+			"player_id": string(playerID),
+		},
 	})
-	if err != nil {
-		return
-	}
 
 	for {
 		_, _, err := conn.ReadMessage()

@@ -18,7 +18,8 @@ func NewRouter() http.Handler {
 	mux.HandleFunc("/health", healthHandler)
 	mux.HandleFunc("/rooms", roomHandler.CreateRoom)
 
-	wsHandler := ws.NewHandler(roomManager)
+	wsHub := ws.NewHub()
+	wsHandler := ws.NewHandler(roomManager, wsHub)
 
 	mux.HandleFunc("/rooms/", func(w http.ResponseWriter, r *http.Request) {
 
