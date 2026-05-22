@@ -60,8 +60,22 @@ func (h *Handler) HandleConnection(w http.ResponseWriter, r *http.Request, roomI
 	}
 
 	defer conn.Close()
+
 	h.hub.AddConnection(roomID, playerID, conn)
-	defer h.hub.RemoveConnection(roomID, playerID)
+
+	defer func() {
+		h.hub.RemoveConnection(roomID, playerID)
+
+		h.hub.BroadcastToRoom(roomID, Event{
+			Type: "player_disconnected",
+			Payload: map[string]string{
+				"room_id":   string(roomID),
+				"player_id": string(playerID),
+			},
+		})
+
+		h.broadcastRoomState(roomID)
+	}()
 
 	h.hub.BroadcastToRoom(roomID, Event{
 		Type: "player_connected",
