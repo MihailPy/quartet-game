@@ -1,6 +1,7 @@
 package ws
 
 import (
+	"encoding/json"
 	"net/http"
 
 	"github.com/MihailPy/quartet-game/internal/room"
@@ -17,6 +18,16 @@ func NewHandler(roomManager *room.Manager, hub *Hub) *Handler {
 		roomManager: roomManager,
 		hub:         hub,
 	}
+}
+
+type ClientMessage struct {
+	Type    string          `json:"type"`
+	Payload json.RawMessage `json:"payload"`
+}
+
+type RequestCardPayload struct {
+	TargetPlayerID string `json:"target_player_id"`
+	CardID         string `json:"card_id"`
 }
 
 var upgrader = websocket.Upgrader{
@@ -61,9 +72,33 @@ func (h *Handler) HandleConnection(w http.ResponseWriter, r *http.Request, roomI
 	})
 
 	for {
-		_, _, err := conn.ReadMessage()
+		_, data, err := conn.ReadMessage()
 		if err != nil {
 			return
+		}
+
+		var message ClientMessage
+
+		if err := json.Unmarshal(data, &message); err != nil {
+			_ = conn.WriteJSON(Event{
+				Type: "error",
+				Payload: map[string]string{
+					"message": "invalid message format",
+				},
+			})
+			continue
+		}
+
+		switch message.Type {
+		case "request_card":
+			h.handleRequestCard(roomID, playerID, message.Payload)
+		default:
+			_ = conn.WriteJSON(Event{
+				Type: "error",
+				Payload: map[string]string{
+					"message": "unknown message type",
+				},
+			})
 		}
 	}
 }
@@ -76,4 +111,37 @@ func playerExists(foundRoom room.Room, playerID room.PlayerID) bool {
 	}
 
 	return false
+}
+
+func (h *Handler) handleRequestCard(roomID room.RoomID, playerID room.PlayerID, payload json.RawMessage) {
+	var request RequestCardPayload
+
+	if err := json.Unmarshal(payload, &request); err != nil {
+		h.hub.SendToPlayer(roomID, playerID, Event{
+			Type: "error",
+			Payload: map[string]string{
+				"message": "invalid request_card payload",
+			},
+		})
+		return
+	}
+
+	if request.TargetPlayerID == "" || request.CardID == "" {
+		h.hub.SendToPlayer(roomID, playerID, Event{
+			Type: "error",
+			Payload: map[string]string{
+				"message": "target_player_id and card_id are required",
+			},
+		})
+		return
+	}
+
+	h.hub.BroadcastToRoom(roomID, Event{
+		Type: "card_requested",
+		Payload: map[string]string{
+			"actor_player_id":  string(playerID),
+			"target_player_id": request.TargetPlayerID,
+			"card_id":          request.CardID,
+		},
+	})
 }

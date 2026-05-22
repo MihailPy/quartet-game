@@ -57,3 +57,20 @@ func (h *Hub) BroadcastToRoom(roomID room.RoomID, event Event) {
 		_ = conn.WriteJSON(event)
 	}
 }
+
+func (h *Hub) SendToPlayer(roomID room.RoomID, playerID room.PlayerID, event Event) {
+	h.mu.RLock()
+	defer h.mu.RUnlock()
+
+	roomConnections := h.connections[roomID]
+	if roomConnections == nil {
+		return
+	}
+
+	conn := roomConnections[playerID]
+	if conn == nil {
+		return
+	}
+
+	_ = conn.WriteJSON(event)
+}
