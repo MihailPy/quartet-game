@@ -18,7 +18,7 @@ func NewRouter() http.Handler {
 	mux.HandleFunc("/health", healthHandler)
 	mux.HandleFunc("/rooms", roomHandler.CreateRoom)
 
-	wsHandler := ws.NewHandler()
+	wsHandler := ws.NewHandler(roomManager)
 
 	mux.HandleFunc("/rooms/", func(w http.ResponseWriter, r *http.Request) {
 
@@ -48,7 +48,7 @@ func NewRouter() http.Handler {
 		case "state":
 			roomHandler.GetRoomState(w, r, roomID)
 		case "ws":
-			wsHandler.HandleConnection(w, r)
+			wsHandler.HandleConnection(w, r, roomID)
 		default:
 			w.WriteHeader(http.StatusNotFound)
 		}
