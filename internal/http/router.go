@@ -6,6 +6,7 @@ import (
 
 	"github.com/MihailPy/quartet-game/internal/http/handlers"
 	"github.com/MihailPy/quartet-game/internal/room"
+	"github.com/MihailPy/quartet-game/internal/ws"
 )
 
 func NewRouter() http.Handler {
@@ -16,6 +17,8 @@ func NewRouter() http.Handler {
 
 	mux.HandleFunc("/health", healthHandler)
 	mux.HandleFunc("/rooms", roomHandler.CreateRoom)
+
+	wsHandler := ws.NewHandler()
 
 	mux.HandleFunc("/rooms/", func(w http.ResponseWriter, r *http.Request) {
 
@@ -44,6 +47,8 @@ func NewRouter() http.Handler {
 			roomHandler.StartRoom(w, r, roomID)
 		case "state":
 			roomHandler.GetRoomState(w, r, roomID)
+		case "ws":
+			wsHandler.HandleConnection(w, r)
 		default:
 			w.WriteHeader(http.StatusNotFound)
 		}
