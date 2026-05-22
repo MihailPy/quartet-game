@@ -71,6 +71,8 @@ func (h *Handler) HandleConnection(w http.ResponseWriter, r *http.Request, roomI
 		},
 	})
 
+	h.broadcastRoomState(roomID)
+
 	for {
 		_, data, err := conn.ReadMessage()
 		if err != nil {
@@ -143,5 +145,19 @@ func (h *Handler) handleRequestCard(roomID room.RoomID, playerID room.PlayerID, 
 			"target_player_id": request.TargetPlayerID,
 			"card_id":          request.CardID,
 		},
+	})
+
+	h.broadcastRoomState(roomID)
+}
+
+func (h *Handler) broadcastRoomState(roomID room.RoomID) {
+	foundRoom, err := h.roomManager.GetRoom(roomID)
+	if err != nil {
+		return
+	}
+
+	h.hub.BroadcastToRoom(roomID, Event{
+		Type:    "room_state",
+		Payload: foundRoom,
 	})
 }
