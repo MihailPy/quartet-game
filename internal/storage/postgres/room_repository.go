@@ -25,3 +25,18 @@ func (r *RoomRepository) SaveRoom(ctx context.Context, currentRoom room.Room) er
 
 	return err
 }
+
+func (r *RoomRepository) SaveRoomPlayer(ctx context.Context, roomID room.RoomID, player room.Player) error {
+	_, err := r.db.ExecContext(ctx, `
+		INSERT INTO room_players (
+			room_id,
+			player_id,
+			name,
+			is_ready,
+			is_connected
+		)
+		VALUES ($1, $2, $3, $4, $5)
+	`, string(roomID), string(player.ID), player.Name, player.IsReady, player.IsConnected)
+
+	return err
+}

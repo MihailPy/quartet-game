@@ -68,7 +68,7 @@ func (h *RoomHandler) JoinRoom(w http.ResponseWriter, r *http.Request, roomID ro
 		return
 	}
 
-	player, joinedRoom, err := h.manager.JoinRoom(roomID, req.Name)
+	player, joinedRoom, err := h.manager.JoinRoom(r.Context(), roomID, req.Name)
 	if err != nil {
 		if err == room.ErrRoomNotFound {
 			w.WriteHeader(http.StatusNotFound)

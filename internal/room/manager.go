@@ -17,6 +17,7 @@ var ErrRoomAlreadyStarted = errors.New("room already started")
 
 type Repository interface {
 	SaveRoom(ctx context.Context, currentRoom Room) error
+	SaveRoomPlayer(ctx context.Context, roomID RoomID, player Player) error
 }
 
 type Manager struct {
@@ -89,7 +90,7 @@ func generateID() string {
 		hex.EncodeToString(bytes[10:16])
 }
 
-func (m *Manager) JoinRoom(roomID RoomID, playerName string) (Player, Room, error) {
+func (m *Manager) JoinRoom(ctx context.Context, roomID RoomID, playerName string) (Player, Room, error) {
 	if playerName == "" {
 		return Player{}, Room{}, ErrInvalidPlayerName
 	}
@@ -107,6 +108,12 @@ func (m *Manager) JoinRoom(roomID RoomID, playerName string) (Player, Room, erro
 		Name:        playerName,
 		IsReady:     false,
 		IsConnected: false,
+	}
+
+	if m.repository != nil {
+		if err := m.repository.SaveRoomPlayer(ctx, roomID, player); err != nil {
+			return Player{}, Room{}, err
+		}
 	}
 
 	currentRoom.Players = append(currentRoom.Players, player)
