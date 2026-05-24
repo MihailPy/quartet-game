@@ -1,6 +1,7 @@
 package room
 
 import (
+	"context"
 	"crypto/rand"
 	"encoding/hex"
 	"errors"
@@ -14,56 +15,109 @@ var ErrNotEnoughPlayers = errors.New("not enough players")
 var ErrNotAllPlayersReady = errors.New("not all players ready")
 var ErrRoomAlreadyStarted = errors.New("room already started")
 
-type Manager struct {
-	mu    sync.RWMutex
-	rooms map[RoomID]Room
+type Repository interface {
+	SaveRoom(ctx context.Context, currentRoom Room) error
+	SaveRoomPlayer(ctx context.Context, roomID RoomID, player Player) error
+	UpdateRoomPlayerReady(ctx context.Context, roomID RoomID, playerID PlayerID, isReady bool) error
+	UpdateRoomStatus(ctx context.Context, roomID RoomID, status RoomStatus) error
+	UpdateRoomPlayerConnected(ctx context.Context, roomID RoomID, playerID PlayerID, isConnected bool) error
+	FindRoomByID(ctx context.Context, roomID RoomID) (Room, error)
+	FindRoomPlayers(ctx context.Context, roomID RoomID) ([]Player, error)
+	ResetRoomConnections(ctx context.Context, roomID RoomID) error
 }
 
-func NewManager() *Manager {
+type Manager struct {
+	mu         sync.RWMutex
+	rooms      map[RoomID]Room
+	repository Repository
+}
+
+func NewManager(repository Repository) *Manager {
+	return &Manager{
+		rooms:      make(map[RoomID]Room),
+		repository: repository,
+	}
+}
+
+func NewMemoryManager() *Manager {
 	return &Manager{
 		rooms: make(map[RoomID]Room),
 	}
 }
 
-func (m *Manager) CreateRoom() Room {
+func (m *Manager) CreateRoom(ctx context.Context) (Room, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
-	room := Room{
+	currentRoom := Room{
 		ID:      RoomID(generateID()),
 		Status:  RoomStatusWaiting,
 		Players: []Player{},
 	}
 
-	m.rooms[room.ID] = room
+	if m.repository != nil {
+		if err := m.repository.SaveRoom(ctx, currentRoom); err != nil {
+			return Room{}, err
+		}
+	}
 
-	return room
+	m.rooms[currentRoom.ID] = currentRoom
+
+	return currentRoom, nil
 }
 
-func (m *Manager) GetRoom(id RoomID) (Room, error) {
+func (m *Manager) GetRoom(ctx context.Context, id RoomID) (Room, error) {
 	m.mu.RLock()
-	defer m.mu.RUnlock()
+	currentRoom, ok := m.rooms[id]
+	m.mu.RUnlock()
 
-	room, ok := m.rooms[id]
-	if !ok {
+	if ok {
+		return currentRoom, nil
+	}
+
+	if m.repository == nil {
 		return Room{}, ErrRoomNotFound
 	}
 
-	return room, nil
+	loadedRoom, err := m.repository.FindRoomByID(ctx, id)
+	if err != nil {
+		return Room{}, err
+	}
+
+	if err := m.repository.ResetRoomConnections(ctx, id); err != nil {
+		return Room{}, err
+	}
+
+	for i := range loadedRoom.Players {
+		loadedRoom.Players[i].IsConnected = false
+	}
+
+	m.mu.Lock()
+	m.rooms[id] = loadedRoom
+	m.mu.Unlock()
+
+	return loadedRoom, nil
 }
 
 func generateID() string {
-	bytes := make([]byte, 8)
+	bytes := make([]byte, 16)
 
 	_, err := rand.Read(bytes)
 	if err != nil {
-		return "fallback-room-id"
+		return "00000000-0000-0000-0000-000000000000"
 	}
 
-	return hex.EncodeToString(bytes)
+	bytes[6] = (bytes[6] & 0x0f) | 0x40
+	bytes[8] = (bytes[8] & 0x3f) | 0x80
+
+	return hex.EncodeToString(bytes[0:4]) + "-" +
+		hex.EncodeToString(bytes[4:6]) + "-" +
+		hex.EncodeToString(bytes[6:8]) + "-" +
+		hex.EncodeToString(bytes[8:10]) + "-" +
+		hex.EncodeToString(bytes[10:16])
 }
 
-func (m *Manager) JoinRoom(roomID RoomID, playerName string) (Player, Room, error) {
+func (m *Manager) JoinRoom(ctx context.Context, roomID RoomID, playerName string) (Player, Room, error) {
 	if playerName == "" {
 		return Player{}, Room{}, ErrInvalidPlayerName
 	}
@@ -73,7 +127,24 @@ func (m *Manager) JoinRoom(roomID RoomID, playerName string) (Player, Room, erro
 
 	currentRoom, ok := m.rooms[roomID]
 	if !ok {
-		return Player{}, Room{}, ErrRoomNotFound
+		if m.repository == nil {
+			return Player{}, Room{}, ErrRoomNotFound
+		}
+
+		loadedRoom, err := m.repository.FindRoomByID(ctx, roomID)
+		if err != nil {
+			return Player{}, Room{}, err
+		}
+
+		if err := m.repository.ResetRoomConnections(ctx, roomID); err != nil {
+			return Player{}, Room{}, err
+		}
+
+		for i := range loadedRoom.Players {
+			loadedRoom.Players[i].IsConnected = false
+		}
+
+		currentRoom = loadedRoom
 	}
 
 	player := Player{
@@ -83,13 +154,19 @@ func (m *Manager) JoinRoom(roomID RoomID, playerName string) (Player, Room, erro
 		IsConnected: false,
 	}
 
+	if m.repository != nil {
+		if err := m.repository.SaveRoomPlayer(ctx, roomID, player); err != nil {
+			return Player{}, Room{}, err
+		}
+	}
+
 	currentRoom.Players = append(currentRoom.Players, player)
 	m.rooms[roomID] = currentRoom
 
 	return player, currentRoom, nil
 }
 
-func (m *Manager) MarkPlayerReady(roomID RoomID, playerID PlayerID) (Room, error) {
+func (m *Manager) MarkPlayerReady(ctx context.Context, roomID RoomID, playerID PlayerID) (Room, error) {
 	if playerID == "" {
 		return Room{}, ErrPlayerNotFound
 	}
@@ -105,6 +182,13 @@ func (m *Manager) MarkPlayerReady(roomID RoomID, playerID PlayerID) (Room, error
 	for i, player := range currentRoom.Players {
 		if player.ID == playerID {
 			currentRoom.Players[i].IsReady = true
+
+			if m.repository != nil {
+				if err := m.repository.UpdateRoomPlayerReady(ctx, roomID, playerID, true); err != nil {
+					return Room{}, err
+				}
+			}
+
 			m.rooms[roomID] = currentRoom
 			return currentRoom, nil
 		}
@@ -113,7 +197,7 @@ func (m *Manager) MarkPlayerReady(roomID RoomID, playerID PlayerID) (Room, error
 	return Room{}, ErrPlayerNotFound
 }
 
-func (m *Manager) StartRoom(roomID RoomID) (Room, error) {
+func (m *Manager) StartRoom(ctx context.Context, roomID RoomID) (Room, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -137,12 +221,19 @@ func (m *Manager) StartRoom(roomID RoomID) (Room, error) {
 	}
 
 	currentRoom.Status = RoomStatusPlaying
+
+	if m.repository != nil {
+		if err := m.repository.UpdateRoomStatus(ctx, roomID, RoomStatusPlaying); err != nil {
+			return Room{}, err
+		}
+	}
+
 	m.rooms[roomID] = currentRoom
 
 	return currentRoom, nil
 }
 
-func (m *Manager) SetPlayerConnected(roomID RoomID, playerID PlayerID, connected bool) (Room, error) {
+func (m *Manager) SetPlayerConnected(ctx context.Context, roomID RoomID, playerID PlayerID, connected bool) (Room, error) {
 	if playerID == "" {
 		return Room{}, ErrPlayerNotFound
 	}
@@ -158,6 +249,13 @@ func (m *Manager) SetPlayerConnected(roomID RoomID, playerID PlayerID, connected
 	for i, player := range currentRoom.Players {
 		if player.ID == playerID {
 			currentRoom.Players[i].IsConnected = connected
+
+			if m.repository != nil {
+				if err := m.repository.UpdateRoomPlayerConnected(ctx, roomID, playerID, connected); err != nil {
+					return Room{}, err
+				}
+			}
+
 			m.rooms[roomID] = currentRoom
 			return currentRoom, nil
 		}

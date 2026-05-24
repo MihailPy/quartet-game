@@ -9,11 +9,10 @@ import (
 	"github.com/MihailPy/quartet-game/internal/ws"
 )
 
-func NewRouter() http.Handler {
+func NewRouter(roomManager *room.Manager, gameStarter handlers.GameStarter) http.Handler {
 	mux := http.NewServeMux()
 
-	roomManager := room.NewManager()
-	roomHandler := handlers.NewRoomHandler(roomManager)
+	roomHandler := handlers.NewRoomHandler(roomManager, gameStarter)
 
 	mux.HandleFunc("/health", healthHandler)
 	mux.HandleFunc("/rooms", roomHandler.CreateRoom)

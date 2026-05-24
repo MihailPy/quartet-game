@@ -1,34 +1,21 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 
+	"github.com/MihailPy/quartet-game/internal/game"
 	"github.com/MihailPy/quartet-game/internal/room"
 )
 
+type GameStarter interface {
+	StartGame(ctx context.Context, currentRoom room.Room) (game.GameState, error)
+}
+
 type RoomHandler struct {
-	manager *room.Manager
-}
-
-func NewRoomHandler(manager *room.Manager) *RoomHandler {
-	return &RoomHandler{
-		manager: manager,
-	}
-}
-
-func (h *RoomHandler) CreateRoom(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		return
-	}
-
-	createdRoom := h.manager.CreateRoom()
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-
-	_ = json.NewEncoder(w).Encode(createdRoom)
+	manager     *room.Manager
+	gameStarter GameStarter
 }
 
 type JoinRoomRequest struct {
@@ -38,6 +25,34 @@ type JoinRoomRequest struct {
 type JoinRoomResponse struct {
 	Player room.Player `json:"player"`
 	Room   room.Room   `json:"room"`
+}
+
+type ReadyRoomRequest struct {
+	PlayerID room.PlayerID `json:"player_id"`
+}
+
+func NewRoomHandler(manager *room.Manager, gameStarter GameStarter) *RoomHandler {
+	return &RoomHandler{
+		manager:     manager,
+		gameStarter: gameStarter,
+	}
+}
+
+func (h *RoomHandler) CreateRoom(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+	createdRoom, err := h.manager.CreateRoom(r.Context())
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+
+	_ = json.NewEncoder(w).Encode(createdRoom)
 }
 
 func (h *RoomHandler) JoinRoom(w http.ResponseWriter, r *http.Request, roomID room.RoomID) {
@@ -53,7 +68,7 @@ func (h *RoomHandler) JoinRoom(w http.ResponseWriter, r *http.Request, roomID ro
 		return
 	}
 
-	player, joinedRoom, err := h.manager.JoinRoom(roomID, req.Name)
+	player, joinedRoom, err := h.manager.JoinRoom(r.Context(), roomID, req.Name)
 	if err != nil {
 		if err == room.ErrRoomNotFound {
 			w.WriteHeader(http.StatusNotFound)
@@ -81,7 +96,7 @@ func (h *RoomHandler) GetRoom(w http.ResponseWriter, r *http.Request, roomID roo
 		return
 	}
 
-	foundRoom, err := h.manager.GetRoom(roomID)
+	foundRoom, err := h.manager.GetRoom(r.Context(), roomID)
 	if err != nil {
 		if err == room.ErrRoomNotFound {
 			w.WriteHeader(http.StatusNotFound)
@@ -98,10 +113,6 @@ func (h *RoomHandler) GetRoom(w http.ResponseWriter, r *http.Request, roomID roo
 	_ = json.NewEncoder(w).Encode(foundRoom)
 }
 
-type ReadyRoomRequest struct {
-	PlayerID room.PlayerID `json:"player_id"`
-}
-
 func (h *RoomHandler) MarkPlayerReady(w http.ResponseWriter, r *http.Request, roomID room.RoomID) {
 	if r.Method != http.MethodPost {
 		w.WriteHeader(http.StatusMethodNotAllowed)
@@ -115,7 +126,7 @@ func (h *RoomHandler) MarkPlayerReady(w http.ResponseWriter, r *http.Request, ro
 		return
 	}
 
-	updatedRoom, err := h.manager.MarkPlayerReady(roomID, req.PlayerID)
+	updatedRoom, err := h.manager.MarkPlayerReady(r.Context(), roomID, req.PlayerID)
 	if err != nil {
 		switch err {
 		case room.ErrRoomNotFound:
@@ -141,7 +152,7 @@ func (h *RoomHandler) StartRoom(w http.ResponseWriter, r *http.Request, roomID r
 		return
 	}
 
-	startedRoom, err := h.manager.StartRoom(roomID)
+	startedRoom, err := h.manager.StartRoom(r.Context(), roomID)
 	if err != nil {
 		switch err {
 		case room.ErrRoomNotFound:
@@ -155,10 +166,23 @@ func (h *RoomHandler) StartRoom(w http.ResponseWriter, r *http.Request, roomID r
 		return
 	}
 
+	gameState, err := h.gameStarter.StartGame(r.Context(), startedRoom)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	response := struct {
+		Room room.Room      `json:"room"`
+		Game game.GameState `json:"game"`
+	}{
+		Room: startedRoom,
+		Game: gameState,
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-
-	_ = json.NewEncoder(w).Encode(startedRoom)
+	_ = json.NewEncoder(w).Encode(response)
 }
 
 func (h *RoomHandler) GetRoomState(w http.ResponseWriter, r *http.Request, roomID room.RoomID) {
@@ -167,7 +191,7 @@ func (h *RoomHandler) GetRoomState(w http.ResponseWriter, r *http.Request, roomI
 		return
 	}
 
-	foundRoom, err := h.manager.GetRoom(roomID)
+	foundRoom, err := h.manager.GetRoom(r.Context(), roomID)
 	if err != nil {
 		if err == room.ErrRoomNotFound {
 			w.WriteHeader(http.StatusNotFound)

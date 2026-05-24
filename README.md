@@ -45,6 +45,14 @@ Healthcheck:
 
 ```
 
+## Environment
+
+Default local database URL:
+
+```text
+postgres://quartet_user:quartet_password@localhost:5432/quartet_game?sslmode=disable
+```
+
 ## Run with Docker
 
 Build image:
