@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: quartet-postgres
+    environment:
+      POSTGRES_DB: quartet_game
+      POSTGRES_USER: quartet_user
+      POSTGRES_PASSWORD: quartet_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - quartet_postgres_data:/var/lib/postgresql/data
+
+volumes:
+  quartet_postgres_data:
