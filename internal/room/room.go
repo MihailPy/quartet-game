@@ -10,9 +10,10 @@ const (
 )
 
 type Player struct {
-	ID      PlayerID `json:"id"`
-	Name    string   `json:"name"`
-	IsReady bool     `json:"is_ready"`
+	ID          PlayerID `json:"id"`
+	Name        string   `json:"name"`
+	IsReady     bool     `json:"is_ready"`
+	IsConnected bool     `json:"is_connected"`
 }
 
 type Room struct {

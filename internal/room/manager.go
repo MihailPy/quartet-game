@@ -77,9 +77,10 @@ func (m *Manager) JoinRoom(roomID RoomID, playerName string) (Player, Room, erro
 	}
 
 	player := Player{
-		ID:      PlayerID(generateID()),
-		Name:    playerName,
-		IsReady: false,
+		ID:          PlayerID(generateID()),
+		Name:        playerName,
+		IsReady:     false,
+		IsConnected: false,
 	}
 
 	currentRoom.Players = append(currentRoom.Players, player)
@@ -139,4 +140,28 @@ func (m *Manager) StartRoom(roomID RoomID) (Room, error) {
 	m.rooms[roomID] = currentRoom
 
 	return currentRoom, nil
+}
+
+func (m *Manager) SetPlayerConnected(roomID RoomID, playerID PlayerID, connected bool) (Room, error) {
+	if playerID == "" {
+		return Room{}, ErrPlayerNotFound
+	}
+
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	currentRoom, ok := m.rooms[roomID]
+	if !ok {
+		return Room{}, ErrRoomNotFound
+	}
+
+	for i, player := range currentRoom.Players {
+		if player.ID == playerID {
+			currentRoom.Players[i].IsConnected = connected
+			m.rooms[roomID] = currentRoom
+			return currentRoom, nil
+		}
+	}
+
+	return Room{}, ErrPlayerNotFound
 }
