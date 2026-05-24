@@ -1,19 +1,40 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 
+	"github.com/MihailPy/quartet-game/internal/game"
 	"github.com/MihailPy/quartet-game/internal/room"
 )
 
-type RoomHandler struct {
-	manager *room.Manager
+type GameStarter interface {
+	StartGame(ctx context.Context, currentRoom room.Room) (game.GameState, error)
 }
 
-func NewRoomHandler(manager *room.Manager) *RoomHandler {
+type RoomHandler struct {
+	manager     *room.Manager
+	gameStarter GameStarter
+}
+
+type JoinRoomRequest struct {
+	Name string `json:"name"`
+}
+
+type JoinRoomResponse struct {
+	Player room.Player `json:"player"`
+	Room   room.Room   `json:"room"`
+}
+
+type ReadyRoomRequest struct {
+	PlayerID room.PlayerID `json:"player_id"`
+}
+
+func NewRoomHandler(manager *room.Manager, gameStarter GameStarter) *RoomHandler {
 	return &RoomHandler{
-		manager: manager,
+		manager:     manager,
+		gameStarter: gameStarter,
 	}
 }
 
@@ -29,15 +50,6 @@ func (h *RoomHandler) CreateRoom(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 
 	_ = json.NewEncoder(w).Encode(createdRoom)
-}
-
-type JoinRoomRequest struct {
-	Name string `json:"name"`
-}
-
-type JoinRoomResponse struct {
-	Player room.Player `json:"player"`
-	Room   room.Room   `json:"room"`
 }
 
 func (h *RoomHandler) JoinRoom(w http.ResponseWriter, r *http.Request, roomID room.RoomID) {
@@ -98,10 +110,6 @@ func (h *RoomHandler) GetRoom(w http.ResponseWriter, r *http.Request, roomID roo
 	_ = json.NewEncoder(w).Encode(foundRoom)
 }
 
-type ReadyRoomRequest struct {
-	PlayerID room.PlayerID `json:"player_id"`
-}
-
 func (h *RoomHandler) MarkPlayerReady(w http.ResponseWriter, r *http.Request, roomID room.RoomID) {
 	if r.Method != http.MethodPost {
 		w.WriteHeader(http.StatusMethodNotAllowed)
@@ -155,10 +163,23 @@ func (h *RoomHandler) StartRoom(w http.ResponseWriter, r *http.Request, roomID r
 		return
 	}
 
+	gameState, err := h.gameStarter.StartGame(r.Context(), startedRoom)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	response := struct {
+		Room room.Room      `json:"room"`
+		Game game.GameState `json:"game"`
+	}{
+		Room: startedRoom,
+		Game: gameState,
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-
-	_ = json.NewEncoder(w).Encode(startedRoom)
+	_ = json.NewEncoder(w).Encode(response)
 }
 
 func (h *RoomHandler) GetRoomState(w http.ResponseWriter, r *http.Request, roomID room.RoomID) {
