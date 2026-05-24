@@ -20,6 +20,7 @@ type Repository interface {
 	SaveRoomPlayer(ctx context.Context, roomID RoomID, player Player) error
 	UpdateRoomPlayerReady(ctx context.Context, roomID RoomID, playerID PlayerID, isReady bool) error
 	UpdateRoomStatus(ctx context.Context, roomID RoomID, status RoomStatus) error
+	UpdateRoomPlayerConnected(ctx context.Context, roomID RoomID, playerID PlayerID, isConnected bool) error
 }
 
 type Manager struct {
@@ -191,7 +192,7 @@ func (m *Manager) StartRoom(ctx context.Context, roomID RoomID) (Room, error) {
 	return currentRoom, nil
 }
 
-func (m *Manager) SetPlayerConnected(roomID RoomID, playerID PlayerID, connected bool) (Room, error) {
+func (m *Manager) SetPlayerConnected(ctx context.Context, roomID RoomID, playerID PlayerID, connected bool) (Room, error) {
 	if playerID == "" {
 		return Room{}, ErrPlayerNotFound
 	}
@@ -207,6 +208,13 @@ func (m *Manager) SetPlayerConnected(roomID RoomID, playerID PlayerID, connected
 	for i, player := range currentRoom.Players {
 		if player.ID == playerID {
 			currentRoom.Players[i].IsConnected = connected
+
+			if m.repository != nil {
+				if err := m.repository.UpdateRoomPlayerConnected(ctx, roomID, playerID, connected); err != nil {
+					return Room{}, err
+				}
+			}
+
 			m.rooms[roomID] = currentRoom
 			return currentRoom, nil
 		}

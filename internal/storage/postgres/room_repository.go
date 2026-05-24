@@ -69,3 +69,18 @@ func (r *RoomRepository) UpdateRoomStatus(
 
 	return err
 }
+
+func (r *RoomRepository) UpdateRoomPlayerConnected(
+	ctx context.Context,
+	roomID room.RoomID,
+	playerID room.PlayerID,
+	isConnected bool,
+) error {
+	_, err := r.db.ExecContext(ctx, `
+		UPDATE room_players
+		SET is_connected = $3
+		WHERE room_id = $1 AND player_id = $2
+	`, string(roomID), string(playerID), isConnected)
+
+	return err
+}
