@@ -152,7 +152,7 @@ func (h *RoomHandler) StartRoom(w http.ResponseWriter, r *http.Request, roomID r
 		return
 	}
 
-	startedRoom, err := h.manager.StartRoom(roomID)
+	startedRoom, err := h.manager.StartRoom(r.Context(), roomID)
 	if err != nil {
 		switch err {
 		case room.ErrRoomNotFound:

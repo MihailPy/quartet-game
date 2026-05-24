@@ -19,6 +19,7 @@ type Repository interface {
 	SaveRoom(ctx context.Context, currentRoom Room) error
 	SaveRoomPlayer(ctx context.Context, roomID RoomID, player Player) error
 	UpdateRoomPlayerReady(ctx context.Context, roomID RoomID, playerID PlayerID, isReady bool) error
+	UpdateRoomStatus(ctx context.Context, roomID RoomID, status RoomStatus) error
 }
 
 type Manager struct {
@@ -154,7 +155,7 @@ func (m *Manager) MarkPlayerReady(ctx context.Context, roomID RoomID, playerID P
 	return Room{}, ErrPlayerNotFound
 }
 
-func (m *Manager) StartRoom(roomID RoomID) (Room, error) {
+func (m *Manager) StartRoom(ctx context.Context, roomID RoomID) (Room, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -178,6 +179,13 @@ func (m *Manager) StartRoom(roomID RoomID) (Room, error) {
 	}
 
 	currentRoom.Status = RoomStatusPlaying
+
+	if m.repository != nil {
+		if err := m.repository.UpdateRoomStatus(ctx, roomID, RoomStatusPlaying); err != nil {
+			return Room{}, err
+		}
+	}
+
 	m.rooms[roomID] = currentRoom
 
 	return currentRoom, nil

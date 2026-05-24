@@ -55,3 +55,17 @@ func (r *RoomRepository) UpdateRoomPlayerReady(
 
 	return err
 }
+
+func (r *RoomRepository) UpdateRoomStatus(
+	ctx context.Context,
+	roomID room.RoomID,
+	status room.RoomStatus,
+) error {
+	_, err := r.db.ExecContext(ctx, `
+		UPDATE rooms
+		SET status = $2
+		WHERE id = $1
+	`, string(roomID), string(status))
+
+	return err
+}
