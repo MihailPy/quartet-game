@@ -96,7 +96,7 @@ func (h *RoomHandler) GetRoom(w http.ResponseWriter, r *http.Request, roomID roo
 		return
 	}
 
-	foundRoom, err := h.manager.GetRoom(roomID)
+	foundRoom, err := h.manager.GetRoom(r.Context(), roomID)
 	if err != nil {
 		if err == room.ErrRoomNotFound {
 			w.WriteHeader(http.StatusNotFound)
@@ -191,7 +191,7 @@ func (h *RoomHandler) GetRoomState(w http.ResponseWriter, r *http.Request, roomI
 		return
 	}
 
-	foundRoom, err := h.manager.GetRoom(roomID)
+	foundRoom, err := h.manager.GetRoom(r.Context(), roomID)
 	if err != nil {
 		if err == room.ErrRoomNotFound {
 			w.WriteHeader(http.StatusNotFound)

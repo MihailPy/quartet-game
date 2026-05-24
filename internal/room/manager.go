@@ -21,6 +21,7 @@ type Repository interface {
 	UpdateRoomPlayerReady(ctx context.Context, roomID RoomID, playerID PlayerID, isReady bool) error
 	UpdateRoomStatus(ctx context.Context, roomID RoomID, status RoomStatus) error
 	UpdateRoomPlayerConnected(ctx context.Context, roomID RoomID, playerID PlayerID, isConnected bool) error
+	FindRoomByID(ctx context.Context, roomID RoomID) (Room, error)
 }
 
 type Manager struct {
@@ -63,16 +64,29 @@ func (m *Manager) CreateRoom(ctx context.Context) (Room, error) {
 	return currentRoom, nil
 }
 
-func (m *Manager) GetRoom(id RoomID) (Room, error) {
+func (m *Manager) GetRoom(ctx context.Context, id RoomID) (Room, error) {
 	m.mu.RLock()
-	defer m.mu.RUnlock()
+	currentRoom, ok := m.rooms[id]
+	m.mu.RUnlock()
 
-	room, ok := m.rooms[id]
-	if !ok {
+	if ok {
+		return currentRoom, nil
+	}
+
+	if m.repository == nil {
 		return Room{}, ErrRoomNotFound
 	}
 
-	return room, nil
+	loadedRoom, err := m.repository.FindRoomByID(ctx, id)
+	if err != nil {
+		return Room{}, err
+	}
+
+	m.mu.Lock()
+	m.rooms[id] = loadedRoom
+	m.mu.Unlock()
+
+	return loadedRoom, nil
 }
 
 func generateID() string {
@@ -103,7 +117,16 @@ func (m *Manager) JoinRoom(ctx context.Context, roomID RoomID, playerName string
 
 	currentRoom, ok := m.rooms[roomID]
 	if !ok {
-		return Player{}, Room{}, ErrRoomNotFound
+		if m.repository == nil {
+			return Player{}, Room{}, ErrRoomNotFound
+		}
+
+		loadedRoom, err := m.repository.FindRoomByID(ctx, roomID)
+		if err != nil {
+			return Player{}, Room{}, err
+		}
+
+		currentRoom = loadedRoom
 	}
 
 	player := Player{

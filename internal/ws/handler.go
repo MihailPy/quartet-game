@@ -1,6 +1,7 @@
 package ws
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 
@@ -43,7 +44,7 @@ func (h *Handler) HandleConnection(w http.ResponseWriter, r *http.Request, roomI
 		return
 	}
 
-	foundRoom, err := h.roomManager.GetRoom(roomID)
+	foundRoom, err := h.roomManager.GetRoom(r.Context(), roomID)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		return
@@ -167,7 +168,7 @@ func (h *Handler) handleRequestCard(roomID room.RoomID, playerID room.PlayerID, 
 }
 
 func (h *Handler) broadcastRoomState(roomID room.RoomID) {
-	foundRoom, err := h.roomManager.GetRoom(roomID)
+	foundRoom, err := h.roomManager.GetRoom(context.Background(), roomID)
 	if err != nil {
 		return
 	}

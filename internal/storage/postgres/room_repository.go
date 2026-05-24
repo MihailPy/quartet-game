@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"database/sql"
+	"errors"
 
 	"github.com/MihailPy/quartet-game/internal/room"
 )
@@ -83,4 +84,29 @@ func (r *RoomRepository) UpdateRoomPlayerConnected(
 	`, string(roomID), string(playerID), isConnected)
 
 	return err
+}
+
+func (r *RoomRepository) FindRoomByID(ctx context.Context, roomID room.RoomID) (room.Room, error) {
+	var currentRoom room.Room
+
+	err := r.db.QueryRowContext(ctx, `
+		SELECT id, status
+		FROM rooms
+		WHERE id = $1
+	`, string(roomID)).Scan(
+		&currentRoom.ID,
+		&currentRoom.Status,
+	)
+
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return room.Room{}, room.ErrRoomNotFound
+		}
+
+		return room.Room{}, err
+	}
+
+	currentRoom.Players = []room.Player{}
+
+	return currentRoom, nil
 }
