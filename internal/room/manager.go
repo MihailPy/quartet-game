@@ -23,6 +23,7 @@ type Repository interface {
 	UpdateRoomPlayerConnected(ctx context.Context, roomID RoomID, playerID PlayerID, isConnected bool) error
 	FindRoomByID(ctx context.Context, roomID RoomID) (Room, error)
 	FindRoomPlayers(ctx context.Context, roomID RoomID) ([]Player, error)
+	ResetRoomConnections(ctx context.Context, roomID RoomID) error
 }
 
 type Manager struct {
@@ -83,6 +84,14 @@ func (m *Manager) GetRoom(ctx context.Context, id RoomID) (Room, error) {
 		return Room{}, err
 	}
 
+	if err := m.repository.ResetRoomConnections(ctx, id); err != nil {
+		return Room{}, err
+	}
+
+	for i := range loadedRoom.Players {
+		loadedRoom.Players[i].IsConnected = false
+	}
+
 	m.mu.Lock()
 	m.rooms[id] = loadedRoom
 	m.mu.Unlock()
@@ -125,6 +134,14 @@ func (m *Manager) JoinRoom(ctx context.Context, roomID RoomID, playerName string
 		loadedRoom, err := m.repository.FindRoomByID(ctx, roomID)
 		if err != nil {
 			return Player{}, Room{}, err
+		}
+
+		if err := m.repository.ResetRoomConnections(ctx, roomID); err != nil {
+			return Player{}, Room{}, err
+		}
+
+		for i := range loadedRoom.Players {
+			loadedRoom.Players[i].IsConnected = false
 		}
 
 		currentRoom = loadedRoom

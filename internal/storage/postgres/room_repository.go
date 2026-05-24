@@ -151,3 +151,13 @@ func (r *RoomRepository) FindRoomPlayers(ctx context.Context, roomID room.RoomID
 
 	return players, nil
 }
+
+func (r *RoomRepository) ResetRoomConnections(ctx context.Context, roomID room.RoomID) error {
+	_, err := r.db.ExecContext(ctx, `
+		UPDATE room_players
+		SET is_connected = false
+		WHERE room_id = $1
+	`, string(roomID))
+
+	return err
+}
