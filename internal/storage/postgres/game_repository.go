@@ -37,3 +37,45 @@ func (r *GameRepository) SaveGame(
 
 	return err
 }
+
+func (r *GameRepository) SaveGameResult(
+	ctx context.Context,
+	gameID game.GameID,
+	result game.GameResult,
+) error {
+	tx, err := r.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	for playerID, score := range result.Scores {
+		isWinner := false
+
+		for _, winnerID := range result.Winners {
+			if winnerID == playerID {
+				isWinner = true
+				break
+			}
+		}
+
+		_, err := tx.ExecContext(ctx, `
+			INSERT INTO game_results (
+				game_id,
+				player_id,
+				score,
+				is_winner
+			)
+			VALUES ($1, $2, $3, $4)
+			ON CONFLICT (game_id, player_id)
+			DO UPDATE SET
+				score = EXCLUDED.score,
+				is_winner = EXCLUDED.is_winner
+		`, string(gameID), string(playerID), score, isWinner)
+		if err != nil {
+			return err
+		}
+	}
+
+	return tx.Commit()
+}

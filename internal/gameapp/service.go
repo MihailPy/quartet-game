@@ -12,6 +12,7 @@ var ErrCannotStartGame = errors.New("cannot start game")
 
 type GameRepository interface {
 	SaveGame(ctx context.Context, roomID room.RoomID, deckID game.DeckID, state game.GameState) error
+	SaveGameResult(ctx context.Context, gameID game.GameID, result game.GameResult) error
 }
 
 type DeckService interface {
@@ -89,4 +90,29 @@ func (s *Service) StartGame(ctx context.Context, currentRoom room.Room) (game.Ga
 func (s *Service) GetGame(roomID room.RoomID) (game.GameState, bool) {
 	state, ok := s.games[roomID]
 	return state, ok
+}
+
+func (s *Service) FinishGame(ctx context.Context, roomID room.RoomID) (game.GameResult, error) {
+	state, ok := s.games[roomID]
+	if !ok {
+		return game.GameResult{}, ErrCannotStartGame
+	}
+
+	game.FinishGame(&state)
+
+	if state.Status != game.GameStatusFinished {
+		return game.GameResult{}, ErrCannotStartGame
+	}
+
+	result := game.CalculateGameResult(&state)
+
+	if s.gameRepository != nil {
+		if err := s.gameRepository.SaveGameResult(ctx, state.ID, result); err != nil {
+			return game.GameResult{}, err
+		}
+	}
+
+	s.games[roomID] = state
+
+	return result, nil
 }
