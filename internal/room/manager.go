@@ -22,6 +22,7 @@ type Repository interface {
 	UpdateRoomStatus(ctx context.Context, roomID RoomID, status RoomStatus) error
 	UpdateRoomPlayerConnected(ctx context.Context, roomID RoomID, playerID PlayerID, isConnected bool) error
 	FindRoomByID(ctx context.Context, roomID RoomID) (Room, error)
+	FindRoomPlayers(ctx context.Context, roomID RoomID) ([]Player, error)
 }
 
 type Manager struct {

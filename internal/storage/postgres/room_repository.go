@@ -106,7 +106,48 @@ func (r *RoomRepository) FindRoomByID(ctx context.Context, roomID room.RoomID) (
 		return room.Room{}, err
 	}
 
-	currentRoom.Players = []room.Player{}
+	players, err := r.FindRoomPlayers(ctx, roomID)
+	if err != nil {
+		return room.Room{}, err
+	}
+
+	currentRoom.Players = players
 
 	return currentRoom, nil
+}
+
+func (r *RoomRepository) FindRoomPlayers(ctx context.Context, roomID room.RoomID) ([]room.Player, error) {
+	rows, err := r.db.QueryContext(ctx, `
+		SELECT player_id, name, is_ready, is_connected
+		FROM room_players
+		WHERE room_id = $1
+		ORDER BY created_at
+	`, string(roomID))
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	players := []room.Player{}
+
+	for rows.Next() {
+		var player room.Player
+
+		if err := rows.Scan(
+			&player.ID,
+			&player.Name,
+			&player.IsReady,
+			&player.IsConnected,
+		); err != nil {
+			return nil, err
+		}
+
+		players = append(players, player)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return players, nil
 }
