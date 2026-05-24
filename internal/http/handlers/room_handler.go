@@ -126,7 +126,7 @@ func (h *RoomHandler) MarkPlayerReady(w http.ResponseWriter, r *http.Request, ro
 		return
 	}
 
-	updatedRoom, err := h.manager.MarkPlayerReady(roomID, req.PlayerID)
+	updatedRoom, err := h.manager.MarkPlayerReady(r.Context(), roomID, req.PlayerID)
 	if err != nil {
 		switch err {
 		case room.ErrRoomNotFound:

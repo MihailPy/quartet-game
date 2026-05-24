@@ -40,3 +40,18 @@ func (r *RoomRepository) SaveRoomPlayer(ctx context.Context, roomID room.RoomID,
 
 	return err
 }
+
+func (r *RoomRepository) UpdateRoomPlayerReady(
+	ctx context.Context,
+	roomID room.RoomID,
+	playerID room.PlayerID,
+	isReady bool,
+) error {
+	_, err := r.db.ExecContext(ctx, `
+		UPDATE room_players
+		SET is_ready = $3
+		WHERE room_id = $1 AND player_id = $2
+	`, string(roomID), string(playerID), isReady)
+
+	return err
+}
