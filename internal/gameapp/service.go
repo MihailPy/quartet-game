@@ -10,21 +10,31 @@ import (
 
 var ErrCannotStartGame = errors.New("cannot start game")
 
+type GameRepository interface {
+	SaveGame(ctx context.Context, roomID room.RoomID, deckID game.DeckID, state game.GameState) error
+}
+
 type DeckService interface {
 	LoadDeck(ctx context.Context, deckID game.DeckID) (game.Deck, error)
 }
 
 type Service struct {
-	deckService DeckService
-	deckID      game.DeckID
-	games       map[room.RoomID]game.GameState
+	deckService    DeckService
+	gameRepository GameRepository
+	deckID         game.DeckID
+	games          map[room.RoomID]game.GameState
 }
 
-func NewService(deckService DeckService, deckID game.DeckID) *Service {
+func NewService(
+	deckService DeckService,
+	gameRepository GameRepository,
+	deckID game.DeckID,
+) *Service {
 	return &Service{
-		deckService: deckService,
-		deckID:      deckID,
-		games:       make(map[room.RoomID]game.GameState),
+		deckService:    deckService,
+		gameRepository: gameRepository,
+		deckID:         deckID,
+		games:          make(map[room.RoomID]game.GameState),
 	}
 }
 
@@ -64,6 +74,12 @@ func (s *Service) StartGame(ctx context.Context, currentRoom room.Room) (game.Ga
 	}
 
 	state.Status = game.GameStatusPlaying
+
+	if s.gameRepository != nil {
+		if err := s.gameRepository.SaveGame(ctx, currentRoom.ID, s.deckID, state); err != nil {
+			return game.GameState{}, err
+		}
+	}
 
 	s.games[currentRoom.ID] = state
 

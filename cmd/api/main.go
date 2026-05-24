@@ -28,8 +28,11 @@ func main() {
 	roomRepository := postgres.NewRoomRepository(db)
 	roomManager := room.NewManager(roomRepository)
 
+	gameRepository := postgres.NewGameRepository(db)
+
 	gameService := gameapp.NewService(
 		deckService,
+		gameRepository,
 		game.DeckID(cfg.DefaultDeckID),
 	)
 
