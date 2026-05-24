@@ -1,6 +1,7 @@
 package room
 
 import (
+	"context"
 	"crypto/rand"
 	"encoding/hex"
 	"errors"
@@ -14,30 +15,48 @@ var ErrNotEnoughPlayers = errors.New("not enough players")
 var ErrNotAllPlayersReady = errors.New("not all players ready")
 var ErrRoomAlreadyStarted = errors.New("room already started")
 
-type Manager struct {
-	mu    sync.RWMutex
-	rooms map[RoomID]Room
+type Repository interface {
+	SaveRoom(ctx context.Context, currentRoom Room) error
 }
 
-func NewManager() *Manager {
+type Manager struct {
+	mu         sync.RWMutex
+	rooms      map[RoomID]Room
+	repository Repository
+}
+
+func NewManager(repository Repository) *Manager {
+	return &Manager{
+		rooms:      make(map[RoomID]Room),
+		repository: repository,
+	}
+}
+
+func NewMemoryManager() *Manager {
 	return &Manager{
 		rooms: make(map[RoomID]Room),
 	}
 }
 
-func (m *Manager) CreateRoom() Room {
+func (m *Manager) CreateRoom(ctx context.Context) (Room, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
-	room := Room{
+	currentRoom := Room{
 		ID:      RoomID(generateID()),
 		Status:  RoomStatusWaiting,
 		Players: []Player{},
 	}
 
-	m.rooms[room.ID] = room
+	if m.repository != nil {
+		if err := m.repository.SaveRoom(ctx, currentRoom); err != nil {
+			return Room{}, err
+		}
+	}
 
-	return room
+	m.rooms[currentRoom.ID] = currentRoom
+
+	return currentRoom, nil
 }
 
 func (m *Manager) GetRoom(id RoomID) (Room, error) {
@@ -53,14 +72,21 @@ func (m *Manager) GetRoom(id RoomID) (Room, error) {
 }
 
 func generateID() string {
-	bytes := make([]byte, 8)
+	bytes := make([]byte, 16)
 
 	_, err := rand.Read(bytes)
 	if err != nil {
-		return "fallback-room-id"
+		return "00000000-0000-0000-0000-000000000000"
 	}
 
-	return hex.EncodeToString(bytes)
+	bytes[6] = (bytes[6] & 0x0f) | 0x40
+	bytes[8] = (bytes[8] & 0x3f) | 0x80
+
+	return hex.EncodeToString(bytes[0:4]) + "-" +
+		hex.EncodeToString(bytes[4:6]) + "-" +
+		hex.EncodeToString(bytes[6:8]) + "-" +
+		hex.EncodeToString(bytes[8:10]) + "-" +
+		hex.EncodeToString(bytes[10:16])
 }
 
 func (m *Manager) JoinRoom(roomID RoomID, playerName string) (Player, Room, error) {

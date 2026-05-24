@@ -25,7 +25,8 @@ func main() {
 	deckRepository := postgres.NewDeckRepository(db)
 	deckService := deck.NewService(deckRepository)
 
-	roomManager := room.NewManager()
+	roomRepository := postgres.NewRoomRepository(db)
+	roomManager := room.NewManager(roomRepository)
 
 	gameService := gameapp.NewService(
 		deckService,

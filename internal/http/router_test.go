@@ -20,7 +20,7 @@ func (f fakeGameStarter) StartGame(ctx context.Context, currentRoom room.Room) (
 var _ handlers.GameStarter = fakeGameStarter{}
 
 func TestHealthHandler(t *testing.T) {
-	roomManager := room.NewManager()
+	roomManager := room.NewMemoryManager()
 	gameStarter := fakeGameStarter{}
 
 	router := NewRouter(roomManager, gameStarter)
