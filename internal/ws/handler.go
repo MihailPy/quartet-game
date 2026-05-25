@@ -74,6 +74,17 @@ type CardState struct {
 	Title     string `json:"title"`
 }
 
+type GameFinishedPayload struct {
+	GameID  string        `json:"game_id"`
+	Winners []string      `json:"winners"`
+	Scores  []PlayerScore `json:"scores"`
+}
+
+type PlayerScore struct {
+	PlayerID string `json:"player_id"`
+	Score    int    `json:"score"`
+}
+
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
 		return true
@@ -247,6 +258,13 @@ func (h *Handler) handleRequestCard(
 			Payload: buildPlayerHandPayload(state, player.ID),
 		})
 	}
+
+	if state.Status == game.GameStatusFinished {
+		h.hub.BroadcastToRoom(roomID, Event{
+			Type:    "game_finished",
+			Payload: buildGameFinishedPayload(state),
+		})
+	}
 }
 
 func (h *Handler) broadcastRoomState(roomID room.RoomID) {
@@ -337,5 +355,28 @@ func requestCardErrorCode(err error) string {
 		return "cannot_transfer_card"
 	default:
 		return "unknown_error"
+	}
+}
+
+func buildGameFinishedPayload(state game.GameState) GameFinishedPayload {
+	result := game.CalculateGameResult(&state)
+
+	winners := make([]string, 0, len(result.Winners))
+	for _, winnerID := range result.Winners {
+		winners = append(winners, string(winnerID))
+	}
+
+	scores := make([]PlayerScore, 0, len(result.Scores))
+	for playerID, score := range result.Scores {
+		scores = append(scores, PlayerScore{
+			PlayerID: string(playerID),
+			Score:    score,
+		})
+	}
+
+	return GameFinishedPayload{
+		GameID:  string(state.ID),
+		Winners: winners,
+		Scores:  scores,
 	}
 }
