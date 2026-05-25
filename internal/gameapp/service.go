@@ -143,6 +143,14 @@ func (s *Service) RequestCard(
 		return game.RequestCardResult{}, game.GameState{}, err
 	}
 
+	if state.Status == game.GameStatusFinished && s.gameRepository != nil {
+		gameResult := game.CalculateGameResult(&state)
+
+		if err := s.gameRepository.SaveGameResult(ctx, state.ID, gameResult); err != nil {
+			return game.RequestCardResult{}, game.GameState{}, err
+		}
+	}
+
 	s.games[roomID] = state
 
 	return result, state, nil
