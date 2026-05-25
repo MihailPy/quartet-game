@@ -89,6 +89,11 @@ type TurnChangedPayload struct {
 	CurrentPlayerID string `json:"current_player_id"`
 }
 
+type QuartetCompletedPayload struct {
+	PlayerID string   `json:"player_id"`
+	Quartets []string `json:"quartets"`
+}
+
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
 		return true
@@ -257,6 +262,22 @@ func (h *Handler) handleRequestCard(
 			CurrentPlayerID: string(state.CurrentPlayerID),
 		},
 	})
+
+	if len(result.CompletedQuartets) > 0 {
+		quartets := make([]string, 0, len(result.CompletedQuartets))
+
+		for _, quartetID := range result.CompletedQuartets {
+			quartets = append(quartets, string(quartetID))
+		}
+
+		h.hub.BroadcastToRoom(roomID, Event{
+			Type: "quartet_completed",
+			Payload: QuartetCompletedPayload{
+				PlayerID: string(playerID),
+				Quartets: quartets,
+			},
+		})
+	}
 
 	h.hub.BroadcastToRoom(roomID, Event{
 		Type:    "game_state",
