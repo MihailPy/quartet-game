@@ -56,3 +56,10 @@ echo "wscat -c \"ws://localhost:8080/rooms/$ROOM_ID/ws?player_id=$PLAYER_2_ID\""
 echo
 echo "Start response:"
 echo "$START_RESPONSE" | jq
+echo
+echo "Player 1 hand:"
+echo "$START_RESPONSE" | jq --arg PLAYER_ID "$PLAYER_1_ID" '.game.Hands[$PLAYER_ID]'
+
+echo
+echo "Player 2 hand:"
+echo "$START_RESPONSE" | jq --arg PLAYER_ID "$PLAYER_2_ID" '.game.Hands[$PLAYER_ID]'
