@@ -85,6 +85,10 @@ type PlayerScore struct {
 	Score    int    `json:"score"`
 }
 
+type TurnChangedPayload struct {
+	CurrentPlayerID string `json:"current_player_id"`
+}
+
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
 		return true
@@ -244,6 +248,13 @@ func (h *Handler) handleRequestCard(
 			"next_player_id":     result.NextPlayerID,
 			"current_player_id":  state.CurrentPlayerID,
 			"game_status":        state.Status,
+		},
+	})
+
+	h.hub.BroadcastToRoom(roomID, Event{
+		Type: "turn_changed",
+		Payload: TurnChangedPayload{
+			CurrentPlayerID: string(state.CurrentPlayerID),
 		},
 	})
 
