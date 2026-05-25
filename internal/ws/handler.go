@@ -10,6 +10,11 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+type ErrorPayload struct {
+	Code    string `json:"code"`
+	Message string `json:"message"`
+}
+
 type Handler struct {
 	roomManager *room.Manager
 	hub         *Hub
@@ -180,9 +185,10 @@ func (h *Handler) handleRequestCard(
 
 	if err := json.Unmarshal(payload, &request); err != nil {
 		h.hub.SendToPlayer(roomID, playerID, Event{
-			Type: "error",
-			Payload: map[string]string{
-				"message": "invalid request_card payload",
+			Type: "request_card_error",
+			Payload: ErrorPayload{
+				Code:    "invalid_payload",
+				Message: "invalid request_card payload",
 			},
 		})
 		return
@@ -190,9 +196,10 @@ func (h *Handler) handleRequestCard(
 
 	if request.TargetPlayerID == "" || request.CardID == "" {
 		h.hub.SendToPlayer(roomID, playerID, Event{
-			Type: "error",
-			Payload: map[string]string{
-				"message": "target_player_id and card_id are required",
+			Type: "request_card_error",
+			Payload: ErrorPayload{
+				Code:    "missing_fields",
+				Message: "target_player_id and card_id are required",
 			},
 		})
 		return
@@ -205,19 +212,21 @@ func (h *Handler) handleRequestCard(
 		room.PlayerID(request.TargetPlayerID),
 		game.CardID(request.CardID),
 	)
+
 	if err != nil {
-		h.hub.SendToPlayer(roomID, playerID, Event{
-			Type: "error",
-			Payload: map[string]string{
-				"message": err.Error(),
-			},
-		})
+		h.sendError(
+			roomID,
+			playerID,
+			"request_card_error",
+			requestCardErrorCode(err),
+			err,
+		)
 		return
 	}
 
 	h.hub.BroadcastToRoom(roomID, Event{
 		Type: "card_request_result",
-		Payload: map[string]interface{}{
+		Payload: map[string]any{
 			"success":            result.Success,
 			"requested_card":     result.RequestedCard,
 			"completed_quartets": result.CompletedQuartets,
@@ -299,5 +308,34 @@ func buildPlayerHandPayload(state game.GameState, playerID game.PlayerID) Player
 	return PlayerHandPayload{
 		PlayerID: string(playerID),
 		Cards:    cards,
+	}
+}
+
+func (h *Handler) sendError(roomID room.RoomID, playerID room.PlayerID, eventType string, code string, err error) {
+	h.hub.SendToPlayer(roomID, playerID, Event{
+		Type: eventType,
+		Payload: ErrorPayload{
+			Code:    code,
+			Message: err.Error(),
+		},
+	})
+}
+
+func requestCardErrorCode(err error) string {
+	switch err {
+	case game.ErrNotPlayerTurn:
+		return "not_player_turn"
+	case game.ErrCardNotFound:
+		return "card_not_found"
+	case game.ErrPlayerHasNoCardFromQuartet:
+		return "player_has_no_card_from_quartet"
+	case game.ErrInvalidRequestCardCommand:
+		return "invalid_request_card_command"
+	case game.ErrCannotRequestCard:
+		return "cannot_request_card"
+	case game.ErrCannotTransferCard:
+		return "cannot_transfer_card"
+	default:
+		return "unknown_error"
 	}
 }
