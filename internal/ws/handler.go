@@ -44,6 +44,20 @@ type GameService interface {
 	) (game.RequestCardResult, game.GameState, error)
 }
 
+type GameStatePayload struct {
+	GameID          string              `json:"game_id"`
+	Status          string              `json:"status"`
+	CurrentPlayerID string              `json:"current_player_id"`
+	Players         []GamePlayerState   `json:"players"`
+	Completed       map[string][]string `json:"completed"`
+}
+
+type GamePlayerState struct {
+	ID        string `json:"id"`
+	Name      string `json:"name"`
+	CardCount int    `json:"card_count"`
+}
+
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
 		return true
@@ -201,6 +215,10 @@ func (h *Handler) handleRequestCard(
 			"game_status":        state.Status,
 		},
 	})
+	h.hub.BroadcastToRoom(roomID, Event{
+		Type:    "game_state",
+		Payload: buildGameStatePayload(state),
+	})
 }
 
 func (h *Handler) broadcastRoomState(roomID room.RoomID) {
@@ -213,4 +231,37 @@ func (h *Handler) broadcastRoomState(roomID room.RoomID) {
 		Type:    "room_state",
 		Payload: foundRoom,
 	})
+}
+
+func buildGameStatePayload(state game.GameState) GameStatePayload {
+	players := make([]GamePlayerState, 0, len(state.Players))
+
+	for _, player := range state.Players {
+		players = append(players, GamePlayerState{
+			ID:        string(player.ID),
+			Name:      player.Name,
+			CardCount: len(state.Hands[player.ID]),
+		})
+	}
+
+	completed := make(map[string][]string)
+
+	for playerID, quartetIDs := range state.Completed {
+		completed[string(playerID)] = make([]string, 0, len(quartetIDs))
+
+		for _, quartetID := range quartetIDs {
+			completed[string(playerID)] = append(
+				completed[string(playerID)],
+				string(quartetID),
+			)
+		}
+	}
+
+	return GameStatePayload{
+		GameID:          string(state.ID),
+		Status:          string(state.Status),
+		CurrentPlayerID: string(state.CurrentPlayerID),
+		Players:         players,
+		Completed:       completed,
+	}
 }
