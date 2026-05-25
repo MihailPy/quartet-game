@@ -79,3 +79,17 @@ func (r *GameRepository) SaveGameResult(
 
 	return tx.Commit()
 }
+
+func (r *GameRepository) UpdateGameStatus(
+	ctx context.Context,
+	gameID game.GameID,
+	status game.GameStatus,
+) error {
+	_, err := r.db.ExecContext(ctx, `
+		UPDATE games
+		SET status = $2
+		WHERE id = $1
+	`, string(gameID), string(status))
+
+	return err
+}

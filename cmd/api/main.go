@@ -36,7 +36,7 @@ func main() {
 		game.DeckID(cfg.DefaultDeckID),
 	)
 
-	router := apphttp.NewRouter(roomManager, gameService)
+	router := apphttp.NewRouter(roomManager, gameService, gameService)
 
 	log.Printf("Quartet Game API is running on %s", cfg.HTTPAddr)
 

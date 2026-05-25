@@ -13,6 +13,7 @@ var ErrCannotStartGame = errors.New("cannot start game")
 type GameRepository interface {
 	SaveGame(ctx context.Context, roomID room.RoomID, deckID game.DeckID, state game.GameState) error
 	SaveGameResult(ctx context.Context, gameID game.GameID, result game.GameResult) error
+	UpdateGameStatus(ctx context.Context, gameID game.GameID, status game.GameStatus) error
 }
 
 type DeckService interface {
@@ -115,4 +116,47 @@ func (s *Service) FinishGame(ctx context.Context, roomID room.RoomID) (game.Game
 	s.games[roomID] = state
 
 	return result, nil
+}
+
+func (s *Service) RequestCard(
+	ctx context.Context,
+	roomID room.RoomID,
+	actorID room.PlayerID,
+	targetPlayerID room.PlayerID,
+	cardID game.CardID,
+) (game.RequestCardResult, game.GameState, error) {
+	state, ok := s.games[roomID]
+	if !ok {
+		return game.RequestCardResult{}, game.GameState{}, ErrCannotStartGame
+	}
+
+	command, err := game.NewRequestCardCommand(
+		game.PlayerID(actorID),
+		game.PlayerID(targetPlayerID),
+		cardID,
+	)
+	if err != nil {
+		return game.RequestCardResult{}, game.GameState{}, err
+	}
+
+	result, err := game.RequestCard(&state, command)
+	if err != nil {
+		return game.RequestCardResult{}, game.GameState{}, err
+	}
+
+	if state.Status == game.GameStatusFinished && s.gameRepository != nil {
+		gameResult := game.CalculateGameResult(&state)
+
+		if err := s.gameRepository.SaveGameResult(ctx, state.ID, gameResult); err != nil {
+			return game.RequestCardResult{}, game.GameState{}, err
+		}
+
+		if err := s.gameRepository.UpdateGameStatus(ctx, state.ID, state.Status); err != nil {
+			return game.RequestCardResult{}, game.GameState{}, err
+		}
+	}
+
+	s.games[roomID] = state
+
+	return result, state, nil
 }
