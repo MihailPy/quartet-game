@@ -9,6 +9,7 @@ import (
 	"github.com/MihailPy/quartet-game/internal/game"
 	"github.com/MihailPy/quartet-game/internal/http/handlers"
 	"github.com/MihailPy/quartet-game/internal/room"
+	"github.com/MihailPy/quartet-game/internal/ws"
 )
 
 type fakeGameStarter struct{}
@@ -17,13 +18,24 @@ func (f fakeGameStarter) StartGame(ctx context.Context, currentRoom room.Room) (
 	return game.GameState{}, nil
 }
 
+func (f fakeGameStarter) RequestCard(
+	ctx context.Context,
+	roomID room.RoomID,
+	actorID room.PlayerID,
+	targetPlayerID room.PlayerID,
+	cardID game.CardID,
+) (game.RequestCardResult, game.GameState, error) {
+	return game.RequestCardResult{}, game.GameState{}, nil
+}
+
 var _ handlers.GameStarter = fakeGameStarter{}
+var _ ws.GameService = fakeGameStarter{}
 
 func TestHealthHandler(t *testing.T) {
 	roomManager := room.NewMemoryManager()
 	gameStarter := fakeGameStarter{}
 
-	router := NewRouter(roomManager, gameStarter)
+	router := NewRouter(roomManager, gameStarter, gameStarter)
 
 	req := httptest.NewRequest(http.MethodGet, "/health", nil)
 	rec := httptest.NewRecorder()

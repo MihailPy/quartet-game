@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/MihailPy/quartet-game/internal/game"
 	"github.com/MihailPy/quartet-game/internal/room"
 	"github.com/gorilla/websocket"
 )
@@ -12,12 +13,14 @@ import (
 type Handler struct {
 	roomManager *room.Manager
 	hub         *Hub
+	gameService GameService
 }
 
-func NewHandler(roomManager *room.Manager, hub *Hub) *Handler {
+func NewHandler(roomManager *room.Manager, hub *Hub, gameService GameService) *Handler {
 	return &Handler{
 		roomManager: roomManager,
 		hub:         hub,
+		gameService: gameService,
 	}
 }
 
@@ -29,6 +32,16 @@ type ClientMessage struct {
 type RequestCardPayload struct {
 	TargetPlayerID string `json:"target_player_id"`
 	CardID         string `json:"card_id"`
+}
+
+type GameService interface {
+	RequestCard(
+		ctx context.Context,
+		roomID room.RoomID,
+		actorID room.PlayerID,
+		targetPlayerID room.PlayerID,
+		cardID game.CardID,
+	) (game.RequestCardResult, game.GameState, error)
 }
 
 var upgrader = websocket.Upgrader{
@@ -110,7 +123,7 @@ func (h *Handler) HandleConnection(w http.ResponseWriter, r *http.Request, roomI
 
 		switch message.Type {
 		case "request_card":
-			h.handleRequestCard(roomID, playerID, message.Payload)
+			h.handleRequestCard(r.Context(), roomID, playerID, message.Payload)
 		default:
 			_ = conn.WriteJSON(Event{
 				Type: "error",
@@ -132,7 +145,12 @@ func playerExists(foundRoom room.Room, playerID room.PlayerID) bool {
 	return false
 }
 
-func (h *Handler) handleRequestCard(roomID room.RoomID, playerID room.PlayerID, payload json.RawMessage) {
+func (h *Handler) handleRequestCard(
+	ctx context.Context,
+	roomID room.RoomID,
+	playerID room.PlayerID,
+	payload json.RawMessage,
+) {
 	var request RequestCardPayload
 
 	if err := json.Unmarshal(payload, &request); err != nil {
@@ -155,16 +173,34 @@ func (h *Handler) handleRequestCard(roomID room.RoomID, playerID room.PlayerID, 
 		return
 	}
 
+	result, state, err := h.gameService.RequestCard(
+		ctx,
+		roomID,
+		playerID,
+		room.PlayerID(request.TargetPlayerID),
+		game.CardID(request.CardID),
+	)
+	if err != nil {
+		h.hub.SendToPlayer(roomID, playerID, Event{
+			Type: "error",
+			Payload: map[string]string{
+				"message": err.Error(),
+			},
+		})
+		return
+	}
+
 	h.hub.BroadcastToRoom(roomID, Event{
-		Type: "card_requested",
-		Payload: map[string]string{
-			"actor_player_id":  string(playerID),
-			"target_player_id": request.TargetPlayerID,
-			"card_id":          request.CardID,
+		Type: "card_request_result",
+		Payload: map[string]interface{}{
+			"success":            result.Success,
+			"requested_card":     result.RequestedCard,
+			"completed_quartets": result.CompletedQuartets,
+			"next_player_id":     result.NextPlayerID,
+			"current_player_id":  state.CurrentPlayerID,
+			"game_status":        state.Status,
 		},
 	})
-
-	h.broadcastRoomState(roomID)
 }
 
 func (h *Handler) broadcastRoomState(roomID room.RoomID) {

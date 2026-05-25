@@ -116,3 +116,34 @@ func (s *Service) FinishGame(ctx context.Context, roomID room.RoomID) (game.Game
 
 	return result, nil
 }
+
+func (s *Service) RequestCard(
+	ctx context.Context,
+	roomID room.RoomID,
+	actorID room.PlayerID,
+	targetPlayerID room.PlayerID,
+	cardID game.CardID,
+) (game.RequestCardResult, game.GameState, error) {
+	state, ok := s.games[roomID]
+	if !ok {
+		return game.RequestCardResult{}, game.GameState{}, ErrCannotStartGame
+	}
+
+	command, err := game.NewRequestCardCommand(
+		game.PlayerID(actorID),
+		game.PlayerID(targetPlayerID),
+		cardID,
+	)
+	if err != nil {
+		return game.RequestCardResult{}, game.GameState{}, err
+	}
+
+	result, err := game.RequestCard(&state, command)
+	if err != nil {
+		return game.RequestCardResult{}, game.GameState{}, err
+	}
+
+	s.games[roomID] = state
+
+	return result, state, nil
+}
