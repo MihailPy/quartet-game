@@ -74,6 +74,8 @@ function App() {
     null,
   )
   const [playerHand, setPlayerHand] = useState<PlayerHandPayload | null>(null)
+  const [targetPlayerID, setTargetPlayerID] = useState<string>('')
+  const [selectedCardID, setSelectedCardID] = useState<string>('')
 
   async function createRoom() {
     setError('')
@@ -224,6 +226,30 @@ function App() {
     }
   }
 
+  function requestCard() {
+    if (!socketRef.current || socketRef.current.readyState !== WebSocket.OPEN) {
+      setError('WebSocket is not connected')
+      return
+    }
+
+    if (!targetPlayerID || !selectedCardID) {
+      setError('Select target player and card')
+      return
+    }
+
+    setError('')
+
+    socketRef.current.send(
+      JSON.stringify({
+        type: 'request_card',
+        payload: {
+          target_player_id: targetPlayerID,
+          card_id: selectedCardID,
+        },
+      }),
+    )
+  }
+
   useEffect(() => {
     if (!room || !player) {
       return
@@ -258,6 +284,14 @@ function App() {
 
         if (message.type === 'player_hand') {
           setPlayerHand(message.payload as PlayerHandPayload)
+        }
+
+        if (message.type === 'card_request_result') {
+          setSelectedCardID('')
+        }
+
+        if (message.type === 'request_card_error') {
+          setError(message.payload.message)
         }
       } catch {
         // ignore invalid websocket message
@@ -404,6 +438,52 @@ function App() {
                     ? publicGameState.current_player_id
                     : game?.CurrentPlayerID}
                 </code>
+
+                {player && publicGameState && (
+                  <div className="request-form">
+                    <h3>Запрос карты</h3>
+
+                    <label>
+                      У кого спросить
+                      <select
+                        className="input"
+                        value={targetPlayerID}
+                        onChange={(event) => setTargetPlayerID(event.target.value)}
+                      >
+                        <option value="">Выбери игрока</option>
+
+                        {publicGameState.players
+                          .filter((gamePlayer) => gamePlayer.id !== player.id)
+                          .map((gamePlayer) => (
+                            <option key={gamePlayer.id} value={gamePlayer.id}>
+                              {gamePlayer.name}
+                            </option>
+                          ))}
+                      </select>
+                    </label>
+
+                    <label>
+                      Какую карту спросить
+                      <select
+                        className="input"
+                        value={selectedCardID}
+                        onChange={(event) => setSelectedCardID(event.target.value)}
+                      >
+                        <option value="">Выбери карту</option>
+
+                        {playerHand?.cards.map((card) => (
+                          <option key={card.id} value={card.id}>
+                            {card.title}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+
+                    <button className="button" onClick={requestCard}>
+                      Спросить карту
+                    </button>
+                  </div>
+                )}
 
                 <h3>Карты игроков</h3>
 
