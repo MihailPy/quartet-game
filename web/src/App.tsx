@@ -76,6 +76,8 @@ function App() {
   const [playerHand, setPlayerHand] = useState<PlayerHandPayload | null>(null)
   const [targetPlayerID, setTargetPlayerID] = useState<string>('')
   const [selectedCardID, setSelectedCardID] = useState<string>('')
+  const [lastMoveMessage, setLastMoveMessage] = useState<string>('')
+  const [currentTurnPlayerID, setCurrentTurnPlayerID] = useState<string>('')
 
   async function createRoom() {
     setError('')
@@ -279,7 +281,9 @@ function App() {
         }
 
         if (message.type === 'game_state') {
-          setPublicGameState(message.payload as PublicGameState)
+          const payload = message.payload as PublicGameState
+          setPublicGameState(payload)
+          setCurrentTurnPlayerID(payload.current_player_id)
         }
 
         if (message.type === 'player_hand') {
@@ -287,7 +291,17 @@ function App() {
         }
 
         if (message.type === 'card_request_result') {
+          const success = message.payload.success as boolean
+          const nextPlayerID = message.payload.next_player_id as string
+
           setSelectedCardID('')
+          setCurrentTurnPlayerID(nextPlayerID)
+
+          if (success) {
+            setLastMoveMessage('Карта найдена. Игрок продолжает ход.')
+          } else {
+            setLastMoveMessage('Карты нет. Ход переходит другому игроку.')
+          }
         }
 
         if (message.type === 'request_card_error') {
@@ -434,10 +448,20 @@ function App() {
                 </p>
 
                 <code>
-                  {publicGameState
-                    ? publicGameState.current_player_id
-                    : game?.CurrentPlayerID}
+
+                  {currentTurnPlayerID ||
+
+                    publicGameState?.current_player_id ||
+
+                    game?.CurrentPlayerID}
+
                 </code>
+
+                {lastMoveMessage && (
+                  <div className="move-message">
+                    {lastMoveMessage}
+                  </div>
+                )}
 
                 {player && publicGameState && (
                   <div className="request-form">
@@ -479,8 +503,14 @@ function App() {
                       </select>
                     </label>
 
-                    <button className="button" onClick={requestCard}>
-                      Спросить карту
+                    <button
+                      className="button"
+                      onClick={requestCard}
+                      disabled={Boolean(player && currentTurnPlayerID && currentTurnPlayerID !== player.id)}
+                    >
+                      {player && currentTurnPlayerID && currentTurnPlayerID !== player.id
+                        ? 'Сейчас не твой ход'
+                        : 'Спросить карту'}
                     </button>
                   </div>
                 )}
