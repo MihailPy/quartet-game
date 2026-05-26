@@ -19,6 +19,8 @@ const API_URL = 'http://localhost:8080'
 function App() {
   const [room, setRoom] = useState<Room | null>(null)
   const [error, setError] = useState<string>('')
+  const [player, setPlayer] = useState<Player | null>(null)
+  const [playerName, setPlayerName] = useState<string>('Mihail')
 
   async function createRoom() {
     setError('')
@@ -34,6 +36,41 @@ function App() {
 
       const createdRoom = (await response.json()) as Room
       setRoom(createdRoom)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unknown error')
+    }
+  }
+
+  async function joinRoom() {
+    if (!room) {
+      setError('Create room first')
+      return
+    }
+
+    setError('')
+
+    try {
+      const response = await fetch(`${API_URL}/rooms/${room.id}/join`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: playerName,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to join room')
+      }
+
+      const data = (await response.json()) as {
+        player: Player
+        room: Room
+      }
+
+      setPlayer(data.player)
+      setRoom(data.room)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error')
     }
@@ -58,15 +95,45 @@ function App() {
             </button>
 
             {room && (
+              <div className="join-form">
+                <label>
+                  Имя игрока
+                  <input
+                    className="input"
+                    value={playerName}
+                    onChange={(event) => setPlayerName(event.target.value)}
+                  />
+                </label>
+
+                <button className="button" onClick={joinRoom}>
+                  Подключиться
+                </button>
+              </div>
+            )}
+
+            {player && (
               <div className="room-info">
                 <p>
-                  <strong>ID комнаты:</strong>
+                  <strong>Мой игрок:</strong>
                 </p>
-                <code>{room.id}</code>
+                <code>{player.id}</code>
 
                 <p>
-                  <strong>Статус:</strong> {room.status}
+                  <strong>Имя:</strong> {player.name}
                 </p>
+              </div>
+            )}
+
+            {room && room.players.length > 0 && (
+              <div className="players-list">
+                <h3>Игроки</h3>
+
+                {room.players.map((roomPlayer) => (
+                  <div className="player-row" key={roomPlayer.id}>
+                    <span>{roomPlayer.name}</span>
+                    <span>{roomPlayer.is_ready ? 'готов' : 'не готов'}</span>
+                  </div>
+                ))}
               </div>
             )}
           </div>
