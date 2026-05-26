@@ -33,6 +33,20 @@ type StartGameResponse = {
   game: GameState
 }
 
+type PublicGameState = {
+  game_id: string
+  status: string
+  current_player_id: string
+  players: PublicGamePlayer[]
+  completed: Record<string, string[]>
+}
+
+type PublicGamePlayer = {
+  id: string
+  name: string
+  card_count: number
+}
+
 const API_URL = 'http://localhost:8080'
 
 function App() {
@@ -45,6 +59,9 @@ function App() {
   const [socketStatus, setSocketStatus] = useState<string>('disconnected')
   const [events, setEvents] = useState<string[]>([])
   const socketRef = useRef<WebSocket | null>(null)
+  const [publicGameState, setPublicGameState] = useState<PublicGameState | null>(
+    null,
+  )
 
   async function createRoom() {
     setError('')
@@ -217,6 +234,10 @@ function App() {
           setRoom(message.payload.room)
           setGame(message.payload.game)
         }
+
+        if (message.type === 'game_state') {
+          setPublicGameState(message.payload as PublicGameState)
+        }
       } catch {
         // ignore invalid websocket message
       }
@@ -344,27 +365,40 @@ function App() {
               <strong>WebSocket:</strong> {socketStatus}
             </div>
 
-            {!game && <p>Игра ещё не началась.</p>}
+            {!game && !publicGameState && <p>Игра ещё не началась.</p>}
 
-            {game && (
+            {(game || publicGameState) && (
               <div className="game-info">
                 <p>
-                  <strong>Статус:</strong> {game.Status}
+                  <strong>Статус:</strong>{' '}
+                  {publicGameState ? publicGameState.status : game?.Status}
                 </p>
 
                 <p>
                   <strong>Сейчас ходит:</strong>
                 </p>
-                <code>{game.CurrentPlayerID}</code>
+
+                <code>
+                  {publicGameState
+                    ? publicGameState.current_player_id
+                    : game?.CurrentPlayerID}
+                </code>
 
                 <h3>Карты игроков</h3>
 
-                {Object.entries(game.Hands).map(([playerID, cards]) => (
-                  <div className="player-row" key={playerID}>
-                    <span>{playerID}</span>
-                    <span>{cards.length} карт</span>
-                  </div>
-                ))}
+                {publicGameState
+                  ? publicGameState.players.map((gamePlayer) => (
+                    <div className="player-row" key={gamePlayer.id}>
+                      <span>{gamePlayer.name}</span>
+                      <span>{gamePlayer.card_count} карт</span>
+                    </div>
+                  ))
+                  : Object.entries(game?.Hands ?? {}).map(([playerID, cards]) => (
+                    <div className="player-row" key={playerID}>
+                      <span>{playerID}</span>
+                      <span>{cards.length} карт</span>
+                    </div>
+                  ))}
               </div>
             )}
 
