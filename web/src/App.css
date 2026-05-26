@@ -57,3 +57,43 @@ body {
   margin: 0;
   color: #71717a;
 }
+
+.button {
+  width: 100%;
+  padding: 10px 14px;
+  border: 0;
+  border-radius: 10px;
+  background: #18181b;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.button:hover {
+  background: #3f3f46;
+}
+
+.room-info {
+  margin-top: 16px;
+}
+
+.room-info p {
+  margin: 12px 0 6px;
+}
+
+code {
+  display: block;
+  padding: 10px;
+  overflow-wrap: anywhere;
+  background: #f4f4f5;
+  border-radius: 8px;
+}
+
+.error {
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+  color: #991b1b;
+}
