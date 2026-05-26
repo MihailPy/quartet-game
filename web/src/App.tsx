@@ -209,6 +209,17 @@ function App() {
         event.data,
         ...currentEvents.slice(0, 9),
       ])
+
+      try {
+        const message = JSON.parse(event.data)
+
+        if (message.type === 'game_started') {
+          setRoom(message.payload.room)
+          setGame(message.payload.game)
+        }
+      } catch {
+        // ignore invalid websocket message
+      }
     }
 
     socket.onerror = () => {

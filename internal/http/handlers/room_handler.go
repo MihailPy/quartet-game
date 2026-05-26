@@ -7,6 +7,7 @@ import (
 
 	"github.com/MihailPy/quartet-game/internal/game"
 	"github.com/MihailPy/quartet-game/internal/room"
+	"github.com/MihailPy/quartet-game/internal/ws"
 )
 
 type GameStarter interface {
@@ -14,8 +15,9 @@ type GameStarter interface {
 }
 
 type RoomHandler struct {
-	manager     *room.Manager
-	gameStarter GameStarter
+	manager          *room.Manager
+	gameStarter      GameStarter
+	eventBroadcaster EventBroadcaster
 }
 
 type JoinRoomRequest struct {
@@ -31,10 +33,19 @@ type ReadyRoomRequest struct {
 	PlayerID room.PlayerID `json:"player_id"`
 }
 
-func NewRoomHandler(manager *room.Manager, gameStarter GameStarter) *RoomHandler {
+type EventBroadcaster interface {
+	BroadcastToRoom(roomID room.RoomID, event ws.Event)
+}
+
+func NewRoomHandler(
+	manager *room.Manager,
+	gameStarter GameStarter,
+	eventBroadcaster EventBroadcaster,
+) *RoomHandler {
 	return &RoomHandler{
-		manager:     manager,
-		gameStarter: gameStarter,
+		manager:          manager,
+		gameStarter:      gameStarter,
+		eventBroadcaster: eventBroadcaster,
 	}
 }
 
@@ -183,6 +194,13 @@ func (h *RoomHandler) StartRoom(w http.ResponseWriter, r *http.Request, roomID r
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	_ = json.NewEncoder(w).Encode(response)
+
+	if h.eventBroadcaster != nil {
+		h.eventBroadcaster.BroadcastToRoom(roomID, ws.Event{
+			Type:    "game_started",
+			Payload: response,
+		})
+	}
 }
 
 func (h *RoomHandler) GetRoomState(w http.ResponseWriter, r *http.Request, roomID room.RoomID) {
