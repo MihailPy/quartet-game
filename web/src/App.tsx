@@ -47,6 +47,17 @@ type PublicGamePlayer = {
   card_count: number
 }
 
+type PlayerHandPayload = {
+  player_id: string
+  cards: PrivateCard[]
+}
+
+type PrivateCard = {
+  id: string
+  quartet_id: string
+  title: string
+}
+
 const API_URL = 'http://localhost:8080'
 
 function App() {
@@ -62,6 +73,7 @@ function App() {
   const [publicGameState, setPublicGameState] = useState<PublicGameState | null>(
     null,
   )
+  const [playerHand, setPlayerHand] = useState<PlayerHandPayload | null>(null)
 
   async function createRoom() {
     setError('')
@@ -77,6 +89,10 @@ function App() {
 
       const createdRoom = (await response.json()) as Room
       setRoom(createdRoom)
+      setPlayer(null)
+      setGame(null)
+      setPlayerHand(null)
+      setPublicGameState(null)
       setRoomIdInput(createdRoom.id)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error')
@@ -102,6 +118,8 @@ function App() {
       setRoom(loadedRoom)
       setPlayer(null)
       setGame(null)
+      setPlayerHand(null)
+      setPublicGameState(null)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error')
     }
@@ -237,6 +255,10 @@ function App() {
 
         if (message.type === 'game_state') {
           setPublicGameState(message.payload as PublicGameState)
+        }
+
+        if (message.type === 'player_hand') {
+          setPlayerHand(message.payload as PlayerHandPayload)
         }
       } catch {
         // ignore invalid websocket message
@@ -418,16 +440,25 @@ function App() {
           <div className="panel">
             <h2>Моя рука</h2>
 
-            {!game || !player ? (
-              <p>Карты появятся после старта игры.</p>
-            ) : (
+            {!player && <p>Сначала подключись к комнате.</p>}
+
+            {player && !game && !playerHand && <p>Карты появятся после старта игры.</p>}
+
+            {player && (playerHand || game) && (
               <div className="cards-list">
-                {(game.Hands[player.id] ?? []).map((card) => (
-                  <div className="card" key={card.ID}>
-                    <strong>{card.Title}</strong>
-                    <span>{card.QuartetID}</span>
-                  </div>
-                ))}
+                {playerHand
+                  ? playerHand.cards.map((card) => (
+                    <div className="card" key={card.id}>
+                      <strong>{card.title}</strong>
+                      <span>{card.quartet_id}</span>
+                    </div>
+                  ))
+                  : (game?.Hands[player.id] ?? []).map((card) => (
+                    <div className="card" key={card.ID}>
+                      <strong>{card.Title}</strong>
+                      <span>{card.QuartetID}</span>
+                    </div>
+                  ))}
               </div>
             )}
           </div>
