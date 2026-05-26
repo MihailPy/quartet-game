@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import './App.css'
 
 type Room = {
@@ -42,6 +42,9 @@ function App() {
   const [playerName, setPlayerName] = useState<string>('Mihail')
   const [roomIdInput, setRoomIdInput] = useState<string>('')
   const [game, setGame] = useState<GameState | null>(null)
+  const [socketStatus, setSocketStatus] = useState<string>('disconnected')
+  const [events, setEvents] = useState<string[]>([])
+  const socketRef = useRef<WebSocket | null>(null)
 
   async function createRoom() {
     setError('')
@@ -186,6 +189,42 @@ function App() {
     }
   }
 
+  useEffect(() => {
+    if (!room || !player) {
+      return
+    }
+
+    const socketUrl = `ws://localhost:8080/rooms/${room.id}/ws?player_id=${player.id}`
+    const socket = new WebSocket(socketUrl)
+
+    socketRef.current = socket
+    setSocketStatus('connecting')
+
+    socket.onopen = () => {
+      setSocketStatus('connected')
+    }
+
+    socket.onmessage = (event) => {
+      setEvents((currentEvents) => [
+        event.data,
+        ...currentEvents.slice(0, 9),
+      ])
+    }
+
+    socket.onerror = () => {
+      setSocketStatus('error')
+    }
+
+    socket.onclose = () => {
+      setSocketStatus('disconnected')
+    }
+
+    return () => {
+      socket.close()
+      socketRef.current = null
+    }
+  }, [room?.id, player?.id])
+
   return (
     <main className="app">
       <section className="game-page">
@@ -290,6 +329,10 @@ function App() {
           <div className="panel">
             <h2>Игра</h2>
 
+            <div className="socket-status">
+              <strong>WebSocket:</strong> {socketStatus}
+            </div>
+
             {!game && <p>Игра ещё не началась.</p>}
 
             {game && (
@@ -313,6 +356,18 @@ function App() {
                 ))}
               </div>
             )}
+
+            <div className="events-list">
+              <h3>События</h3>
+
+              {events.length === 0 && <p>Пока событий нет.</p>}
+
+              {events.map((event, index) => (
+                <pre className="event-item" key={`${event}-${index}`}>
+                  {event}
+                </pre>
+              ))}
+            </div>
           </div>
 
           <div className="panel">

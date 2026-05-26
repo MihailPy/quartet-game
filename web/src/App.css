@@ -169,3 +169,26 @@ code {
   font-size: 12px;
   color: #71717a;
 }
+
+.socket-status {
+  margin-bottom: 16px;
+  padding: 10px;
+  background: #f4f4f5;
+  border-radius: 10px;
+  font-size: 14px;
+}
+
+.events-list {
+  margin-top: 20px;
+}
+
+.event-item {
+  max-height: 160px;
+  overflow: auto;
+  padding: 10px;
+  background: #18181b;
+  color: #f4f4f5;
+  border-radius: 10px;
+  font-size: 12px;
+  white-space: pre-wrap;
+}
