@@ -14,6 +14,25 @@ type Player = {
   is_connected: boolean
 }
 
+type GameState = {
+  ID: string
+  Status: string
+  CurrentPlayerID: string
+  Hands: Record<string, Card[]>
+  Completed: Record<string, string[]>
+}
+
+type Card = {
+  ID: string
+  QuartetID: string
+  Title: string
+}
+
+type StartGameResponse = {
+  room: Room
+  game: GameState
+}
+
 const API_URL = 'http://localhost:8080'
 
 function App() {
@@ -22,6 +41,7 @@ function App() {
   const [player, setPlayer] = useState<Player | null>(null)
   const [playerName, setPlayerName] = useState<string>('Mihail')
   const [roomIdInput, setRoomIdInput] = useState<string>('')
+  const [game, setGame] = useState<GameState | null>(null)
 
   async function createRoom() {
     setError('')
@@ -38,6 +58,11 @@ function App() {
       const createdRoom = (await response.json()) as Room
       setRoom(createdRoom)
       setRoomIdInput(createdRoom.id)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unknown error')
+    }
+  }
+
   async function loadRoom() {
     if (!roomIdInput) {
       setError('Enter room id')
@@ -135,6 +160,32 @@ function App() {
     }
   }
 
+  async function startGame() {
+    if (!room) {
+      setError('Create room first')
+      return
+    }
+
+    setError('')
+
+    try {
+      const response = await fetch(`${API_URL}/rooms/${room.id}/start`, {
+        method: 'POST',
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to start game')
+      }
+
+      const data = (await response.json()) as StartGameResponse
+
+      setRoom(data.room)
+      setGame(data.game)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unknown error')
+    }
+  }
+
   return (
     <main className="app">
       <section className="game-page">
@@ -222,16 +273,63 @@ function App() {
                 ))}
               </div>
             )}
+            {room && room.players.length >= 2 && (
+              <button
+                className="button start-button"
+                onClick={startGame}
+                disabled={
+                  room.status === 'playing' ||
+                  !room.players.every((roomPlayer) => roomPlayer.is_ready)
+                }
+              >
+                {room.status === 'playing' ? 'Игра началась' : 'Старт игры'}
+              </button>
+            )}
           </div>
 
           <div className="panel">
             <h2>Игра</h2>
-            <p>Здесь будет состояние игры, ход и события.</p>
+
+            {!game && <p>Игра ещё не началась.</p>}
+
+            {game && (
+              <div className="game-info">
+                <p>
+                  <strong>Статус:</strong> {game.Status}
+                </p>
+
+                <p>
+                  <strong>Сейчас ходит:</strong>
+                </p>
+                <code>{game.CurrentPlayerID}</code>
+
+                <h3>Карты игроков</h3>
+
+                {Object.entries(game.Hands).map(([playerID, cards]) => (
+                  <div className="player-row" key={playerID}>
+                    <span>{playerID}</span>
+                    <span>{cards.length} карт</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="panel">
             <h2>Моя рука</h2>
-            <p>Здесь будут карты текущего игрока.</p>
+
+            {!game || !player ? (
+              <p>Карты появятся после старта игры.</p>
+            ) : (
+              <div className="cards-list">
+                {(game.Hands[player.id] ?? []).map((card) => (
+                  <div className="card" key={card.ID}>
+                    <strong>{card.Title}</strong>
+                    <span>{card.QuartetID}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </section>
       </section>
