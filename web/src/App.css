@@ -246,3 +246,25 @@ code {
 .game-finished h4 {
   margin: 0 0 10px;
 }
+
+.turn-player-name {
+  margin: 8px 0 0;
+  color: #2563eb;
+  font-weight: 600;
+}
+
+.player-row-active {
+  padding-left: 8px;
+  border-left: 4px solid #2563eb;
+  background: #eff6ff;
+}
+
+.card small {
+  overflow-wrap: anywhere;
+  color: #a1a1aa;
+  font-size: 11px;
+}
+
+.event-item {
+  margin: 8px 0 0;
+}

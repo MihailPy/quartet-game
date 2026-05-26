@@ -273,6 +273,15 @@ function App() {
     )
   }
 
+  function getPlayerName(playerID: string): string {
+    return (
+      publicGameState?.players.find((gamePlayer) => gamePlayer.id === playerID)
+        ?.name ??
+      room?.players.find((roomPlayer) => roomPlayer.id === playerID)?.name ??
+      playerID
+    )
+  }
+
   useEffect(() => {
     if (!room || !player) {
       return
@@ -433,13 +442,9 @@ function App() {
                 <button
                   className="button"
                   onClick={markReady}
-                  disabled={player.is_ready}
+                  disabled={player.is_ready || room?.status === 'playing'}
                 >
-                  {gameFinished
-                    ? 'Игра завершена'
-                    : player && currentTurnPlayerID && currentTurnPlayerID !== player.id
-                      ? 'Сейчас не твой ход'
-                      : 'Спросить карту'}
+                  {player.is_ready ? 'Готов' : 'Готовиться'}
                 </button>
               </div>
             )}
@@ -490,15 +495,26 @@ function App() {
                   <strong>Сейчас ходит:</strong>
                 </p>
 
-                <code>
-
-                  {currentTurnPlayerID ||
-
+                {(() => {
+                  const turnPlayerID =
+                    currentTurnPlayerID ||
                     publicGameState?.current_player_id ||
+                    game?.CurrentPlayerID ||
+                    ''
 
-                    game?.CurrentPlayerID}
+                  return (
+                    <div>
+                      <code>{turnPlayerID}</code>
 
-                </code>
+                      {turnPlayerID && (
+                        <p className="turn-player-name">
+                          {getPlayerName(turnPlayerID)}
+                          {player?.id === turnPlayerID ? ' — твой ход' : ''}
+                        </p>
+                      )}
+                    </div>
+                  )
+                })()}
 
                 {lastMoveMessage && (
                   <div className="move-message">
@@ -591,7 +607,14 @@ function App() {
 
                 {publicGameState
                   ? publicGameState.players.map((gamePlayer) => (
-                    <div className="player-row" key={gamePlayer.id}>
+                    <div
+                      className={
+                        gamePlayer.id === currentTurnPlayerID
+                          ? 'player-row player-row-active'
+                          : 'player-row'
+                      }
+                      key={gamePlayer.id}
+                    >
                       <span>{gamePlayer.name}</span>
                       <span>{gamePlayer.card_count} карт</span>
                     </div>
@@ -606,7 +629,7 @@ function App() {
             )}
 
             <div className="events-list">
-              <h3>События</h3>
+              <h3>Последние события</h3>
 
               {events.length === 0 && <p>Пока событий нет.</p>}
 
@@ -631,7 +654,8 @@ function App() {
                   ? playerHand.cards.map((card) => (
                     <div className="card" key={card.id}>
                       <strong>{card.title}</strong>
-                      <span>{card.quartet_id}</span>
+                      <span>Квартет: {card.quartet_id}</span>
+                      <small>{card.id}</small>
                     </div>
                   ))
                   : (game?.Hands[player.id] ?? []).map((card) => (
