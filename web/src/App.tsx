@@ -250,7 +250,6 @@ function App() {
 
         if (message.type === 'game_started') {
           setRoom(message.payload.room)
-          setGame(message.payload.game)
         }
 
         if (message.type === 'game_state') {

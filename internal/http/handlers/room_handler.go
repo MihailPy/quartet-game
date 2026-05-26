@@ -35,6 +35,36 @@ type ReadyRoomRequest struct {
 
 type EventBroadcaster interface {
 	BroadcastToRoom(roomID room.RoomID, event ws.Event)
+	SendToPlayer(roomID room.RoomID, playerID room.PlayerID, event ws.Event)
+}
+
+type GameStartedPayload struct {
+	Room room.Room `json:"room"`
+}
+
+type GameStatePayload struct {
+	GameID          string              `json:"game_id"`
+	Status          string              `json:"status"`
+	CurrentPlayerID string              `json:"current_player_id"`
+	Players         []GamePlayerState   `json:"players"`
+	Completed       map[string][]string `json:"completed"`
+}
+
+type GamePlayerState struct {
+	ID        string `json:"id"`
+	Name      string `json:"name"`
+	CardCount int    `json:"card_count"`
+}
+
+type PlayerHandPayload struct {
+	PlayerID string      `json:"player_id"`
+	Cards    []CardState `json:"cards"`
+}
+
+type CardState struct {
+	ID        string `json:"id"`
+	QuartetID string `json:"quartet_id"`
+	Title     string `json:"title"`
 }
 
 func NewRoomHandler(
@@ -197,9 +227,23 @@ func (h *RoomHandler) StartRoom(w http.ResponseWriter, r *http.Request, roomID r
 
 	if h.eventBroadcaster != nil {
 		h.eventBroadcaster.BroadcastToRoom(roomID, ws.Event{
-			Type:    "game_started",
-			Payload: response,
+			Type: "game_started",
+			Payload: GameStartedPayload{
+				Room: startedRoom,
+			},
 		})
+
+		h.eventBroadcaster.BroadcastToRoom(roomID, ws.Event{
+			Type:    "game_state",
+			Payload: buildGameStatePayload(gameState),
+		})
+
+		for _, player := range gameState.Players {
+			h.eventBroadcaster.SendToPlayer(roomID, room.PlayerID(player.ID), ws.Event{
+				Type:    "player_hand",
+				Payload: buildPlayerHandPayload(gameState, player.ID),
+			})
+		}
 	}
 }
 
@@ -224,4 +268,54 @@ func (h *RoomHandler) GetRoomState(w http.ResponseWriter, r *http.Request, roomI
 	w.WriteHeader(http.StatusOK)
 
 	_ = json.NewEncoder(w).Encode(foundRoom)
+}
+
+func buildGameStatePayload(state game.GameState) GameStatePayload {
+	players := make([]GamePlayerState, 0, len(state.Players))
+
+	for _, player := range state.Players {
+		players = append(players, GamePlayerState{
+			ID:        string(player.ID),
+			Name:      player.Name,
+			CardCount: len(state.Hands[player.ID]),
+		})
+	}
+
+	completed := make(map[string][]string)
+
+	for playerID, quartetIDs := range state.Completed {
+		completed[string(playerID)] = make([]string, 0, len(quartetIDs))
+
+		for _, quartetID := range quartetIDs {
+			completed[string(playerID)] = append(
+				completed[string(playerID)],
+				string(quartetID),
+			)
+		}
+	}
+
+	return GameStatePayload{
+		GameID:          string(state.ID),
+		Status:          string(state.Status),
+		CurrentPlayerID: string(state.CurrentPlayerID),
+		Players:         players,
+		Completed:       completed,
+	}
+}
+
+func buildPlayerHandPayload(state game.GameState, playerID game.PlayerID) PlayerHandPayload {
+	cards := make([]CardState, 0, len(state.Hands[playerID]))
+
+	for _, card := range state.Hands[playerID] {
+		cards = append(cards, CardState{
+			ID:        string(card.ID),
+			QuartetID: string(card.QuartetID),
+			Title:     card.Title,
+		})
+	}
+
+	return PlayerHandPayload{
+		PlayerID: string(playerID),
+		Cards:    cards,
+	}
 }
