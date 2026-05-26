@@ -21,6 +21,7 @@ function App() {
   const [error, setError] = useState<string>('')
   const [player, setPlayer] = useState<Player | null>(null)
   const [playerName, setPlayerName] = useState<string>('Mihail')
+  const [roomIdInput, setRoomIdInput] = useState<string>('')
 
   async function createRoom() {
     setError('')
@@ -36,6 +37,26 @@ function App() {
 
       const createdRoom = (await response.json()) as Room
       setRoom(createdRoom)
+      setRoomIdInput(createdRoom.id)
+  async function loadRoom() {
+    if (!roomIdInput) {
+      setError('Enter room id')
+      return
+    }
+
+    setError('')
+
+    try {
+      const response = await fetch(`${API_URL}/rooms/${roomIdInput}`)
+
+      if (!response.ok) {
+        throw new Error('Failed to load room')
+      }
+
+      const loadedRoom = (await response.json()) as Room
+      setRoom(loadedRoom)
+      setPlayer(null)
+      setGame(null)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error')
     }
@@ -127,6 +148,21 @@ function App() {
         <section className="game-layout">
           <div className="panel">
             <h2>Комната</h2>
+            <div className="join-form">
+              <label>
+                ID существующей комнаты
+                <input
+                  className="input"
+                  value={roomIdInput}
+                  onChange={(event) => setRoomIdInput(event.target.value)}
+                  placeholder="Room ID"
+                />
+              </label>
+
+              <button className="button" onClick={loadRoom}>
+                Открыть комнату
+              </button>
+            </div>
 
             <button className="button" onClick={createRoom}>
               Создать комнату
