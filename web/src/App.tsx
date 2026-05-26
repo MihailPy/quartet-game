@@ -76,6 +76,44 @@ function App() {
     }
   }
 
+  async function markReady() {
+    if (!room || !player) {
+      setError('Join room first')
+      return
+    }
+
+    setError('')
+
+    try {
+      const response = await fetch(`${API_URL}/rooms/${room.id}/ready`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          player_id: player.id,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to mark player ready')
+      }
+
+      const updatedRoom = (await response.json()) as Room
+      setRoom(updatedRoom)
+
+      const updatedPlayer = updatedRoom.players.find(
+        (roomPlayer) => roomPlayer.id === player.id,
+      )
+
+      if (updatedPlayer) {
+        setPlayer(updatedPlayer)
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unknown error')
+    }
+  }
+
   return (
     <main className="app">
       <section className="game-page">
@@ -121,6 +159,18 @@ function App() {
                 <p>
                   <strong>Имя:</strong> {player.name}
                 </p>
+
+                <p>
+                  <strong>Статус:</strong> {player.is_ready ? 'готов' : 'не готов'}
+                </p>
+
+                <button
+                  className="button"
+                  onClick={markReady}
+                  disabled={player.is_ready}
+                >
+                  {player.is_ready ? 'Готов' : 'Я готов'}
+                </button>
               </div>
             )}
 

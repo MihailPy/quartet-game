@@ -136,3 +136,8 @@ code {
   border-bottom: 1px solid #e4e4e7;
   font-size: 14px;
 }
+
+.button:disabled {
+  cursor: not-allowed;
+  background: #a1a1aa;
+}
