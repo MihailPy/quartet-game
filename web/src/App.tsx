@@ -78,6 +78,7 @@ function App() {
   const [selectedCardID, setSelectedCardID] = useState<string>('')
   const [lastMoveMessage, setLastMoveMessage] = useState<string>('')
   const [currentTurnPlayerID, setCurrentTurnPlayerID] = useState<string>('')
+  const [completedQuartetMessage, setCompletedQuartetMessage] = useState<string>('')
 
   async function createRoom() {
     setError('')
@@ -97,6 +98,9 @@ function App() {
       setGame(null)
       setPlayerHand(null)
       setPublicGameState(null)
+      setCompletedQuartetMessage('')
+      setLastMoveMessage('')
+      setCurrentTurnPlayerID('')
       setRoomIdInput(createdRoom.id)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error')
@@ -124,6 +128,9 @@ function App() {
       setGame(null)
       setPlayerHand(null)
       setPublicGameState(null)
+      setCompletedQuartetMessage('')
+      setLastMoveMessage('')
+      setCurrentTurnPlayerID('')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error')
     }
@@ -307,6 +314,19 @@ function App() {
         if (message.type === 'request_card_error') {
           setError(message.payload.message)
         }
+
+        if (message.type === 'quartet_completed') {
+          const playerID = message.payload.player_id as string
+          const quartets = message.payload.quartets as string[]
+
+          const playerName =
+            publicGameState?.players.find((gamePlayer) => gamePlayer.id === playerID)
+              ?.name ?? playerID
+
+          setCompletedQuartetMessage(
+            `${playerName} собрал квартет: ${quartets.join(', ')}`,
+          )
+        }
       } catch {
         // ignore invalid websocket message
       }
@@ -460,6 +480,12 @@ function App() {
                 {lastMoveMessage && (
                   <div className="move-message">
                     {lastMoveMessage}
+                  </div>
+                )}
+
+                {completedQuartetMessage && (
+                  <div className="quartet-message">
+                    {completedQuartetMessage}
                   </div>
                 )}
 
