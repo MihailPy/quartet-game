@@ -58,6 +58,17 @@ type PrivateCard = {
   title: string
 }
 
+type GameFinishedPayload = {
+  game_id: string
+  winners: string[]
+  scores: PlayerScore[]
+}
+
+type PlayerScore = {
+  player_id: string
+  score: number
+}
+
 const API_URL = 'http://localhost:8080'
 
 function App() {
@@ -79,6 +90,7 @@ function App() {
   const [lastMoveMessage, setLastMoveMessage] = useState<string>('')
   const [currentTurnPlayerID, setCurrentTurnPlayerID] = useState<string>('')
   const [completedQuartetMessage, setCompletedQuartetMessage] = useState<string>('')
+  const [gameFinished, setGameFinished] = useState<GameFinishedPayload | null>(null)
 
   async function createRoom() {
     setError('')
@@ -102,6 +114,7 @@ function App() {
       setLastMoveMessage('')
       setCurrentTurnPlayerID('')
       setRoomIdInput(createdRoom.id)
+      setGameFinished(null)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error')
     }
@@ -131,6 +144,7 @@ function App() {
       setCompletedQuartetMessage('')
       setLastMoveMessage('')
       setCurrentTurnPlayerID('')
+      setGameFinished(null)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error')
     }
@@ -327,6 +341,11 @@ function App() {
             `${playerName} собрал квартет: ${quartets.join(', ')}`,
           )
         }
+
+        if (message.type === 'game_finished') {
+          setGameFinished(message.payload as GameFinishedPayload)
+          setLastMoveMessage('Игра завершена.')
+        }
       } catch {
         // ignore invalid websocket message
       }
@@ -416,7 +435,11 @@ function App() {
                   onClick={markReady}
                   disabled={player.is_ready}
                 >
-                  {player.is_ready ? 'Готов' : 'Я готов'}
+                  {gameFinished
+                    ? 'Игра завершена'
+                    : player && currentTurnPlayerID && currentTurnPlayerID !== player.id
+                      ? 'Сейчас не твой ход'
+                      : 'Спросить карту'}
                 </button>
               </div>
             )}
@@ -489,6 +512,26 @@ function App() {
                   </div>
                 )}
 
+                {gameFinished && (
+                  <div className="game-finished">
+                    <h3>Игра завершена</h3>
+
+                    <p>
+                      <strong>Победители:</strong>{' '}
+                      {gameFinished.winners.join(', ')}
+                    </p>
+
+                    <h4>Счёт</h4>
+
+                    {gameFinished.scores.map((score) => (
+                      <div className="player-row" key={score.player_id}>
+                        <span>{score.player_id}</span>
+                        <span>{score.score}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
                 {player && publicGameState && (
                   <div className="request-form">
                     <h3>Запрос карты</h3>
@@ -532,7 +575,10 @@ function App() {
                     <button
                       className="button"
                       onClick={requestCard}
-                      disabled={Boolean(player && currentTurnPlayerID && currentTurnPlayerID !== player.id)}
+                      disabled={Boolean(
+                        gameFinished ||
+                        (player && currentTurnPlayerID && currentTurnPlayerID !== player.id),
+                      )}
                     >
                       {player && currentTurnPlayerID && currentTurnPlayerID !== player.id
                         ? 'Сейчас не твой ход'

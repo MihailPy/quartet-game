@@ -232,3 +232,17 @@ code {
   color: #92400e;
   font-size: 14px;
 }
+
+.game-finished {
+  margin-top: 12px;
+  padding: 12px;
+  background: #dcfce7;
+  border: 1px solid #bbf7d0;
+  border-radius: 10px;
+  color: #166534;
+}
+
+.game-finished h3,
+.game-finished h4 {
+  margin: 0 0 10px;
+}
