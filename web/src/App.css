@@ -274,3 +274,12 @@ code {
   color: #71717a;
   font-size: 13px;
 }
+
+.technical-id {
+  display: block;
+  margin-top: 4px;
+  color: #a1a1aa;
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+

@@ -549,16 +549,18 @@ function App() {
                     game?.CurrentPlayerID ||
                     ''
 
+                  if (!turnPlayerID) {
+                    return <p>Пока неизвестно.</p>
+                  }
+
                   return (
                     <div>
-                      <code>{turnPlayerID}</code>
+                      <p className="turn-player-name">
+                        {getPlayerName(turnPlayerID)}
+                        {player?.id === turnPlayerID ? ' — твой ход' : ''}
+                      </p>
 
-                      {turnPlayerID && (
-                        <p className="turn-player-name">
-                          {getPlayerName(turnPlayerID)}
-                          {player?.id === turnPlayerID ? ' — твой ход' : ''}
-                        </p>
-                      )}
+                      <small className="technical-id">{turnPlayerID}</small>
                     </div>
                   )
                 })()}
@@ -581,13 +583,14 @@ function App() {
 
                     <p>
                       <strong>Победители:</strong>{' '}
-                      {gameFinished.winners.join(', ')}
+                      {gameFinished.winners.map(getPlayerName).join(', ')}
                     </p>
 
                     <h4>Счёт</h4>
 
                     {gameFinished.scores.map((score) => (
                       <div className="player-row" key={score.player_id}>
+                        <span>{getPlayerName(score.player_id)}</span>
                         <span>{score.player_id}</span>
                         <span>{score.score}</span>
                       </div>
@@ -672,13 +675,16 @@ function App() {
                       }
                       key={gamePlayer.id}
                     >
-                      <span>{gamePlayer.name}</span>
+                      <span>
+                        {gamePlayer.name}
+                        {player?.id === gamePlayer.id ? ' (ты)' : ''}
+                      </span>
                       <span>{gamePlayer.card_count} карт</span>
                     </div>
                   ))
                   : Object.entries(game?.Hands ?? {}).map(([playerID, cards]) => (
                     <div className="player-row" key={playerID}>
-                      <span>{playerID}</span>
+                      <span>{getPlayerName(playerID)}</span>
                       <span>{cards.length} карт</span>
                     </div>
                   ))}
