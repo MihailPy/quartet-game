@@ -295,6 +295,13 @@ function App() {
     )
   }
 
+  function getQuartetTitle(quartetID: string): string {
+    return (
+      game?.Deck.Quartets.find((quartet) => quartet.ID === quartetID)?.Title ??
+      quartetID
+    )
+  }
+
   function getAvailableRequestCards() {
     if (!game || !playerHand) {
       return []
@@ -385,7 +392,7 @@ function App() {
               ?.name ?? playerID
 
           setCompletedQuartetMessage(
-            `${playerName} собрал квартет: ${quartets.join(', ')}`,
+            `${playerName} собрал квартет: ${quartets.map(getQuartetTitle).join(', ')}`,
           )
         }
 
@@ -704,14 +711,14 @@ function App() {
                   ? playerHand.cards.map((card) => (
                     <div className="card" key={card.id}>
                       <strong>{card.title}</strong>
-                      <span>Квартет: {card.quartet_id}</span>
+                      <span>Квартет: {getQuartetTitle(card.quartet_id)}</span>
                       <small>{card.id}</small>
                     </div>
                   ))
                   : (game?.Hands[player.id] ?? []).map((card) => (
                     <div className="card" key={card.ID}>
                       <strong>{card.Title}</strong>
-                      <span>{card.QuartetID}</span>
+                      <span>Квартет: {getQuartetTitle(card.QuartetID)}</span>
                     </div>
                   ))}
               </div>
