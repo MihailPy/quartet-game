@@ -40,6 +40,7 @@ type EventBroadcaster interface {
 
 type GameStartedPayload struct {
 	Room room.Room `json:"room"`
+	Deck game.Deck `json:"deck"`
 }
 
 type GameStatePayload struct {
@@ -230,6 +231,7 @@ func (h *RoomHandler) StartRoom(w http.ResponseWriter, r *http.Request, roomID r
 			Type: "game_started",
 			Payload: GameStartedPayload{
 				Room: startedRoom,
+				Deck: gameState.Deck,
 			},
 		})
 

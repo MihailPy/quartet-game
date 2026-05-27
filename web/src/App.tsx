@@ -23,6 +23,11 @@ type GameState = {
   Completed: Record<string, string[]>
 }
 
+type GameStartedPayload = {
+  room: Room
+  deck: Deck
+}
+
 type Deck = {
   ID: string
   Title: string
@@ -82,6 +87,8 @@ type PlayerScore = {
   score: number
 }
 
+
+
 const API_URL = 'http://localhost:8080'
 
 function App() {
@@ -106,6 +113,7 @@ function App() {
   const [gameFinished, setGameFinished] = useState<GameFinishedPayload | null>(null)
   const [gameLog, setGameLog] = useState<string[]>([])
   const [showDebugEvents, setShowDebugEvents] = useState<boolean>(false)
+  const [deck, setDeck] = useState<Deck | null>(null)
 
   async function createRoom() {
     setError('')
@@ -125,6 +133,7 @@ function App() {
       setGame(null)
       setPlayerHand(null)
       setPublicGameState(null)
+      setDeck(null)
       setCompletedQuartetMessage('')
       setLastMoveMessage('')
       setCurrentTurnPlayerID('')
@@ -157,6 +166,7 @@ function App() {
       setGame(null)
       setPlayerHand(null)
       setPublicGameState(null)
+      setDeck(null)
       setCompletedQuartetMessage('')
       setLastMoveMessage('')
       setCurrentTurnPlayerID('')
@@ -261,6 +271,7 @@ function App() {
 
       setRoom(data.room)
       setGame(data.game)
+      setDeck(data.game.Deck)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error')
     }
@@ -316,13 +327,13 @@ function App() {
 
   function getQuartetTitle(quartetID: string): string {
     return (
-      game?.Deck.Quartets.find((quartet) => quartet.ID === quartetID)?.Title ??
+      deck?.Quartets.find((quartet) => quartet.ID === quartetID)?.Title ??
       quartetID
     )
   }
 
   function getAvailableRequestCards() {
-    if (!game || !playerHand) {
+    if (!deck || !playerHand) {
       return []
     }
 
@@ -331,7 +342,7 @@ function App() {
       playerHand.cards.map((card) => card.quartet_id),
     )
 
-    return game.Deck.Quartets.flatMap((quartet) =>
+    return deck.Quartets.flatMap((quartet) =>
       quartet.Cards.filter((card) => {
         return (
           handQuartetIDs.has(card.QuartetID) &&
@@ -442,7 +453,10 @@ function App() {
         const message = JSON.parse(event.data)
 
         if (message.type === 'game_started') {
-          setRoom(message.payload.room)
+          const payload = message.payload as GameStartedPayload
+
+          setRoom(payload.room)
+          setDeck(payload.deck)
           addGameLog('Игра началась.')
         }
 
@@ -503,17 +517,13 @@ function App() {
           const playerID = message.payload.player_id as string
           const quartets = message.payload.quartets as string[]
 
-          const playerName =
-            publicGameState?.players.find((gamePlayer) => gamePlayer.id === playerID)
-              ?.name ?? playerID
+          const playerName = getPlayerName(playerID)
+          const quartetTitles = quartets.map(getQuartetTitle).join(', ')
 
-          setCompletedQuartetMessage(
-            `${playerName} собрал квартет: ${quartets.map(getQuartetTitle).join(', ')}`,
-          )
+          const messageText = `${playerName} собрал квартет: ${quartetTitles}`
 
-          addGameLog(
-            `${playerName} собрал квартет: ${quartets.map(getQuartetTitle).join(', ')}`,
-          )
+          setCompletedQuartetMessage(messageText)
+          addGameLog(messageText)
         }
 
         if (message.type === 'game_finished') {
