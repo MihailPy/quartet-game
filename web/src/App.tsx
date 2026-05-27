@@ -87,6 +87,13 @@ type PlayerScore = {
   score: number
 }
 
+type RequestableCard = {
+  id: string
+  title: string
+  quartet_id: string
+  quartet_title: string
+}
+
 
 
 const API_URL = 'http://localhost:8080'
@@ -115,6 +122,22 @@ function App() {
   const [showDebugEvents, setShowDebugEvents] = useState<boolean>(false)
   const [deck, setDeck] = useState<Deck | null>(null)
 
+  function resetGameState() {
+    setGame(null)
+    setDeck(null)
+    setPublicGameState(null)
+    setPlayerHand(null)
+    setTargetPlayerID('')
+    setSelectedCardID('')
+    setLastMoveMessage('')
+    setCompletedQuartetMessage('')
+    setCurrentTurnPlayerID('')
+    setGameFinished(null)
+    setGameLog([])
+    setEvents([])
+    setError('')
+  }
+
   async function createRoom() {
     setError('')
 
@@ -130,16 +153,8 @@ function App() {
       const createdRoom = (await response.json()) as Room
       setRoom(createdRoom)
       setPlayer(null)
-      setGame(null)
-      setPlayerHand(null)
-      setPublicGameState(null)
-      setDeck(null)
-      setCompletedQuartetMessage('')
-      setLastMoveMessage('')
-      setCurrentTurnPlayerID('')
       setRoomIdInput(createdRoom.id)
-      setGameFinished(null)
-      setGameLog([])
+      resetGameState()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error')
     }
@@ -163,15 +178,7 @@ function App() {
       const loadedRoom = (await response.json()) as Room
       setRoom(loadedRoom)
       setPlayer(null)
-      setGame(null)
-      setPlayerHand(null)
-      setPublicGameState(null)
-      setDeck(null)
-      setCompletedQuartetMessage('')
-      setLastMoveMessage('')
-      setCurrentTurnPlayerID('')
-      setGameFinished(null)
-      setGameLog([])
+      resetGameState()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error')
     }
@@ -205,8 +212,9 @@ function App() {
         room: Room
       }
 
-      setPlayer(data.player)
       setRoom(data.room)
+      setPlayer(data.player)
+      resetGameState()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error')
     }
@@ -332,7 +340,7 @@ function App() {
     )
   }
 
-  function getAvailableRequestCards() {
+  function getAvailableRequestCards(): RequestableCard[] {
     if (!deck || !playerHand) {
       return []
     }
