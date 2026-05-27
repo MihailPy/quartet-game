@@ -367,6 +367,56 @@ function App() {
     }
   }
 
+  function canRequestCard(): boolean {
+    return Boolean(
+      player &&
+      publicGameState &&
+      !gameFinished &&
+      socketStatus === 'connected' &&
+      currentTurnPlayerID === player.id &&
+      targetPlayerID &&
+      selectedCardID &&
+      availableRequestCards.length > 0,
+    )
+
+  }
+
+  function getRequestButtonText(): string {
+    if (!player) {
+      return 'Сначала подключись'
+    }
+
+    if (socketStatus !== 'connected') {
+      return 'Нет подключения'
+    }
+
+    if (gameFinished) {
+      return 'Игра завершена'
+    }
+
+    if (!currentTurnPlayerID) {
+      return 'Ожидание хода'
+    }
+
+    if (currentTurnPlayerID !== player.id) {
+      return 'Сейчас не твой ход'
+    }
+
+    if (availableRequestCards.length === 0) {
+      return 'Нет доступных карт'
+    }
+
+    if (!targetPlayerID) {
+      return 'Выбери игрока'
+    }
+
+    if (!selectedCardID) {
+      return 'Выбери карту'
+    }
+
+    return 'Спросить карту'
+  }
+
   useEffect(() => {
     if (!room || !player) {
       return
@@ -403,6 +453,17 @@ function App() {
           addGameLog(`Сейчас ходит ${getPlayerName(payload.current_player_id)}.`)
         }
 
+        if (message.type === 'turn_changed') {
+          const payload = message.payload as {
+            current_player_id: string
+          }
+
+          setCurrentTurnPlayerID(payload.current_player_id)
+          setTargetPlayerID('')
+          setSelectedCardID('')
+          addGameLog(`Ходит ${getPlayerName(payload.current_player_id)}.`)
+        }
+
         if (message.type === 'player_hand') {
           setPlayerHand(message.payload as PlayerHandPayload)
           addGameLog('Твоя рука обновлена.')
@@ -413,6 +474,7 @@ function App() {
           const nextPlayerID = message.payload.next_player_id as string
 
           setError('')
+          setTargetPlayerID('')
           setSelectedCardID('')
           setCurrentTurnPlayerID(nextPlayerID)
 
@@ -671,6 +733,12 @@ function App() {
                         className="input"
                         value={targetPlayerID}
                         onChange={(event) => setTargetPlayerID(event.target.value)}
+                        disabled={
+                          !player ||
+                          gameFinished !== null ||
+                          socketStatus !== 'connected' ||
+                          currentTurnPlayerID !== player.id
+                        }
                       >
                         <option value="">Выбери игрока</option>
 
@@ -690,6 +758,13 @@ function App() {
                         className="input"
                         value={selectedCardID}
                         onChange={(event) => setSelectedCardID(event.target.value)}
+                        disabled={
+                          !player ||
+                          gameFinished !== null ||
+                          socketStatus !== 'connected' ||
+                          currentTurnPlayerID !== player.id ||
+                          availableRequestCards.length === 0
+                        }
                       >
                         <option value="">Выбери карту</option>
 
@@ -706,22 +781,20 @@ function App() {
                       )}
                     </label>
 
+                    <p className="form-hint">
+                      {currentTurnPlayerID === player?.id
+                        ? 'Сейчас твой ход. Выбери игрока и карту.'
+                        : currentTurnPlayerID
+                          ? `Сейчас ходит ${getPlayerName(currentTurnPlayerID)}.`
+                          : 'Ожидаем состояние игры.'}
+                    </p>
+
                     <button
                       className="button"
                       onClick={requestCard}
-                      disabled={Boolean(
-                        gameFinished ||
-                        availableRequestCards.length === 0 ||
-                        (player && currentTurnPlayerID && currentTurnPlayerID !== player.id),
-                      )}
+                      disabled={!canRequestCard()}
                     >
-                      {gameFinished
-                        ? 'Игра завершена'
-                        : availableRequestCards.length === 0
-                          ? 'Нет доступных карт для запроса'
-                          : player && currentTurnPlayerID && currentTurnPlayerID !== player.id
-                            ? 'Сейчас не твой ход'
-                            : 'Спросить карту'}
+                      {getRequestButtonText()}
                     </button>
                   </div>
                 )}
