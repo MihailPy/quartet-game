@@ -268,12 +268,27 @@ function App() {
 
   function requestCard() {
     if (!socketRef.current || socketRef.current.readyState !== WebSocket.OPEN) {
-      setError('WebSocket is not connected')
+      setError('Нет подключения к серверу.')
       return
     }
 
-    if (!targetPlayerID || !selectedCardID) {
-      setError('Select target player and card')
+    if (!targetPlayerID) {
+      setError('Выбери игрока, у которого хочешь спросить карту.')
+      return
+    }
+
+    if (!selectedCardID) {
+      setError('Выбери карту, которую хочешь спросить.')
+      return
+    }
+
+    if (gameFinished) {
+      setError('Игра уже завершена.')
+      return
+    }
+
+    if (player && currentTurnPlayerID && currentTurnPlayerID !== player.id) {
+      setError('Сейчас не твой ход.')
       return
     }
 
@@ -335,6 +350,23 @@ function App() {
     setGameLog((currentLog) => [message, ...currentLog.slice(0, 9)])
   }
 
+  function getRequestCardErrorMessage(code?: string): string {
+    switch (code) {
+      case 'not_your_turn':
+        return 'Сейчас не твой ход.'
+      case 'card_not_found':
+        return 'Такая карта не найдена.'
+      case 'target_player_not_found':
+        return 'Такой игрок не найден.'
+      case 'player_does_not_have_quartet_card':
+        return 'Можно спрашивать только карту из квартета, который есть у тебя в руке.'
+      case 'cannot_request_card':
+        return 'Сейчас нельзя запросить карту.'
+      default:
+        return 'Не удалось выполнить ход.'
+    }
+  }
+
   useEffect(() => {
     if (!room || !player) {
       return
@@ -380,6 +412,7 @@ function App() {
           const success = message.payload.success as boolean
           const nextPlayerID = message.payload.next_player_id as string
 
+          setError('')
           setSelectedCardID('')
           setCurrentTurnPlayerID(nextPlayerID)
 
@@ -393,7 +426,15 @@ function App() {
         }
 
         if (message.type === 'request_card_error') {
-          setError(message.payload.message)
+          const payload = message.payload as {
+            code?: string
+            message?: string
+          }
+
+          const errorMessage = getRequestCardErrorMessage(payload.code)
+
+          setError(errorMessage)
+          addGameLog(errorMessage)
         }
 
         if (message.type === 'quartet_completed') {
