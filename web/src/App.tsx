@@ -104,6 +104,7 @@ function App() {
   const [currentTurnPlayerID, setCurrentTurnPlayerID] = useState<string>('')
   const [completedQuartetMessage, setCompletedQuartetMessage] = useState<string>('')
   const [gameFinished, setGameFinished] = useState<GameFinishedPayload | null>(null)
+  const [gameLog, setGameLog] = useState<string[]>([])
 
   async function createRoom() {
     setError('')
@@ -128,6 +129,7 @@ function App() {
       setCurrentTurnPlayerID('')
       setRoomIdInput(createdRoom.id)
       setGameFinished(null)
+      setGameLog([])
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error')
     }
@@ -158,6 +160,7 @@ function App() {
       setLastMoveMessage('')
       setCurrentTurnPlayerID('')
       setGameFinished(null)
+      setGameLog([])
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error')
     }
@@ -327,6 +330,10 @@ function App() {
     )
   }
 
+  function addGameLog(message: string) {
+    setGameLog((currentLog) => [message, ...currentLog.slice(0, 9)])
+  }
+
   useEffect(() => {
     if (!room || !player) {
       return
@@ -353,16 +360,19 @@ function App() {
 
         if (message.type === 'game_started') {
           setRoom(message.payload.room)
+          addGameLog('Игра началась.')
         }
 
         if (message.type === 'game_state') {
           const payload = message.payload as PublicGameState
           setPublicGameState(payload)
           setCurrentTurnPlayerID(payload.current_player_id)
+          addGameLog(`Сейчас ходит ${getPlayerName(payload.current_player_id)}.`)
         }
 
         if (message.type === 'player_hand') {
           setPlayerHand(message.payload as PlayerHandPayload)
+          addGameLog('Твоя рука обновлена.')
         }
 
         if (message.type === 'card_request_result') {
@@ -374,8 +384,10 @@ function App() {
 
           if (success) {
             setLastMoveMessage('Карта найдена. Игрок продолжает ход.')
+            addGameLog('Карта найдена. Игрок продолжает ход.')
           } else {
             setLastMoveMessage('Карты нет. Ход переходит другому игроку.')
+            addGameLog(`Карты нет. Следующий ходит ${getPlayerName(nextPlayerID)}.`)
           }
         }
 
@@ -394,11 +406,20 @@ function App() {
           setCompletedQuartetMessage(
             `${playerName} собрал квартет: ${quartets.map(getQuartetTitle).join(', ')}`,
           )
+
+          addGameLog(
+            `${playerName} собрал квартет: ${quartets.map(getQuartetTitle).join(', ')}`,
+          )
         }
 
         if (message.type === 'game_finished') {
-          setGameFinished(message.payload as GameFinishedPayload)
+          const payload = message.payload as GameFinishedPayload
+
+          setGameFinished(payload)
           setLastMoveMessage('Игра завершена.')
+          addGameLog(
+            `Игра завершена. Победители: ${payload.winners.map(getPlayerName).join(', ')}`,
+          )
         }
       } catch {
         // ignore invalid websocket message
@@ -692,14 +713,14 @@ function App() {
             )}
 
             <div className="events-list">
-              <h3>Последние события</h3>
+              <h3>Журнал игры</h3>
 
-              {events.length === 0 && <p>Пока событий нет.</p>}
+              {gameLog.length === 0 && <p>Пока событий нет.</p>}
 
-              {events.map((event, index) => (
-                <pre className="event-item" key={`${event}-${index}`}>
+              {gameLog.map((event, index) => (
+                <div className="log-item" key={`${event}-${index}`}>
                   {event}
-                </pre>
+                </div>
               ))}
             </div>
           </div>

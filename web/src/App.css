@@ -283,3 +283,13 @@ code {
   overflow-wrap: anywhere;
 }
 
+.log-item {
+  margin-top: 8px;
+  padding: 8px 10px;
+  background: #f8fafc;
+  border: 1px solid #e4e4e7;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+
