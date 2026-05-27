@@ -105,6 +105,7 @@ function App() {
   const [completedQuartetMessage, setCompletedQuartetMessage] = useState<string>('')
   const [gameFinished, setGameFinished] = useState<GameFinishedPayload | null>(null)
   const [gameLog, setGameLog] = useState<string[]>([])
+  const [showDebugEvents, setShowDebugEvents] = useState<boolean>(false)
 
   async function createRoom() {
     setError('')
@@ -722,6 +723,28 @@ function App() {
                   {event}
                 </div>
               ))}
+            </div>
+
+            <div className="debug-events">
+              <button
+                className="secondary-button"
+                type="button"
+                onClick={() => setShowDebugEvents((current) => !current)}
+              >
+                {showDebugEvents ? 'Скрыть debug-события' : 'Показать debug-события'}
+              </button>
+
+              {showDebugEvents && (
+                <div className="debug-events-list">
+                  {events.length === 0 && <p>Debug-событий пока нет.</p>}
+
+                  {events.map((event, index) => (
+                    <pre className="event-item" key={`${event}-${index}`}>
+                      {event}
+                    </pre>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 

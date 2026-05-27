@@ -292,4 +292,26 @@ code {
   font-size: 13px;
 }
 
+.debug-events {
+  margin-top: 12px;
+}
+
+.debug-events-list {
+  margin-top: 10px;
+}
+
+.secondary-button {
+  border: 1px solid #d4d4d8;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #3f3f46;
+  cursor: pointer;
+  padding: 8px 12px;
+  font-weight: 600;
+}
+
+.secondary-button:hover {
+  background: #f4f4f5;
+}
+
 
