@@ -397,7 +397,6 @@ function App() {
       selectedCardID &&
       availableRequestCards.length > 0,
     )
-
   }
 
   function getRequestButtonText(): string {

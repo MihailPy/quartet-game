@@ -105,3 +105,19 @@ Next:
 - Deck shuffling
 - Card dealing
 - Turn logic
+
+## MVP status
+
+Current MVP supports:
+
+- room creation;
+- joining an existing room;
+- ready state;
+- starting a game;
+- WebSocket synchronization;
+- private player hands;
+- requesting cards;
+- turn updates;
+- completed quartet events;
+- finished game events;
+- minimal React UI for manual testing.
