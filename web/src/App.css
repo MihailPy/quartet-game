@@ -268,3 +268,9 @@ code {
 .event-item {
   margin: 8px 0 0;
 }
+
+.form-hint {
+  margin: 0;
+  color: #71717a;
+  font-size: 13px;
+}

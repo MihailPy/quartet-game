@@ -16,10 +16,23 @@ type Player = {
 
 type GameState = {
   ID: string
+  Deck: Deck
   Status: string
   CurrentPlayerID: string
   Hands: Record<string, Card[]>
   Completed: Record<string, string[]>
+}
+
+type Deck = {
+  ID: string
+  Title: string
+  Quartets: Quartet[]
+}
+
+type Quartet = {
+  ID: string
+  Title: string
+  Cards: Card[]
 }
 
 type Card = {
@@ -282,6 +295,31 @@ function App() {
     )
   }
 
+  function getAvailableRequestCards() {
+    if (!game || !playerHand) {
+      return []
+    }
+
+    const handCardIDs = new Set(playerHand.cards.map((card) => card.id))
+    const handQuartetIDs = new Set(
+      playerHand.cards.map((card) => card.quartet_id),
+    )
+
+    return game.Deck.Quartets.flatMap((quartet) =>
+      quartet.Cards.filter((card) => {
+        return (
+          handQuartetIDs.has(card.QuartetID) &&
+          !handCardIDs.has(card.ID)
+        )
+      }).map((card) => ({
+        id: card.ID,
+        title: card.Title,
+        quartet_id: card.QuartetID,
+        quartet_title: quartet.Title,
+      })),
+    )
+  }
+
   useEffect(() => {
     if (!room || !player) {
       return
@@ -373,6 +411,8 @@ function App() {
       socketRef.current = null
     }
   }, [room?.id, player?.id])
+
+  const availableRequestCards = getAvailableRequestCards()
 
   return (
     <main className="app">
@@ -580,12 +620,17 @@ function App() {
                       >
                         <option value="">Выбери карту</option>
 
-                        {playerHand?.cards.map((card) => (
+                        {availableRequestCards.map((card) => (
                           <option key={card.id} value={card.id}>
-                            {card.title}
+                            {card.title} — {card.quartet_title}
                           </option>
                         ))}
                       </select>
+                      {availableRequestCards.length === 0 && (
+                        <p className="form-hint">
+                          Нет карт, которые можно спросить по текущим квартетам.
+                        </p>
+                      )}
                     </label>
 
                     <button
@@ -593,12 +638,17 @@ function App() {
                       onClick={requestCard}
                       disabled={Boolean(
                         gameFinished ||
+                        availableRequestCards.length === 0 ||
                         (player && currentTurnPlayerID && currentTurnPlayerID !== player.id),
                       )}
                     >
-                      {player && currentTurnPlayerID && currentTurnPlayerID !== player.id
-                        ? 'Сейчас не твой ход'
-                        : 'Спросить карту'}
+                      {gameFinished
+                        ? 'Игра завершена'
+                        : availableRequestCards.length === 0
+                          ? 'Нет доступных карт для запроса'
+                          : player && currentTurnPlayerID && currentTurnPlayerID !== player.id
+                            ? 'Сейчас не твой ход'
+                            : 'Спросить карту'}
                     </button>
                   </div>
                 )}
