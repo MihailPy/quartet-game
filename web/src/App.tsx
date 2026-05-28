@@ -126,6 +126,7 @@ function App() {
   const [gameLog, setGameLog] = useState<string[]>([])
   const [showDebugEvents, setShowDebugEvents] = useState<boolean>(false)
   const [deck, setDeck] = useState<Deck | null>(null)
+  const [reconnectAttempt, setReconnectAttempt] = useState<number>(0)
 
   function resetGameState() {
     setGame(null)
@@ -141,6 +142,7 @@ function App() {
     setGameLog([])
     setEvents([])
     setError('')
+    setReconnectAttempt(0)
   }
 
   async function createRoom() {
@@ -467,6 +469,9 @@ function App() {
     const response = await fetch(`${API_URL}/rooms/${roomID}/state`)
 
     if (!response.ok) {
+      setPublicGameState(null)
+      setCurrentTurnPlayerID('')
+      addGameLog('Не удалось восстановить состояние игры после reconnect.')
       return
     }
 
@@ -482,6 +487,7 @@ function App() {
     )
 
     if (!response.ok) {
+      setPlayerHand(null)
       return
     }
 
@@ -491,9 +497,9 @@ function App() {
   }
 
   useEffect(() => {
-    if (!room || !player) {
-      return
-    }
+    if (!room || !player) return
+
+    let shouldReconnect = true
 
     const socketUrl = `ws://localhost:8080/rooms/${room.id}/ws?player_id=${player.id}`
     const socket = new WebSocket(socketUrl)
@@ -503,6 +509,10 @@ function App() {
 
     socket.onopen = () => {
       setSocketStatus('connected')
+
+      void loadDeck(room.id)
+      void loadGameState(room.id)
+      void loadPlayerHand(room.id, player.id)
     }
 
     socket.onmessage = (event) => {
@@ -614,13 +624,21 @@ function App() {
 
     socket.onclose = () => {
       setSocketStatus('disconnected')
+      if (!shouldReconnect) {
+        return
+      }
+
+      window.setTimeout(() => {
+        setReconnectAttempt((currentAttempt) => currentAttempt + 1)
+      }, 2000)
     }
 
     return () => {
+      shouldReconnect = false
       socket.close()
       socketRef.current = null
     }
-  }, [room?.id, player?.id])
+  }, [room?.id, player?.id, reconnectAttempt])
 
   useEffect(() => {
     async function restoreSession() {
@@ -787,7 +805,15 @@ function App() {
               <strong>WebSocket:</strong> {socketStatus}
             </div>
 
-            {!game && !publicGameState && <p>Игра ещё не началась.</p>}
+            {!publicGameState && room?.status !== 'playing' && (
+              <p>Игра ещё не началась.</p>
+            )}
+
+            {!publicGameState && room?.status === 'playing' && (
+              <p className="form-hint">
+                Игра была начата, но состояние игры не восстановлено. Возможно, backend был перезапущен.
+              </p>
+            )}
 
             {(game || publicGameState) && (
               <div className="game-info">
