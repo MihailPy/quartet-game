@@ -48,7 +48,7 @@ type Card = {
 
 type StartGameResponse = {
   room: Room
-  game: GameState
+  state: PublicGameState
 }
 
 type PublicGameState = {
@@ -278,8 +278,8 @@ function App() {
       const data = (await response.json()) as StartGameResponse
 
       setRoom(data.room)
-      setGame(data.game)
-      setDeck(data.game.Deck)
+      setPublicGameState(data.state)
+      setCurrentTurnPlayerID(data.state.current_player_id)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error')
     }

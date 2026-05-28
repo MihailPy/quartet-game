@@ -215,11 +215,11 @@ func (h *RoomHandler) StartRoom(w http.ResponseWriter, r *http.Request, roomID r
 	}
 
 	response := struct {
-		Room room.Room      `json:"room"`
-		Game game.GameState `json:"game"`
+		Room  room.Room        `json:"room"`
+		State GameStatePayload `json:"state"`
 	}{
-		Room: startedRoom,
-		Game: gameState,
+		Room:  startedRoom,
+		State: buildGameStatePayload(gameState),
 	}
 
 	w.Header().Set("Content-Type", "application/json")
