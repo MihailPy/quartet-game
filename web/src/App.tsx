@@ -100,6 +100,8 @@ type RoomDeckResponse = {
 
 
 const API_URL = 'http://localhost:8080'
+const STORAGE_ROOM_ID_KEY = 'quartet_room_id'
+const STORAGE_PLAYER_KEY = 'quartet_player'
 
 function App() {
   const [room, setRoom] = useState<Room | null>(null)
@@ -158,6 +160,9 @@ function App() {
       setPlayer(null)
       setRoomIdInput(createdRoom.id)
       resetGameState()
+
+      localStorage.setItem(STORAGE_ROOM_ID_KEY, createdRoom.id)
+      localStorage.removeItem(STORAGE_PLAYER_KEY)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error')
     }
@@ -182,6 +187,9 @@ function App() {
       setRoom(loadedRoom)
       setPlayer(null)
       resetGameState()
+
+      localStorage.setItem(STORAGE_ROOM_ID_KEY, loadedRoom.id)
+      localStorage.removeItem(STORAGE_PLAYER_KEY)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error')
     }
@@ -218,6 +226,9 @@ function App() {
       setRoom(data.room)
       setPlayer(data.player)
       resetGameState()
+
+      localStorage.setItem(STORAGE_ROOM_ID_KEY, data.room.id)
+      localStorage.setItem(STORAGE_PLAYER_KEY, JSON.stringify(data.player))
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error')
     }
@@ -579,6 +590,55 @@ function App() {
       socketRef.current = null
     }
   }, [room?.id, player?.id])
+
+  useEffect(() => {
+    async function restoreSession() {
+      const savedRoomID = localStorage.getItem(STORAGE_ROOM_ID_KEY)
+      const savedPlayerJSON = localStorage.getItem(STORAGE_PLAYER_KEY)
+
+      if (!savedRoomID) {
+        return
+      }
+
+      try {
+        const response = await fetch(`${API_URL}/rooms/${savedRoomID}`)
+
+        if (!response.ok) {
+          localStorage.removeItem(STORAGE_ROOM_ID_KEY)
+          localStorage.removeItem(STORAGE_PLAYER_KEY)
+          return
+        }
+
+        const loadedRoom = (await response.json()) as Room
+
+        setRoom(loadedRoom)
+        setRoomIdInput(loadedRoom.id)
+
+        if (loadedRoom.status === 'playing') {
+          void loadDeck(loadedRoom.id)
+        }
+
+        if (savedPlayerJSON) {
+          const savedPlayer = JSON.parse(savedPlayerJSON) as Player
+          const playerStillInRoom = loadedRoom.players.some(
+            (roomPlayer) => roomPlayer.id === savedPlayer.id,
+          )
+
+          if (playerStillInRoom) {
+            setPlayer(savedPlayer)
+            return
+          }
+        }
+
+        localStorage.removeItem(STORAGE_PLAYER_KEY)
+      } catch {
+        localStorage.removeItem(STORAGE_ROOM_ID_KEY)
+        localStorage.removeItem(STORAGE_PLAYER_KEY)
+      }
+    }
+
+    void restoreSession()
+  }, [])
 
   const availableRequestCards = getAvailableRequestCards()
 
