@@ -57,7 +57,11 @@ func NewRouter(
 		case "start":
 			roomHandler.StartRoom(w, r, roomID)
 		case "state":
-			roomHandler.GetRoomState(w, r, roomID)
+			roomHandler.GetGameState(w, r, roomID)
+		case "deck":
+			roomHandler.GetRoomDeck(w, r, roomID)
+		case "hand":
+			roomHandler.GetPlayerHand(w, r, roomID)
 		case "ws":
 			wsHandler.HandleConnection(w, r, roomID)
 		default:

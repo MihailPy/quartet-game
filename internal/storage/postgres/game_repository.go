@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 
 	"github.com/MihailPy/quartet-game/internal/game"
 	"github.com/MihailPy/quartet-game/internal/room"
@@ -24,16 +25,22 @@ func (r *GameRepository) SaveGame(
 	deckID game.DeckID,
 	state game.GameState,
 ) error {
-	_, err := r.db.ExecContext(ctx, `
+	stateJSON, err := json.Marshal(state)
+	if err != nil {
+		return err
+	}
+
+	_, err = r.db.ExecContext(ctx, `
 		INSERT INTO games (
 			id,
 			room_id,
 			deck_id,
 			status,
-			current_player_id
+			current_player_id,
+			state
 		)
-		VALUES ($1, $2, $3, $4, $5)
-	`, string(state.ID), string(roomID), string(deckID), string(state.Status), string(state.CurrentPlayerID))
+		VALUES ($1, $2, $3, $4, $5, $6)
+	`, string(state.ID), string(roomID), string(deckID), string(state.Status), string(state.CurrentPlayerID), stateJSON)
 
 	return err
 }
@@ -90,6 +97,57 @@ func (r *GameRepository) UpdateGameStatus(
 		SET status = $2
 		WHERE id = $1
 	`, string(gameID), string(status))
+
+	return err
+}
+
+func (r *GameRepository) FindGameByRoomID(ctx context.Context, roomID room.RoomID) (game.GameState, error) {
+	var rawState []byte
+
+	err := r.db.QueryRowContext(
+		ctx,
+		`
+		SELECT state
+		FROM games
+		WHERE room_id = $1
+		ORDER BY created_at DESC
+		LIMIT 1
+		`,
+		string(roomID),
+	).Scan(&rawState)
+	if err != nil {
+		return game.GameState{}, err
+	}
+
+	var state game.GameState
+	if err := json.Unmarshal(rawState, &state); err != nil {
+		return game.GameState{}, err
+	}
+
+	return state, nil
+}
+
+func (r *GameRepository) UpdateGameState(ctx context.Context, state game.GameState) error {
+	stateJSON, err := json.Marshal(state)
+	if err != nil {
+		return err
+	}
+
+	_, err = r.db.ExecContext(
+		ctx,
+		`
+		UPDATE games
+		SET
+			status = $2,
+			current_player_id = $3,
+			state = $4
+		WHERE id = $1
+		`,
+		string(state.ID),
+		string(state.Status),
+		string(state.CurrentPlayerID),
+		stateJSON,
+	)
 
 	return err
 }

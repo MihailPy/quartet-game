@@ -12,6 +12,7 @@ import (
 
 type GameStarter interface {
 	StartGame(ctx context.Context, currentRoom room.Room) (game.GameState, error)
+	GetGameState(ctx context.Context, roomID room.RoomID) (game.GameState, bool)
 }
 
 type RoomHandler struct {
@@ -215,11 +216,11 @@ func (h *RoomHandler) StartRoom(w http.ResponseWriter, r *http.Request, roomID r
 	}
 
 	response := struct {
-		Room room.Room      `json:"room"`
-		Game game.GameState `json:"game"`
+		Room  room.Room        `json:"room"`
+		State GameStatePayload `json:"state"`
 	}{
-		Room: startedRoom,
-		Game: gameState,
+		Room:  startedRoom,
+		State: buildGameStatePayload(gameState),
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -270,6 +271,78 @@ func (h *RoomHandler) GetRoomState(w http.ResponseWriter, r *http.Request, roomI
 	w.WriteHeader(http.StatusOK)
 
 	_ = json.NewEncoder(w).Encode(foundRoom)
+}
+
+func (h *RoomHandler) GetRoomDeck(w http.ResponseWriter, r *http.Request, roomID room.RoomID) {
+	if r.Method != http.MethodGet {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+
+	currentRoom, err := h.manager.GetRoom(r.Context(), roomID)
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	gameState, ok := h.gameStarter.GetGameState(r.Context(), roomID)
+	if !ok {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	_ = currentRoom
+
+	response := struct {
+		Deck game.Deck `json:"deck"`
+	}{
+		Deck: gameState.Deck,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
+func (h *RoomHandler) GetPlayerHand(w http.ResponseWriter, r *http.Request, roomID room.RoomID) {
+	if r.Method != http.MethodGet {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+
+	playerID := r.URL.Query().Get("player_id")
+	if playerID == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	gameState, ok := h.gameStarter.GetGameState(r.Context(), roomID)
+	if !ok {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	payload := buildPlayerHandPayload(gameState, game.PlayerID(playerID))
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(payload)
+}
+
+func (h *RoomHandler) GetGameState(w http.ResponseWriter, r *http.Request, roomID room.RoomID) {
+	if r.Method != http.MethodGet {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+
+	gameState, ok := h.gameStarter.GetGameState(r.Context(), roomID)
+	if !ok {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	payload := buildGameStatePayload(gameState)
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(payload)
 }
 
 func buildGameStatePayload(state game.GameState) GameStatePayload {

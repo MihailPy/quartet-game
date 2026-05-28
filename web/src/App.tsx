@@ -48,7 +48,7 @@ type Card = {
 
 type StartGameResponse = {
   room: Room
-  game: GameState
+  state: PublicGameState
 }
 
 type PublicGameState = {
@@ -94,9 +94,14 @@ type RequestableCard = {
   quartet_title: string
 }
 
+type RoomDeckResponse = {
+  deck: Deck
+}
 
 
 const API_URL = 'http://localhost:8080'
+const STORAGE_ROOM_ID_KEY = 'quartet_room_id'
+const STORAGE_PLAYER_KEY = 'quartet_player'
 
 function App() {
   const [room, setRoom] = useState<Room | null>(null)
@@ -121,6 +126,7 @@ function App() {
   const [gameLog, setGameLog] = useState<string[]>([])
   const [showDebugEvents, setShowDebugEvents] = useState<boolean>(false)
   const [deck, setDeck] = useState<Deck | null>(null)
+  const [reconnectAttempt, setReconnectAttempt] = useState<number>(0)
 
   function resetGameState() {
     setGame(null)
@@ -136,6 +142,7 @@ function App() {
     setGameLog([])
     setEvents([])
     setError('')
+    setReconnectAttempt(0)
   }
 
   async function createRoom() {
@@ -155,6 +162,9 @@ function App() {
       setPlayer(null)
       setRoomIdInput(createdRoom.id)
       resetGameState()
+
+      localStorage.setItem(STORAGE_ROOM_ID_KEY, createdRoom.id)
+      localStorage.removeItem(STORAGE_PLAYER_KEY)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error')
     }
@@ -179,6 +189,9 @@ function App() {
       setRoom(loadedRoom)
       setPlayer(null)
       resetGameState()
+
+      localStorage.setItem(STORAGE_ROOM_ID_KEY, loadedRoom.id)
+      localStorage.removeItem(STORAGE_PLAYER_KEY)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error')
     }
@@ -215,6 +228,9 @@ function App() {
       setRoom(data.room)
       setPlayer(data.player)
       resetGameState()
+
+      localStorage.setItem(STORAGE_ROOM_ID_KEY, data.room.id)
+      localStorage.setItem(STORAGE_PLAYER_KEY, JSON.stringify(data.player))
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error')
     }
@@ -278,8 +294,10 @@ function App() {
       const data = (await response.json()) as StartGameResponse
 
       setRoom(data.room)
-      setGame(data.game)
-      setDeck(data.game.Deck)
+      setPublicGameState(data.state)
+      setCurrentTurnPlayerID(data.state.current_player_id)
+
+      await loadDeck(data.room.id)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error')
     }
@@ -435,10 +453,53 @@ function App() {
     return 'Спросить карту'
   }
 
-  useEffect(() => {
-    if (!room || !player) {
+  async function loadDeck(roomID: string) {
+    const response = await fetch(`${API_URL}/rooms/${roomID}/deck`)
+
+    if (!response.ok) {
       return
     }
+
+    const data = (await response.json()) as RoomDeckResponse
+
+    setDeck(data.deck)
+  }
+
+  async function loadGameState(roomID: string) {
+    const response = await fetch(`${API_URL}/rooms/${roomID}/state`)
+
+    if (!response.ok) {
+      setPublicGameState(null)
+      setCurrentTurnPlayerID('')
+      addGameLog('Не удалось восстановить состояние игры после reconnect.')
+      return
+    }
+
+    const data = (await response.json()) as PublicGameState
+
+    setPublicGameState(data)
+    setCurrentTurnPlayerID(data.current_player_id)
+  }
+
+  async function loadPlayerHand(roomID: string, playerID: string) {
+    const response = await fetch(
+      `${API_URL}/rooms/${roomID}/hand?player_id=${playerID}`,
+    )
+
+    if (!response.ok) {
+      setPlayerHand(null)
+      return
+    }
+
+    const data = (await response.json()) as PlayerHandPayload
+
+    setPlayerHand(data)
+  }
+
+  useEffect(() => {
+    if (!room || !player) return
+
+    let shouldReconnect = true
 
     const socketUrl = `ws://localhost:8080/rooms/${room.id}/ws?player_id=${player.id}`
     const socket = new WebSocket(socketUrl)
@@ -448,6 +509,10 @@ function App() {
 
     socket.onopen = () => {
       setSocketStatus('connected')
+
+      void loadDeck(room.id)
+      void loadGameState(room.id)
+      void loadPlayerHand(room.id, player.id)
     }
 
     socket.onmessage = (event) => {
@@ -465,6 +530,12 @@ function App() {
           setRoom(payload.room)
           setDeck(payload.deck)
           addGameLog('Игра началась.')
+
+          void loadGameState(payload.room.id)
+
+          if (player) {
+            void loadPlayerHand(payload.room.id, player.id)
+          }
         }
 
         if (message.type === 'game_state') {
@@ -553,13 +624,76 @@ function App() {
 
     socket.onclose = () => {
       setSocketStatus('disconnected')
+      if (!shouldReconnect) {
+        return
+      }
+
+      window.setTimeout(() => {
+        setReconnectAttempt((currentAttempt) => currentAttempt + 1)
+      }, 2000)
     }
 
     return () => {
+      shouldReconnect = false
       socket.close()
       socketRef.current = null
     }
-  }, [room?.id, player?.id])
+  }, [room?.id, player?.id, reconnectAttempt])
+
+  useEffect(() => {
+    async function restoreSession() {
+      const savedRoomID = localStorage.getItem(STORAGE_ROOM_ID_KEY)
+      const savedPlayerJSON = localStorage.getItem(STORAGE_PLAYER_KEY)
+
+      if (!savedRoomID) {
+        return
+      }
+
+      try {
+        const response = await fetch(`${API_URL}/rooms/${savedRoomID}`)
+
+        if (!response.ok) {
+          localStorage.removeItem(STORAGE_ROOM_ID_KEY)
+          localStorage.removeItem(STORAGE_PLAYER_KEY)
+          return
+        }
+
+        const loadedRoom = (await response.json()) as Room
+
+        setRoom(loadedRoom)
+        setRoomIdInput(loadedRoom.id)
+
+        if (loadedRoom.status === 'playing') {
+          void loadDeck(loadedRoom.id)
+          void loadGameState(loadedRoom.id)
+        }
+
+        if (savedPlayerJSON) {
+          const savedPlayer = JSON.parse(savedPlayerJSON) as Player
+          const playerStillInRoom = loadedRoom.players.some(
+            (roomPlayer) => roomPlayer.id === savedPlayer.id,
+          )
+
+          if (playerStillInRoom) {
+            setPlayer(savedPlayer)
+
+            if (loadedRoom.status === 'playing') {
+              void loadPlayerHand(loadedRoom.id, savedPlayer.id)
+            }
+
+            return
+          }
+        }
+
+        localStorage.removeItem(STORAGE_PLAYER_KEY)
+      } catch {
+        localStorage.removeItem(STORAGE_ROOM_ID_KEY)
+        localStorage.removeItem(STORAGE_PLAYER_KEY)
+      }
+    }
+
+    void restoreSession()
+  }, [])
 
   const availableRequestCards = getAvailableRequestCards()
 
@@ -671,7 +805,15 @@ function App() {
               <strong>WebSocket:</strong> {socketStatus}
             </div>
 
-            {!game && !publicGameState && <p>Игра ещё не началась.</p>}
+            {!publicGameState && room?.status !== 'playing' && (
+              <p>Игра ещё не началась.</p>
+            )}
+
+            {!publicGameState && room?.status === 'playing' && (
+              <p className="form-hint">
+                Игра была начата, но состояние игры не восстановлено. Возможно, backend был перезапущен.
+              </p>
+            )}
 
             {(game || publicGameState) && (
               <div className="game-info">

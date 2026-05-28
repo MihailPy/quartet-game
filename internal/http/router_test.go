@@ -7,15 +7,30 @@ import (
 	"testing"
 
 	"github.com/MihailPy/quartet-game/internal/game"
-	"github.com/MihailPy/quartet-game/internal/http/handlers"
 	"github.com/MihailPy/quartet-game/internal/room"
 	"github.com/MihailPy/quartet-game/internal/ws"
 )
 
-type fakeGameStarter struct{}
+type fakeGameStarter struct {
+	state    game.GameState
+	err      error
+	hasState bool
+}
 
 func (f fakeGameStarter) StartGame(ctx context.Context, currentRoom room.Room) (game.GameState, error) {
-	return game.GameState{}, nil
+	if f.err != nil {
+		return game.GameState{}, f.err
+	}
+
+	return f.state, nil
+}
+
+func (f fakeGameStarter) GetGameState(ctx context.Context, roomID room.RoomID) (game.GameState, bool) {
+	if !f.hasState {
+		return game.GameState{}, false
+	}
+
+	return f.state, true
 }
 
 func (f fakeGameStarter) RequestCard(
@@ -28,7 +43,6 @@ func (f fakeGameStarter) RequestCard(
 	return game.RequestCardResult{}, game.GameState{}, nil
 }
 
-var _ handlers.GameStarter = fakeGameStarter{}
 var _ ws.GameService = fakeGameStarter{}
 
 func TestHealthHandler(t *testing.T) {
