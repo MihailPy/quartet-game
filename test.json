@@ -1,0 +1,94 @@
+{
+  "type": "request_card",
+  "payload": {
+    "target_player_id": "fb3b9575-135b-40b2-9f45-a3ac9ab4170e",
+    "card_id": "00000000-0000-0000-0000-000000001001"
+  }
+}
+
+< {
+  "type": "card_request_result",
+  "payload": {
+    "completed_quartets": [],
+    "current_player_id": "ed6ac08f-b150-4c26-be6f-b1718ec2df89",
+    "game_status": "playing",
+    "next_player_id": "ed6ac08f-b150-4c26-be6f-b1718ec2df89",
+    "requested_card": {
+      "ID": "00000000-0000-0000-0000-000000001006",
+      "QuartetID": "00000000-0000-0000-0000-000000000102",
+      "Title": "Аврора"
+    },
+    "success": true
+  }
+}
+
+< {
+  "type": "turn_changed",
+  "payload": {
+    "current_player_id": "ed6ac08f-b150-4c26-be6f-b1718ec2df89"
+  }
+}
+
+< {
+  "type": "game_state",
+  "payload": {
+    "game_id": "6044f115-61b6-4a0e-9909-c071ec087dc2",
+    "status": "playing",
+    "current_player_id": "ed6ac08f-b150-4c26-be6f-b1718ec2df89",
+    "players": [
+      {
+        "id": "b8126bf0-9928-473a-8f04-1dfdf986d215",
+        "name": "Mihail",
+        "card_count": 2
+      },
+      {
+        "id": "ed6ac08f-b150-4c26-be6f-b1718ec2df89",
+        "name": "Anna",
+        "card_count": 6
+      }
+    ],
+    "completed": {
+      "b8126bf0-9928-473a-8f04-1dfdf986d215": [],
+      "ed6ac08f-b150-4c26-be6f-b1718ec2df89": []
+    }
+  }
+}
+
+< {
+  "type": "player_hand",
+  "payload": {
+    "player_id": "ed6ac08f-b150-4c26-be6f-b1718ec2df89",
+    "cards": [
+      {
+        "id": "00000000-0000-0000-0000-000000001008",
+        "quartet_id": "00000000-0000-0000-0000-000000000102",
+        "title": "Cutty Sark"
+      },
+      {
+        "id": "00000000-0000-0000-0000-000000001004",
+        "quartet_id": "00000000-0000-0000-0000-000000000101",
+        "title": "Ан-225"
+      },
+      {
+        "id": "00000000-0000-0000-0000-000000001001",
+        "quartet_id": "00000000-0000-0000-0000-000000000101",
+        "title": "Boeing 747"
+      },
+      {
+        "id": "00000000-0000-0000-0000-000000001003",
+        "quartet_id": "00000000-0000-0000-0000-000000000101",
+        "title": "Concorde"
+      },
+      {
+        "id": "00000000-0000-0000-0000-000000001005",
+        "quartet_id": "00000000-0000-0000-0000-000000000102",
+        "title": "Титаник"
+      },
+      {
+        "id": "00000000-0000-0000-0000-000000001006",
+        "quartet_id": "00000000-0000-0000-0000-000000000102",
+        "title": "Аврора"
+      }
+    ]
+  }
+}

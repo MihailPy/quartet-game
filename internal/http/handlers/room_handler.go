@@ -7,6 +7,7 @@ import (
 
 	"github.com/MihailPy/quartet-game/internal/game"
 	"github.com/MihailPy/quartet-game/internal/room"
+	"github.com/MihailPy/quartet-game/internal/ws"
 )
 
 type GameStarter interface {
@@ -14,8 +15,9 @@ type GameStarter interface {
 }
 
 type RoomHandler struct {
-	manager     *room.Manager
-	gameStarter GameStarter
+	manager          *room.Manager
+	gameStarter      GameStarter
+	eventBroadcaster EventBroadcaster
 }
 
 type JoinRoomRequest struct {
@@ -31,10 +33,50 @@ type ReadyRoomRequest struct {
 	PlayerID room.PlayerID `json:"player_id"`
 }
 
-func NewRoomHandler(manager *room.Manager, gameStarter GameStarter) *RoomHandler {
+type EventBroadcaster interface {
+	BroadcastToRoom(roomID room.RoomID, event ws.Event)
+	SendToPlayer(roomID room.RoomID, playerID room.PlayerID, event ws.Event)
+}
+
+type GameStartedPayload struct {
+	Room room.Room `json:"room"`
+	Deck game.Deck `json:"deck"`
+}
+
+type GameStatePayload struct {
+	GameID          string              `json:"game_id"`
+	Status          string              `json:"status"`
+	CurrentPlayerID string              `json:"current_player_id"`
+	Players         []GamePlayerState   `json:"players"`
+	Completed       map[string][]string `json:"completed"`
+}
+
+type GamePlayerState struct {
+	ID        string `json:"id"`
+	Name      string `json:"name"`
+	CardCount int    `json:"card_count"`
+}
+
+type PlayerHandPayload struct {
+	PlayerID string      `json:"player_id"`
+	Cards    []CardState `json:"cards"`
+}
+
+type CardState struct {
+	ID        string `json:"id"`
+	QuartetID string `json:"quartet_id"`
+	Title     string `json:"title"`
+}
+
+func NewRoomHandler(
+	manager *room.Manager,
+	gameStarter GameStarter,
+	eventBroadcaster EventBroadcaster,
+) *RoomHandler {
 	return &RoomHandler{
-		manager:     manager,
-		gameStarter: gameStarter,
+		manager:          manager,
+		gameStarter:      gameStarter,
+		eventBroadcaster: eventBroadcaster,
 	}
 }
 
@@ -183,6 +225,28 @@ func (h *RoomHandler) StartRoom(w http.ResponseWriter, r *http.Request, roomID r
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	_ = json.NewEncoder(w).Encode(response)
+
+	if h.eventBroadcaster != nil {
+		h.eventBroadcaster.BroadcastToRoom(roomID, ws.Event{
+			Type: "game_started",
+			Payload: GameStartedPayload{
+				Room: startedRoom,
+				Deck: gameState.Deck,
+			},
+		})
+
+		h.eventBroadcaster.BroadcastToRoom(roomID, ws.Event{
+			Type:    "game_state",
+			Payload: buildGameStatePayload(gameState),
+		})
+
+		for _, player := range gameState.Players {
+			h.eventBroadcaster.SendToPlayer(roomID, room.PlayerID(player.ID), ws.Event{
+				Type:    "player_hand",
+				Payload: buildPlayerHandPayload(gameState, player.ID),
+			})
+		}
+	}
 }
 
 func (h *RoomHandler) GetRoomState(w http.ResponseWriter, r *http.Request, roomID room.RoomID) {
@@ -206,4 +270,54 @@ func (h *RoomHandler) GetRoomState(w http.ResponseWriter, r *http.Request, roomI
 	w.WriteHeader(http.StatusOK)
 
 	_ = json.NewEncoder(w).Encode(foundRoom)
+}
+
+func buildGameStatePayload(state game.GameState) GameStatePayload {
+	players := make([]GamePlayerState, 0, len(state.Players))
+
+	for _, player := range state.Players {
+		players = append(players, GamePlayerState{
+			ID:        string(player.ID),
+			Name:      player.Name,
+			CardCount: len(state.Hands[player.ID]),
+		})
+	}
+
+	completed := make(map[string][]string)
+
+	for playerID, quartetIDs := range state.Completed {
+		completed[string(playerID)] = make([]string, 0, len(quartetIDs))
+
+		for _, quartetID := range quartetIDs {
+			completed[string(playerID)] = append(
+				completed[string(playerID)],
+				string(quartetID),
+			)
+		}
+	}
+
+	return GameStatePayload{
+		GameID:          string(state.ID),
+		Status:          string(state.Status),
+		CurrentPlayerID: string(state.CurrentPlayerID),
+		Players:         players,
+		Completed:       completed,
+	}
+}
+
+func buildPlayerHandPayload(state game.GameState, playerID game.PlayerID) PlayerHandPayload {
+	cards := make([]CardState, 0, len(state.Hands[playerID]))
+
+	for _, card := range state.Hands[playerID] {
+		cards = append(cards, CardState{
+			ID:        string(card.ID),
+			QuartetID: string(card.QuartetID),
+			Title:     card.Title,
+		})
+	}
+
+	return PlayerHandPayload{
+		PlayerID: string(playerID),
+		Cards:    cards,
+	}
 }
