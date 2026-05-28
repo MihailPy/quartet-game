@@ -58,6 +58,8 @@ func NewRouter(
 			roomHandler.StartRoom(w, r, roomID)
 		case "state":
 			roomHandler.GetRoomState(w, r, roomID)
+		case "deck":
+			roomHandler.GetRoomDeck(w, r, roomID)
 		case "ws":
 			wsHandler.HandleConnection(w, r, roomID)
 		default:

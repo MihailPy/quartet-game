@@ -160,3 +160,8 @@ func (s *Service) RequestCard(
 
 	return result, state, nil
 }
+
+func (s *Service) GetGameState(roomID room.RoomID) (game.GameState, bool) {
+	state, ok := s.games[roomID]
+	return state, ok
+}

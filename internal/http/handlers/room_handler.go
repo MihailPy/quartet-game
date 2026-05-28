@@ -12,6 +12,7 @@ import (
 
 type GameStarter interface {
 	StartGame(ctx context.Context, currentRoom room.Room) (game.GameState, error)
+	GetGameState(roomID room.RoomID) (game.GameState, bool)
 }
 
 type RoomHandler struct {
@@ -270,6 +271,36 @@ func (h *RoomHandler) GetRoomState(w http.ResponseWriter, r *http.Request, roomI
 	w.WriteHeader(http.StatusOK)
 
 	_ = json.NewEncoder(w).Encode(foundRoom)
+}
+
+func (h *RoomHandler) GetRoomDeck(w http.ResponseWriter, r *http.Request, roomID room.RoomID) {
+	if r.Method != http.MethodGet {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+
+	currentRoom, err := h.manager.GetRoom(r.Context(), roomID)
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	gameState, ok := h.gameStarter.GetGameState(roomID)
+	if !ok {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	_ = currentRoom
+
+	response := struct {
+		Deck game.Deck `json:"deck"`
+	}{
+		Deck: gameState.Deck,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
 }
 
 func buildGameStatePayload(state game.GameState) GameStatePayload {
