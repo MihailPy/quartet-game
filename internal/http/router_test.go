@@ -25,7 +25,7 @@ func (f fakeGameStarter) StartGame(ctx context.Context, currentRoom room.Room) (
 	return f.state, nil
 }
 
-func (f fakeGameStarter) GetGameState(roomID room.RoomID) (game.GameState, bool) {
+func (f fakeGameStarter) GetGameState(ctx context.Context, roomID room.RoomID) (game.GameState, bool) {
 	if !f.hasState {
 		return game.GameState{}, false
 	}

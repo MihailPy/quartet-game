@@ -12,7 +12,7 @@ import (
 
 type GameStarter interface {
 	StartGame(ctx context.Context, currentRoom room.Room) (game.GameState, error)
-	GetGameState(roomID room.RoomID) (game.GameState, bool)
+	GetGameState(ctx context.Context, roomID room.RoomID) (game.GameState, bool)
 }
 
 type RoomHandler struct {
@@ -285,7 +285,7 @@ func (h *RoomHandler) GetRoomDeck(w http.ResponseWriter, r *http.Request, roomID
 		return
 	}
 
-	gameState, ok := h.gameStarter.GetGameState(roomID)
+	gameState, ok := h.gameStarter.GetGameState(r.Context(), roomID)
 	if !ok {
 		w.WriteHeader(http.StatusNotFound)
 		return
@@ -315,7 +315,7 @@ func (h *RoomHandler) GetPlayerHand(w http.ResponseWriter, r *http.Request, room
 		return
 	}
 
-	gameState, ok := h.gameStarter.GetGameState(roomID)
+	gameState, ok := h.gameStarter.GetGameState(r.Context(), roomID)
 	if !ok {
 		w.WriteHeader(http.StatusNotFound)
 		return
@@ -333,7 +333,7 @@ func (h *RoomHandler) GetGameState(w http.ResponseWriter, r *http.Request, roomI
 		return
 	}
 
-	gameState, ok := h.gameStarter.GetGameState(roomID)
+	gameState, ok := h.gameStarter.GetGameState(r.Context(), roomID)
 	if !ok {
 		w.WriteHeader(http.StatusNotFound)
 		return
