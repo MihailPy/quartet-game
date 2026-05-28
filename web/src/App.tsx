@@ -94,6 +94,9 @@ type RequestableCard = {
   quartet_title: string
 }
 
+type RoomDeckResponse = {
+  deck: Deck
+}
 
 
 const API_URL = 'http://localhost:8080'
@@ -280,6 +283,8 @@ function App() {
       setRoom(data.room)
       setPublicGameState(data.state)
       setCurrentTurnPlayerID(data.state.current_player_id)
+
+      await loadDeck(data.room.id)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error')
     }
@@ -435,6 +440,18 @@ function App() {
     return 'Спросить карту'
   }
 
+  async function loadDeck(roomID: string) {
+    const response = await fetch(`${API_URL}/rooms/${roomID}/deck`)
+
+    if (!response.ok) {
+      return
+    }
+
+    const data = (await response.json()) as RoomDeckResponse
+
+    setDeck(data.deck)
+  }
+
   useEffect(() => {
     if (!room || !player) {
       return
@@ -465,6 +482,8 @@ function App() {
           setRoom(payload.room)
           setDeck(payload.deck)
           addGameLog('Игра началась.')
+
+          void loadDeck(payload.room.id)
         }
 
         if (message.type === 'game_state') {
