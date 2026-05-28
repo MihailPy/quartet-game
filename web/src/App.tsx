@@ -463,6 +463,33 @@ function App() {
     setDeck(data.deck)
   }
 
+  async function loadGameState(roomID: string) {
+    const response = await fetch(`${API_URL}/rooms/${roomID}/state`)
+
+    if (!response.ok) {
+      return
+    }
+
+    const data = (await response.json()) as PublicGameState
+
+    setPublicGameState(data)
+    setCurrentTurnPlayerID(data.current_player_id)
+  }
+
+  async function loadPlayerHand(roomID: string, playerID: string) {
+    const response = await fetch(
+      `${API_URL}/rooms/${roomID}/hand?player_id=${playerID}`,
+    )
+
+    if (!response.ok) {
+      return
+    }
+
+    const data = (await response.json()) as PlayerHandPayload
+
+    setPlayerHand(data)
+  }
+
   useEffect(() => {
     if (!room || !player) {
       return
@@ -494,7 +521,11 @@ function App() {
           setDeck(payload.deck)
           addGameLog('Игра началась.')
 
-          void loadDeck(payload.room.id)
+          void loadGameState(payload.room.id)
+
+          if (player) {
+            void loadPlayerHand(payload.room.id, player.id)
+          }
         }
 
         if (message.type === 'game_state') {
@@ -616,6 +647,7 @@ function App() {
 
         if (loadedRoom.status === 'playing') {
           void loadDeck(loadedRoom.id)
+          void loadGameState(loadedRoom.id)
         }
 
         if (savedPlayerJSON) {
@@ -626,6 +658,11 @@ function App() {
 
           if (playerStillInRoom) {
             setPlayer(savedPlayer)
+
+            if (loadedRoom.status === 'playing') {
+              void loadPlayerHand(loadedRoom.id, savedPlayer.id)
+            }
+
             return
           }
         }
