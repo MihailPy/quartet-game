@@ -126,3 +126,28 @@ func (r *GameRepository) FindGameByRoomID(ctx context.Context, roomID room.RoomI
 
 	return state, nil
 }
+
+func (r *GameRepository) UpdateGameState(ctx context.Context, state game.GameState) error {
+	stateJSON, err := json.Marshal(state)
+	if err != nil {
+		return err
+	}
+
+	_, err = r.db.ExecContext(
+		ctx,
+		`
+		UPDATE games
+		SET
+			status = $2,
+			current_player_id = $3,
+			state = $4
+		WHERE id = $1
+		`,
+		string(state.ID),
+		string(state.Status),
+		string(state.CurrentPlayerID),
+		stateJSON,
+	)
+
+	return err
+}

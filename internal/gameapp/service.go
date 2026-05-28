@@ -15,6 +15,7 @@ type GameRepository interface {
 	SaveGameResult(ctx context.Context, gameID game.GameID, result game.GameResult) error
 	UpdateGameStatus(ctx context.Context, gameID game.GameID, status game.GameStatus) error
 	FindGameByRoomID(ctx context.Context, roomID room.RoomID) (game.GameState, error)
+	UpdateGameState(ctx context.Context, state game.GameState) error
 }
 
 type DeckService interface {
@@ -158,6 +159,10 @@ func (s *Service) RequestCard(
 	}
 
 	s.games[roomID] = state
+
+	if err := s.gameRepository.UpdateGameState(ctx, state); err != nil {
+		return game.RequestCardResult{}, game.GameState{}, err
+	}
 
 	return result, state, nil
 }
