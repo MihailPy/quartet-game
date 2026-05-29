@@ -10,6 +10,7 @@ import {
   startGameRequest,
 } from './api'
 import './App.css'
+import { GameLogPanel } from './components/GameLogPanel'
 import { GamePanel } from './components/GamePanel'
 import { PlayerHandPanel } from './components/PlayerHandPanel'
 import { PlayerPanel } from './components/PlayerPanel'
@@ -622,40 +623,12 @@ function App() {
             getQuartetTitle={getQuartetTitle}
           />
 
-          <div className="panel">
-            <div className="events-list">
-              <h3>Журнал игры</h3>
-              {gameLog.length === 0 && <p>Пока событий нет.</p>}
-
-              {gameLog.map((event, index) => (
-                <div className="log-item" key={`${event}-${index}`}>
-                  {event}
-                </div>
-              ))}
-            </div>
-
-            <div className="debug-events">
-              <button
-                className="secondary-button"
-                type="button"
-                onClick={() => setShowDebugEvents((current) => !current)}
-              >
-                {showDebugEvents ? 'Скрыть debug-события' : 'Показать debug-события'}
-              </button>
-
-              {showDebugEvents && (
-                <div className="debug-events-list">
-                  {events.length === 0 && <p>Debug-событий пока нет.</p>}
-
-                  {events.map((event, index) => (
-                    <pre className="event-item" key={`${event}-${index}`}>
-                      {event}
-                    </pre>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
+          <GameLogPanel
+            gameLog={gameLog}
+            events={events}
+            showDebugEvents={showDebugEvents}
+            onToggleDebugEvents={() => setShowDebugEvents((current) => !current)}
+          />
         </section>
       </section>
     </main>
