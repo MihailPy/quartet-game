@@ -11,6 +11,7 @@ import {
 } from './api'
 import './App.css'
 import { RoomPanel } from './components/RoomPanel'
+import { PlayerPanel } from './components/PlayerPanel'
 import {
   clearPlayer,
   clearSession,
@@ -583,60 +584,15 @@ function App() {
             onLoadRoom={loadRoom}
           />
 
-            {room && (
-              <div className="join-form">
-                <label>
-                  Имя игрока
-                  <input
-                    className="input"
-                    value={playerName}
-                    onChange={(event) => setPlayerName(event.target.value)}
-                  />
-                </label>
+          <PlayerPanel
+            room={room}
+            player={player}
+            playerName={playerName}
+            onPlayerNameChange={setPlayerName}
+            onJoinRoom={joinRoom}
+            onMarkReady={markReady}
+          />
 
-                <button className="button" onClick={joinRoom}>
-                  Подключиться
-                </button>
-              </div>
-            )}
-
-            {player && (
-              <div className="room-info">
-                <p>
-                  <strong>Мой игрок:</strong>
-                </p>
-                <code>{player.id}</code>
-
-                <p>
-                  <strong>Имя:</strong> {player.name}
-                </p>
-
-                <p>
-                  <strong>Статус:</strong> {player.is_ready ? 'готов' : 'не готов'}
-                </p>
-
-                <button
-                  className="button"
-                  onClick={markReady}
-                  disabled={player.is_ready || room?.status === 'playing'}
-                >
-                  {player.is_ready ? 'Готов' : 'Готовиться'}
-                </button>
-              </div>
-            )}
-
-            {room && room.players.length > 0 && (
-              <div className="players-list">
-                <h3>Игроки</h3>
-
-                {room.players.map((roomPlayer) => (
-                  <div className="player-row" key={roomPlayer.id}>
-                    <span>{roomPlayer.name}</span>
-                    <span>{roomPlayer.is_ready ? 'готов' : 'не готов'}</span>
-                  </div>
-                ))}
-              </div>
-            )}
           <div className="panel">
             {room && room.players.length >= 2 && (
               <button
