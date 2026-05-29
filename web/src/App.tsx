@@ -1,103 +1,17 @@
 import { useEffect, useRef, useState } from 'react'
 import './App.css'
-
-type Room = {
-  id: string
-  status: string
-  players: Player[]
-}
-
-type Player = {
-  id: string
-  name: string
-  is_ready: boolean
-  is_connected: boolean
-}
-
-type GameState = {
-  ID: string
-  Deck: Deck
-  Status: string
-  CurrentPlayerID: string
-  Hands: Record<string, Card[]>
-  Completed: Record<string, string[]>
-}
-
-type GameStartedPayload = {
-  room: Room
-  deck: Deck
-}
-
-type Deck = {
-  ID: string
-  Title: string
-  Quartets: Quartet[]
-}
-
-type Quartet = {
-  ID: string
-  Title: string
-  Cards: Card[]
-}
-
-type Card = {
-  ID: string
-  QuartetID: string
-  Title: string
-}
-
-type StartGameResponse = {
-  room: Room
-  state: PublicGameState
-}
-
-type PublicGameState = {
-  game_id: string
-  status: string
-  current_player_id: string
-  players: PublicGamePlayer[]
-  completed: Record<string, string[]>
-}
-
-type PublicGamePlayer = {
-  id: string
-  name: string
-  card_count: number
-}
-
-type PlayerHandPayload = {
-  player_id: string
-  cards: PrivateCard[]
-}
-
-type PrivateCard = {
-  id: string
-  quartet_id: string
-  title: string
-}
-
-type GameFinishedPayload = {
-  game_id: string
-  winners: string[]
-  scores: PlayerScore[]
-}
-
-type PlayerScore = {
-  player_id: string
-  score: number
-}
-
-type RequestableCard = {
-  id: string
-  title: string
-  quartet_id: string
-  quartet_title: string
-}
-
-type RoomDeckResponse = {
-  deck: Deck
-}
-
+import type {
+  Deck,
+  GameFinishedPayload,
+  GameStartedPayload,
+  Player,
+  PlayerHandPayload,
+  PublicGameState,
+  RequestableCard,
+  Room,
+  RoomDeckResponse,
+  StartGameResponse
+} from './types'
 
 const API_URL = 'http://localhost:8080'
 const STORAGE_ROOM_ID_KEY = 'quartet_room_id'
@@ -109,7 +23,6 @@ function App() {
   const [player, setPlayer] = useState<Player | null>(null)
   const [playerName, setPlayerName] = useState<string>('Mihail')
   const [roomIdInput, setRoomIdInput] = useState<string>('')
-  const [game, setGame] = useState<GameState | null>(null)
   const [socketStatus, setSocketStatus] = useState<string>('disconnected')
   const [events, setEvents] = useState<string[]>([])
   const socketRef = useRef<WebSocket | null>(null)
@@ -129,7 +42,6 @@ function App() {
   const [reconnectAttempt, setReconnectAttempt] = useState<number>(0)
 
   function resetGameState() {
-    setGame(null)
     setDeck(null)
     setPublicGameState(null)
     setPlayerHand(null)
@@ -815,11 +727,11 @@ function App() {
               </p>
             )}
 
-            {(game || publicGameState) && (
+            {(publicGameState) && (
               <div className="game-info">
                 <p>
                   <strong>Статус:</strong>{' '}
-                  {publicGameState ? publicGameState.status : game?.Status}
+                  {publicGameState.status}
                 </p>
 
                 <p>
@@ -830,7 +742,6 @@ function App() {
                   const turnPlayerID =
                     currentTurnPlayerID ||
                     publicGameState?.current_player_id ||
-                    game?.CurrentPlayerID ||
                     ''
 
                   if (!turnPlayerID) {
@@ -960,29 +871,22 @@ function App() {
 
                 <h3>Карты игроков</h3>
 
-                {publicGameState
-                  ? publicGameState.players.map((gamePlayer) => (
-                    <div
-                      className={
-                        gamePlayer.id === currentTurnPlayerID
-                          ? 'player-row player-row-active'
-                          : 'player-row'
-                      }
-                      key={gamePlayer.id}
-                    >
-                      <span>
-                        {gamePlayer.name}
-                        {player?.id === gamePlayer.id ? ' (ты)' : ''}
-                      </span>
-                      <span>{gamePlayer.card_count} карт</span>
-                    </div>
-                  ))
-                  : Object.entries(game?.Hands ?? {}).map(([playerID, cards]) => (
-                    <div className="player-row" key={playerID}>
-                      <span>{getPlayerName(playerID)}</span>
-                      <span>{cards.length} карт</span>
-                    </div>
-                  ))}
+                {publicGameState.players.map((gamePlayer) => (
+                  <div
+                    className={
+                      gamePlayer.id === currentTurnPlayerID
+                        ? 'player-row player-row-active'
+                        : 'player-row'
+                    }
+                    key={gamePlayer.id}
+                  >
+                    <span>
+                      {gamePlayer.name}
+                      {player?.id === gamePlayer.id ? ' (ты)' : ''}
+                    </span>
+                    <span>{gamePlayer.card_count} карт</span>
+                  </div>
+                ))}
               </div>
             )}
 
@@ -1026,24 +930,17 @@ function App() {
 
             {!player && <p>Сначала подключись к комнате.</p>}
 
-            {player && !game && !playerHand && <p>Карты появятся после старта игры.</p>}
+            {player && !playerHand && <p>Карты появятся после старта игры.</p>}
 
-            {player && (playerHand || game) && (
+            {player && playerHand && (
               <div className="cards-list">
-                {playerHand
-                  ? playerHand.cards.map((card) => (
-                    <div className="card" key={card.id}>
-                      <strong>{card.title}</strong>
-                      <span>Квартет: {getQuartetTitle(card.quartet_id)}</span>
-                      <small>{card.id}</small>
-                    </div>
-                  ))
-                  : (game?.Hands[player.id] ?? []).map((card) => (
-                    <div className="card" key={card.ID}>
-                      <strong>{card.Title}</strong>
-                      <span>Квартет: {getQuartetTitle(card.QuartetID)}</span>
-                    </div>
-                  ))}
+                {playerHand.cards.map((card) => (
+                  <div className="card" key={card.id}>
+                    <strong>{card.title}</strong>
+                    <span>Квартет: {getQuartetTitle(card.quartet_id)}</span>
+                    <small>{card.id}</small>
+                  </div>
+                ))}
               </div>
             )}
           </div>
