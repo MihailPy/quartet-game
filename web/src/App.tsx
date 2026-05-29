@@ -1,4 +1,14 @@
 import { useEffect, useRef, useState } from 'react'
+import {
+  createRoomRequest,
+  joinRoomRequest,
+  loadDeckRequest,
+  loadGameStateRequest,
+  loadPlayerHandRequest,
+  loadRoomRequest,
+  markReadyRequest,
+  startGameRequest,
+} from './api'
 import './App.css'
 import type {
   Deck,
@@ -11,18 +21,13 @@ import type {
   Room,
 } from './types'
 import {
-  createRoomRequest,
-  joinRoomRequest,
-  loadDeckRequest,
-  loadGameStateRequest,
-  loadPlayerHandRequest,
-  loadRoomRequest,
-  markReadyRequest,
-  startGameRequest,
-} from './api'
-
-const STORAGE_ROOM_ID_KEY = 'quartet_room_id'
-const STORAGE_PLAYER_KEY = 'quartet_player'
+  clearPlayer,
+  clearSession,
+  loadPlayer,
+  loadRoomID,
+  savePlayer,
+  saveRoomID,
+} from './session'
 
 function App() {
   const [room, setRoom] = useState<Room | null>(null)
@@ -75,8 +80,9 @@ function App() {
       setRoomIdInput(createdRoom.id)
       resetGameState()
 
-      localStorage.setItem(STORAGE_ROOM_ID_KEY, createdRoom.id)
-      localStorage.removeItem(STORAGE_PLAYER_KEY)
+      saveRoomID(createdRoom.id)
+      clearPlayer()
+
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error')
     }
@@ -97,8 +103,9 @@ function App() {
       setPlayer(null)
       resetGameState()
 
-      localStorage.setItem(STORAGE_ROOM_ID_KEY, loadedRoom.id)
-      localStorage.removeItem(STORAGE_PLAYER_KEY)
+      saveRoomID(loadedRoom.id)
+      clearPlayer()
+
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error')
     }
@@ -119,8 +126,9 @@ function App() {
       setPlayer(data.player)
       resetGameState()
 
-      localStorage.setItem(STORAGE_ROOM_ID_KEY, data.room.id)
-      localStorage.setItem(STORAGE_PLAYER_KEY, JSON.stringify(data.player))
+      saveRoomID(data.room.id)
+      savePlayer(data.player)
+
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error')
     }
@@ -503,8 +511,8 @@ function App() {
 
   useEffect(() => {
     async function restoreSession() {
-      const savedRoomID = localStorage.getItem(STORAGE_ROOM_ID_KEY)
-      const savedPlayerJSON = localStorage.getItem(STORAGE_PLAYER_KEY)
+      const savedRoomID = loadRoomID()
+      const savedPlayer = loadPlayer()
 
       if (!savedRoomID) {
         return
@@ -516,8 +524,8 @@ function App() {
         try {
           loadedRoom = await loadRoomRequest(savedRoomID)
         } catch {
-          localStorage.removeItem(STORAGE_ROOM_ID_KEY)
-          localStorage.removeItem(STORAGE_PLAYER_KEY)
+          clearSession()
+
           return
         }
 
@@ -529,8 +537,7 @@ function App() {
           void loadGameState(loadedRoom.id)
         }
 
-        if (savedPlayerJSON) {
-          const savedPlayer = JSON.parse(savedPlayerJSON) as Player
+        if (savedPlayer) {
           const playerStillInRoom = loadedRoom.players.some(
             (roomPlayer) => roomPlayer.id === savedPlayer.id,
           )
@@ -546,10 +553,10 @@ function App() {
           }
         }
 
-        localStorage.removeItem(STORAGE_PLAYER_KEY)
+        clearSession()
+
       } catch {
-        localStorage.removeItem(STORAGE_ROOM_ID_KEY)
-        localStorage.removeItem(STORAGE_PLAYER_KEY)
+        clearSession()
       }
     }
 
