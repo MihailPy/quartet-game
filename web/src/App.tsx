@@ -11,6 +11,7 @@ import {
 } from './api'
 import './App.css'
 import { GamePanel } from './components/GamePanel'
+import { PlayerHandPanel } from './components/PlayerHandPanel'
 import { PlayerPanel } from './components/PlayerPanel'
 import { RoomPanel } from './components/RoomPanel'
 import {
@@ -614,6 +615,13 @@ function App() {
             canRequestCard={canRequestCard}
             getRequestButtonText={getRequestButtonText}
           />
+
+          <PlayerHandPanel
+            player={player}
+            playerHand={playerHand}
+            getQuartetTitle={getQuartetTitle}
+          />
+
           <div className="panel">
             <div className="events-list">
               <h3>Журнал игры</h3>
@@ -647,26 +655,6 @@ function App() {
                 </div>
               )}
             </div>
-          </div>
-
-          <div className="panel">
-            <h2>Моя рука</h2>
-
-            {!player && <p>Сначала подключись к комнате.</p>}
-
-            {player && !playerHand && <p>Карты появятся после старта игры.</p>}
-
-            {player && playerHand && (
-              <div className="cards-list">
-                {playerHand.cards.map((card) => (
-                  <div className="card" key={card.id}>
-                    <strong>{card.title}</strong>
-                    <span>Квартет: {getQuartetTitle(card.quartet_id)}</span>
-                    <small>{card.id}</small>
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
         </section>
       </section>
