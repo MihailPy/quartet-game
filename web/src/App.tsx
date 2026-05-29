@@ -10,6 +10,7 @@ import {
   startGameRequest,
 } from './api'
 import './App.css'
+import { RoomPanel } from './components/RoomPanel'
 import {
   clearPlayer,
   clearSession,
@@ -574,27 +575,13 @@ function App() {
         {error && <div className="error">{error}</div>}
 
         <section className="game-layout">
-          <div className="panel">
-            <h2>Комната</h2>
-            <div className="join-form">
-              <label>
-                ID существующей комнаты
-                <input
-                  className="input"
-                  value={roomIdInput}
-                  onChange={(event) => setRoomIdInput(event.target.value)}
-                  placeholder="Room ID"
-                />
-              </label>
-
-              <button className="button" onClick={loadRoom}>
-                Открыть комнату
-              </button>
-            </div>
-
-            <button className="button" onClick={createRoom}>
-              Создать комнату
-            </button>
+          <RoomPanel
+            room={room}
+            roomIdInput={roomIdInput}
+            onRoomIdInputChange={setRoomIdInput}
+            onCreateRoom={createRoom}
+            onLoadRoom={loadRoom}
+          />
 
             {room && (
               <div className="join-form">
@@ -650,6 +637,7 @@ function App() {
                 ))}
               </div>
             )}
+          <div className="panel">
             {room && room.players.length >= 2 && (
               <button
                 className="button start-button"
