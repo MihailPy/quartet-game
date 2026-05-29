@@ -10,6 +10,14 @@ import {
   startGameRequest,
 } from './api'
 import './App.css'
+import {
+  clearPlayer,
+  clearSession,
+  loadPlayer,
+  loadRoomID,
+  savePlayer,
+  saveRoomID,
+} from './session'
 import type {
   Deck,
   GameFinishedPayload,
@@ -21,13 +29,9 @@ import type {
   Room,
 } from './types'
 import {
-  clearPlayer,
-  clearSession,
-  loadPlayer,
-  loadRoomID,
-  savePlayer,
-  saveRoomID,
-} from './session'
+  buildRequestCardMessage,
+  buildRoomWebSocketURL,
+} from './websocket'
 
 function App() {
   const [room, setRoom] = useState<Room | null>(null)
@@ -209,13 +213,7 @@ function App() {
     setError('')
 
     socketRef.current.send(
-      JSON.stringify({
-        type: 'request_card',
-        payload: {
-          target_player_id: targetPlayerID,
-          card_id: selectedCardID,
-        },
-      }),
+      JSON.stringify(buildRequestCardMessage(targetPlayerID, selectedCardID)),
     )
   }
 
@@ -370,7 +368,7 @@ function App() {
 
     let shouldReconnect = true
 
-    const socketUrl = `ws://localhost:8080/rooms/${room.id}/ws?player_id=${player.id}`
+    const socketUrl = buildRoomWebSocketURL(room.id, player.id)
     const socket = new WebSocket(socketUrl)
 
     socketRef.current = socket
