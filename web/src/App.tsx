@@ -10,8 +10,9 @@ import {
   startGameRequest,
 } from './api'
 import './App.css'
-import { RoomPanel } from './components/RoomPanel'
+import { GamePanel } from './components/GamePanel'
 import { PlayerPanel } from './components/PlayerPanel'
+import { RoomPanel } from './components/RoomPanel'
 import {
   clearPlayer,
   clearSession,
@@ -593,204 +594,29 @@ function App() {
             onMarkReady={markReady}
           />
 
+          <GamePanel
+            room={room}
+            player={player}
+            publicGameState={publicGameState}
+            currentTurnPlayerID={currentTurnPlayerID}
+            lastMoveMessage={lastMoveMessage}
+            completedQuartetMessage={completedQuartetMessage}
+            gameFinished={gameFinished}
+            socketStatus={socketStatus}
+            targetPlayerID={targetPlayerID}
+            selectedCardID={selectedCardID}
+            availableRequestCards={availableRequestCards}
+            onTargetPlayerIDChange={setTargetPlayerID}
+            onSelectedCardIDChange={setSelectedCardID}
+            onRequestCard={requestCard}
+            onStartGame={startGame}
+            getPlayerName={getPlayerName}
+            canRequestCard={canRequestCard}
+            getRequestButtonText={getRequestButtonText}
+          />
           <div className="panel">
-            {room && room.players.length >= 2 && (
-              <button
-                className="button start-button"
-                onClick={startGame}
-                disabled={
-                  room.status === 'playing' ||
-                  !room.players.every((roomPlayer) => roomPlayer.is_ready)
-                }
-              >
-                {room.status === 'playing' ? 'Игра началась' : 'Старт игры'}
-              </button>
-            )}
-          </div>
-
-          <div className="panel">
-            <h2>Игра</h2>
-
-            <div className="socket-status">
-              <strong>WebSocket:</strong> {socketStatus}
-            </div>
-
-            {!publicGameState && room?.status !== 'playing' && (
-              <p>Игра ещё не началась.</p>
-            )}
-
-            {!publicGameState && room?.status === 'playing' && (
-              <p className="form-hint">
-                Игра была начата, но состояние игры не восстановлено. Возможно, backend был перезапущен.
-              </p>
-            )}
-
-            {(publicGameState) && (
-              <div className="game-info">
-                <p>
-                  <strong>Статус:</strong>{' '}
-                  {publicGameState.status}
-                </p>
-
-                <p>
-                  <strong>Сейчас ходит:</strong>
-                </p>
-
-                {(() => {
-                  const turnPlayerID =
-                    currentTurnPlayerID ||
-                    publicGameState?.current_player_id ||
-                    ''
-
-                  if (!turnPlayerID) {
-                    return <p>Пока неизвестно.</p>
-                  }
-
-                  return (
-                    <div>
-                      <p className="turn-player-name">
-                        {getPlayerName(turnPlayerID)}
-                        {player?.id === turnPlayerID ? ' — твой ход' : ''}
-                      </p>
-
-                      <small className="technical-id">{turnPlayerID}</small>
-                    </div>
-                  )
-                })()}
-
-                {lastMoveMessage && (
-                  <div className="move-message">
-                    {lastMoveMessage}
-                  </div>
-                )}
-
-                {completedQuartetMessage && (
-                  <div className="quartet-message">
-                    {completedQuartetMessage}
-                  </div>
-                )}
-
-                {gameFinished && (
-                  <div className="game-finished">
-                    <h3>Игра завершена</h3>
-
-                    <p>
-                      <strong>Победители:</strong>{' '}
-                      {gameFinished.winners.map(getPlayerName).join(', ')}
-                    </p>
-
-                    <h4>Счёт</h4>
-
-                    {gameFinished.scores.map((score) => (
-                      <div className="player-row" key={score.player_id}>
-                        <span>{getPlayerName(score.player_id)}</span>
-                        <span>{score.player_id}</span>
-                        <span>{score.score}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {player && publicGameState && (
-                  <div className="request-form">
-                    <h3>Запрос карты</h3>
-
-                    <label>
-                      У кого спросить
-                      <select
-                        className="input"
-                        value={targetPlayerID}
-                        onChange={(event) => setTargetPlayerID(event.target.value)}
-                        disabled={
-                          !player ||
-                          gameFinished !== null ||
-                          socketStatus !== 'connected' ||
-                          currentTurnPlayerID !== player.id
-                        }
-                      >
-                        <option value="">Выбери игрока</option>
-
-                        {publicGameState.players
-                          .filter((gamePlayer) => gamePlayer.id !== player.id)
-                          .map((gamePlayer) => (
-                            <option key={gamePlayer.id} value={gamePlayer.id}>
-                              {gamePlayer.name}
-                            </option>
-                          ))}
-                      </select>
-                    </label>
-
-                    <label>
-                      Какую карту спросить
-                      <select
-                        className="input"
-                        value={selectedCardID}
-                        onChange={(event) => setSelectedCardID(event.target.value)}
-                        disabled={
-                          !player ||
-                          gameFinished !== null ||
-                          socketStatus !== 'connected' ||
-                          currentTurnPlayerID !== player.id ||
-                          availableRequestCards.length === 0
-                        }
-                      >
-                        <option value="">Выбери карту</option>
-
-                        {availableRequestCards.map((card) => (
-                          <option key={card.id} value={card.id}>
-                            {card.title} — {card.quartet_title}
-                          </option>
-                        ))}
-                      </select>
-                      {availableRequestCards.length === 0 && (
-                        <p className="form-hint">
-                          Нет карт, которые можно спросить по текущим квартетам.
-                        </p>
-                      )}
-                    </label>
-
-                    <p className="form-hint">
-                      {currentTurnPlayerID === player?.id
-                        ? 'Сейчас твой ход. Выбери игрока и карту.'
-                        : currentTurnPlayerID
-                          ? `Сейчас ходит ${getPlayerName(currentTurnPlayerID)}.`
-                          : 'Ожидаем состояние игры.'}
-                    </p>
-
-                    <button
-                      className="button"
-                      onClick={requestCard}
-                      disabled={!canRequestCard()}
-                    >
-                      {getRequestButtonText()}
-                    </button>
-                  </div>
-                )}
-
-                <h3>Карты игроков</h3>
-
-                {publicGameState.players.map((gamePlayer) => (
-                  <div
-                    className={
-                      gamePlayer.id === currentTurnPlayerID
-                        ? 'player-row player-row-active'
-                        : 'player-row'
-                    }
-                    key={gamePlayer.id}
-                  >
-                    <span>
-                      {gamePlayer.name}
-                      {player?.id === gamePlayer.id ? ' (ты)' : ''}
-                    </span>
-                    <span>{gamePlayer.card_count} карт</span>
-                  </div>
-                ))}
-              </div>
-            )}
-
             <div className="events-list">
               <h3>Журнал игры</h3>
-
               {gameLog.length === 0 && <p>Пока событий нет.</p>}
 
               {gameLog.map((event, index) => (
