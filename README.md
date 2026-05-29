@@ -35,7 +35,29 @@ internal/
   storage/          Storage layer
 migrations/         Database migrations
 web/                React frontend
+  src/
+    api.ts          HTTP API client
+    session.ts      Browser session/localStorage helpers
+    types.ts        Frontend TypeScript types
+    websocket.ts    WebSocket helpers
+    components/     React UI panels
 ```
+
+## Frontend architecture
+
+The React frontend is organized around a thin top-level coordinator and focused
+feature modules:
+
+- `web/src/App.tsx` coordinates application state and event flow;
+- `web/src/types.ts` contains frontend TypeScript types;
+- `web/src/api.ts` contains HTTP request helpers;
+- `web/src/session.ts` contains `localStorage` session persistence helpers;
+- `web/src/websocket.ts` contains WebSocket connection helpers;
+- `web/src/components/RoomPanel.tsx` renders room creation and join controls;
+- `web/src/components/PlayerPanel.tsx` renders player state and actions;
+- `web/src/components/GamePanel.tsx` renders the game state and turn actions;
+- `web/src/components/PlayerHandPanel.tsx` renders the current player's hand;
+- `web/src/components/GameLogPanel.tsx` renders the game log and debug events.
 
 ## Run locally with PostgreSQL
 
