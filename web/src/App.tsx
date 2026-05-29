@@ -9,11 +9,18 @@ import type {
   PublicGameState,
   RequestableCard,
   Room,
-  RoomDeckResponse,
-  StartGameResponse
 } from './types'
+import {
+  createRoomRequest,
+  joinRoomRequest,
+  loadDeckRequest,
+  loadGameStateRequest,
+  loadPlayerHandRequest,
+  loadRoomRequest,
+  markReadyRequest,
+  startGameRequest,
+} from './api'
 
-const API_URL = 'http://localhost:8080'
 const STORAGE_ROOM_ID_KEY = 'quartet_room_id'
 const STORAGE_PLAYER_KEY = 'quartet_player'
 
@@ -61,15 +68,8 @@ function App() {
     setError('')
 
     try {
-      const response = await fetch(`${API_URL}/rooms`, {
-        method: 'POST',
-      })
+      const createdRoom = await createRoomRequest()
 
-      if (!response.ok) {
-        throw new Error('Failed to create room')
-      }
-
-      const createdRoom = (await response.json()) as Room
       setRoom(createdRoom)
       setPlayer(null)
       setRoomIdInput(createdRoom.id)
@@ -91,13 +91,8 @@ function App() {
     setError('')
 
     try {
-      const response = await fetch(`${API_URL}/rooms/${roomIdInput}`)
+      const loadedRoom = await loadRoomRequest(roomIdInput)
 
-      if (!response.ok) {
-        throw new Error('Failed to load room')
-      }
-
-      const loadedRoom = (await response.json()) as Room
       setRoom(loadedRoom)
       setPlayer(null)
       resetGameState()
@@ -118,24 +113,7 @@ function App() {
     setError('')
 
     try {
-      const response = await fetch(`${API_URL}/rooms/${room.id}/join`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: playerName,
-        }),
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to join room')
-      }
-
-      const data = (await response.json()) as {
-        player: Player
-        room: Room
-      }
+      const data = await joinRoomRequest(room.id, playerName)
 
       setRoom(data.room)
       setPlayer(data.player)
@@ -157,21 +135,8 @@ function App() {
     setError('')
 
     try {
-      const response = await fetch(`${API_URL}/rooms/${room.id}/ready`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          player_id: player.id,
-        }),
-      })
+      const updatedRoom = await markReadyRequest(room.id, player.id)
 
-      if (!response.ok) {
-        throw new Error('Failed to mark player ready')
-      }
-
-      const updatedRoom = (await response.json()) as Room
       setRoom(updatedRoom)
 
       const updatedPlayer = updatedRoom.players.find(
@@ -195,15 +160,7 @@ function App() {
     setError('')
 
     try {
-      const response = await fetch(`${API_URL}/rooms/${room.id}/start`, {
-        method: 'POST',
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to start game')
-      }
-
-      const data = (await response.json()) as StartGameResponse
+      const data = await startGameRequest(room.id)
 
       setRoom(data.room)
       setPublicGameState(data.state)
@@ -366,44 +323,36 @@ function App() {
   }
 
   async function loadDeck(roomID: string) {
-    const response = await fetch(`${API_URL}/rooms/${roomID}/deck`)
+    const data = await loadDeckRequest(roomID)
 
-    if (!response.ok) {
+    if (!data) {
       return
     }
-
-    const data = (await response.json()) as RoomDeckResponse
 
     setDeck(data.deck)
   }
 
   async function loadGameState(roomID: string) {
-    const response = await fetch(`${API_URL}/rooms/${roomID}/state`)
+    const data = await loadGameStateRequest(roomID)
 
-    if (!response.ok) {
+    if (!data) {
       setPublicGameState(null)
       setCurrentTurnPlayerID('')
       addGameLog('Не удалось восстановить состояние игры после reconnect.')
       return
     }
 
-    const data = (await response.json()) as PublicGameState
-
     setPublicGameState(data)
     setCurrentTurnPlayerID(data.current_player_id)
   }
 
   async function loadPlayerHand(roomID: string, playerID: string) {
-    const response = await fetch(
-      `${API_URL}/rooms/${roomID}/hand?player_id=${playerID}`,
-    )
+    const data = await loadPlayerHandRequest(roomID, playerID)
 
-    if (!response.ok) {
+    if (!data) {
       setPlayerHand(null)
       return
     }
-
-    const data = (await response.json()) as PlayerHandPayload
 
     setPlayerHand(data)
   }
@@ -562,15 +511,15 @@ function App() {
       }
 
       try {
-        const response = await fetch(`${API_URL}/rooms/${savedRoomID}`)
+        let loadedRoom: Room
 
-        if (!response.ok) {
+        try {
+          loadedRoom = await loadRoomRequest(savedRoomID)
+        } catch {
           localStorage.removeItem(STORAGE_ROOM_ID_KEY)
           localStorage.removeItem(STORAGE_PLAYER_KEY)
           return
         }
-
-        const loadedRoom = (await response.json()) as Room
 
         setRoom(loadedRoom)
         setRoomIdInput(loadedRoom.id)
