@@ -1,107 +1,42 @@
 import { useEffect, useRef, useState } from 'react'
+import {
+  createRoomRequest,
+  joinRoomRequest,
+  loadDeckRequest,
+  loadGameStateRequest,
+  loadPlayerHandRequest,
+  loadRoomRequest,
+  markReadyRequest,
+  startGameRequest,
+} from './api'
 import './App.css'
-
-type Room = {
-  id: string
-  status: string
-  players: Player[]
-}
-
-type Player = {
-  id: string
-  name: string
-  is_ready: boolean
-  is_connected: boolean
-}
-
-type GameState = {
-  ID: string
-  Deck: Deck
-  Status: string
-  CurrentPlayerID: string
-  Hands: Record<string, Card[]>
-  Completed: Record<string, string[]>
-}
-
-type GameStartedPayload = {
-  room: Room
-  deck: Deck
-}
-
-type Deck = {
-  ID: string
-  Title: string
-  Quartets: Quartet[]
-}
-
-type Quartet = {
-  ID: string
-  Title: string
-  Cards: Card[]
-}
-
-type Card = {
-  ID: string
-  QuartetID: string
-  Title: string
-}
-
-type StartGameResponse = {
-  room: Room
-  state: PublicGameState
-}
-
-type PublicGameState = {
-  game_id: string
-  status: string
-  current_player_id: string
-  players: PublicGamePlayer[]
-  completed: Record<string, string[]>
-}
-
-type PublicGamePlayer = {
-  id: string
-  name: string
-  card_count: number
-}
-
-type PlayerHandPayload = {
-  player_id: string
-  cards: PrivateCard[]
-}
-
-type PrivateCard = {
-  id: string
-  quartet_id: string
-  title: string
-}
-
-type GameFinishedPayload = {
-  game_id: string
-  winners: string[]
-  scores: PlayerScore[]
-}
-
-type PlayerScore = {
-  player_id: string
-  score: number
-}
-
-type RequestableCard = {
-  id: string
-  title: string
-  quartet_id: string
-  quartet_title: string
-}
-
-type RoomDeckResponse = {
-  deck: Deck
-}
-
-
-const API_URL = 'http://localhost:8080'
-const STORAGE_ROOM_ID_KEY = 'quartet_room_id'
-const STORAGE_PLAYER_KEY = 'quartet_player'
+import { GameLogPanel } from './components/GameLogPanel'
+import { GamePanel } from './components/GamePanel'
+import { PlayerHandPanel } from './components/PlayerHandPanel'
+import { PlayerPanel } from './components/PlayerPanel'
+import { RoomPanel } from './components/RoomPanel'
+import {
+  clearPlayer,
+  clearSession,
+  loadPlayer,
+  loadRoomID,
+  savePlayer,
+  saveRoomID,
+} from './session'
+import type {
+  Deck,
+  GameFinishedPayload,
+  GameStartedPayload,
+  Player,
+  PlayerHandPayload,
+  PublicGameState,
+  RequestableCard,
+  Room,
+} from './types'
+import {
+  buildRequestCardMessage,
+  buildRoomWebSocketURL,
+} from './websocket'
 
 function App() {
   const [room, setRoom] = useState<Room | null>(null)
@@ -109,7 +44,6 @@ function App() {
   const [player, setPlayer] = useState<Player | null>(null)
   const [playerName, setPlayerName] = useState<string>('Mihail')
   const [roomIdInput, setRoomIdInput] = useState<string>('')
-  const [game, setGame] = useState<GameState | null>(null)
   const [socketStatus, setSocketStatus] = useState<string>('disconnected')
   const [events, setEvents] = useState<string[]>([])
   const socketRef = useRef<WebSocket | null>(null)
@@ -129,7 +63,6 @@ function App() {
   const [reconnectAttempt, setReconnectAttempt] = useState<number>(0)
 
   function resetGameState() {
-    setGame(null)
     setDeck(null)
     setPublicGameState(null)
     setPlayerHand(null)
@@ -149,22 +82,16 @@ function App() {
     setError('')
 
     try {
-      const response = await fetch(`${API_URL}/rooms`, {
-        method: 'POST',
-      })
+      const createdRoom = await createRoomRequest()
 
-      if (!response.ok) {
-        throw new Error('Failed to create room')
-      }
-
-      const createdRoom = (await response.json()) as Room
       setRoom(createdRoom)
       setPlayer(null)
       setRoomIdInput(createdRoom.id)
       resetGameState()
 
-      localStorage.setItem(STORAGE_ROOM_ID_KEY, createdRoom.id)
-      localStorage.removeItem(STORAGE_PLAYER_KEY)
+      saveRoomID(createdRoom.id)
+      clearPlayer()
+
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error')
     }
@@ -179,19 +106,15 @@ function App() {
     setError('')
 
     try {
-      const response = await fetch(`${API_URL}/rooms/${roomIdInput}`)
+      const loadedRoom = await loadRoomRequest(roomIdInput)
 
-      if (!response.ok) {
-        throw new Error('Failed to load room')
-      }
-
-      const loadedRoom = (await response.json()) as Room
       setRoom(loadedRoom)
       setPlayer(null)
       resetGameState()
 
-      localStorage.setItem(STORAGE_ROOM_ID_KEY, loadedRoom.id)
-      localStorage.removeItem(STORAGE_PLAYER_KEY)
+      saveRoomID(loadedRoom.id)
+      clearPlayer()
+
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error')
     }
@@ -206,31 +129,15 @@ function App() {
     setError('')
 
     try {
-      const response = await fetch(`${API_URL}/rooms/${room.id}/join`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: playerName,
-        }),
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to join room')
-      }
-
-      const data = (await response.json()) as {
-        player: Player
-        room: Room
-      }
+      const data = await joinRoomRequest(room.id, playerName)
 
       setRoom(data.room)
       setPlayer(data.player)
       resetGameState()
 
-      localStorage.setItem(STORAGE_ROOM_ID_KEY, data.room.id)
-      localStorage.setItem(STORAGE_PLAYER_KEY, JSON.stringify(data.player))
+      saveRoomID(data.room.id)
+      savePlayer(data.player)
+
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error')
     }
@@ -245,21 +152,8 @@ function App() {
     setError('')
 
     try {
-      const response = await fetch(`${API_URL}/rooms/${room.id}/ready`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          player_id: player.id,
-        }),
-      })
+      const updatedRoom = await markReadyRequest(room.id, player.id)
 
-      if (!response.ok) {
-        throw new Error('Failed to mark player ready')
-      }
-
-      const updatedRoom = (await response.json()) as Room
       setRoom(updatedRoom)
 
       const updatedPlayer = updatedRoom.players.find(
@@ -283,15 +177,7 @@ function App() {
     setError('')
 
     try {
-      const response = await fetch(`${API_URL}/rooms/${room.id}/start`, {
-        method: 'POST',
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to start game')
-      }
-
-      const data = (await response.json()) as StartGameResponse
+      const data = await startGameRequest(room.id)
 
       setRoom(data.room)
       setPublicGameState(data.state)
@@ -332,13 +218,7 @@ function App() {
     setError('')
 
     socketRef.current.send(
-      JSON.stringify({
-        type: 'request_card',
-        payload: {
-          target_player_id: targetPlayerID,
-          card_id: selectedCardID,
-        },
-      }),
+      JSON.stringify(buildRequestCardMessage(targetPlayerID, selectedCardID)),
     )
   }
 
@@ -454,44 +334,36 @@ function App() {
   }
 
   async function loadDeck(roomID: string) {
-    const response = await fetch(`${API_URL}/rooms/${roomID}/deck`)
+    const data = await loadDeckRequest(roomID)
 
-    if (!response.ok) {
+    if (!data) {
       return
     }
-
-    const data = (await response.json()) as RoomDeckResponse
 
     setDeck(data.deck)
   }
 
   async function loadGameState(roomID: string) {
-    const response = await fetch(`${API_URL}/rooms/${roomID}/state`)
+    const data = await loadGameStateRequest(roomID)
 
-    if (!response.ok) {
+    if (!data) {
       setPublicGameState(null)
       setCurrentTurnPlayerID('')
       addGameLog('Не удалось восстановить состояние игры после reconnect.')
       return
     }
 
-    const data = (await response.json()) as PublicGameState
-
     setPublicGameState(data)
     setCurrentTurnPlayerID(data.current_player_id)
   }
 
   async function loadPlayerHand(roomID: string, playerID: string) {
-    const response = await fetch(
-      `${API_URL}/rooms/${roomID}/hand?player_id=${playerID}`,
-    )
+    const data = await loadPlayerHandRequest(roomID, playerID)
 
-    if (!response.ok) {
+    if (!data) {
       setPlayerHand(null)
       return
     }
-
-    const data = (await response.json()) as PlayerHandPayload
 
     setPlayerHand(data)
   }
@@ -501,7 +373,7 @@ function App() {
 
     let shouldReconnect = true
 
-    const socketUrl = `ws://localhost:8080/rooms/${room.id}/ws?player_id=${player.id}`
+    const socketUrl = buildRoomWebSocketURL(room.id, player.id)
     const socket = new WebSocket(socketUrl)
 
     socketRef.current = socket
@@ -642,23 +514,23 @@ function App() {
 
   useEffect(() => {
     async function restoreSession() {
-      const savedRoomID = localStorage.getItem(STORAGE_ROOM_ID_KEY)
-      const savedPlayerJSON = localStorage.getItem(STORAGE_PLAYER_KEY)
+      const savedRoomID = loadRoomID()
+      const savedPlayer = loadPlayer()
 
       if (!savedRoomID) {
         return
       }
 
       try {
-        const response = await fetch(`${API_URL}/rooms/${savedRoomID}`)
+        let loadedRoom: Room
 
-        if (!response.ok) {
-          localStorage.removeItem(STORAGE_ROOM_ID_KEY)
-          localStorage.removeItem(STORAGE_PLAYER_KEY)
+        try {
+          loadedRoom = await loadRoomRequest(savedRoomID)
+        } catch {
+          clearSession()
+
           return
         }
-
-        const loadedRoom = (await response.json()) as Room
 
         setRoom(loadedRoom)
         setRoomIdInput(loadedRoom.id)
@@ -668,8 +540,7 @@ function App() {
           void loadGameState(loadedRoom.id)
         }
 
-        if (savedPlayerJSON) {
-          const savedPlayer = JSON.parse(savedPlayerJSON) as Player
+        if (savedPlayer) {
           const playerStillInRoom = loadedRoom.players.some(
             (roomPlayer) => roomPlayer.id === savedPlayer.id,
           )
@@ -685,10 +556,10 @@ function App() {
           }
         }
 
-        localStorage.removeItem(STORAGE_PLAYER_KEY)
+        clearSession()
+
       } catch {
-        localStorage.removeItem(STORAGE_ROOM_ID_KEY)
-        localStorage.removeItem(STORAGE_PLAYER_KEY)
+        clearSession()
       }
     }
 
@@ -708,345 +579,56 @@ function App() {
         {error && <div className="error">{error}</div>}
 
         <section className="game-layout">
-          <div className="panel">
-            <h2>Комната</h2>
-            <div className="join-form">
-              <label>
-                ID существующей комнаты
-                <input
-                  className="input"
-                  value={roomIdInput}
-                  onChange={(event) => setRoomIdInput(event.target.value)}
-                  placeholder="Room ID"
-                />
-              </label>
+          <RoomPanel
+            room={room}
+            roomIdInput={roomIdInput}
+            onRoomIdInputChange={setRoomIdInput}
+            onCreateRoom={createRoom}
+            onLoadRoom={loadRoom}
+          />
 
-              <button className="button" onClick={loadRoom}>
-                Открыть комнату
-              </button>
-            </div>
+          <PlayerPanel
+            room={room}
+            player={player}
+            playerName={playerName}
+            onPlayerNameChange={setPlayerName}
+            onJoinRoom={joinRoom}
+            onMarkReady={markReady}
+          />
 
-            <button className="button" onClick={createRoom}>
-              Создать комнату
-            </button>
+          <GamePanel
+            room={room}
+            player={player}
+            publicGameState={publicGameState}
+            currentTurnPlayerID={currentTurnPlayerID}
+            lastMoveMessage={lastMoveMessage}
+            completedQuartetMessage={completedQuartetMessage}
+            gameFinished={gameFinished}
+            socketStatus={socketStatus}
+            targetPlayerID={targetPlayerID}
+            selectedCardID={selectedCardID}
+            availableRequestCards={availableRequestCards}
+            onTargetPlayerIDChange={setTargetPlayerID}
+            onSelectedCardIDChange={setSelectedCardID}
+            onRequestCard={requestCard}
+            onStartGame={startGame}
+            getPlayerName={getPlayerName}
+            canRequestCard={canRequestCard}
+            getRequestButtonText={getRequestButtonText}
+          />
 
-            {room && (
-              <div className="join-form">
-                <label>
-                  Имя игрока
-                  <input
-                    className="input"
-                    value={playerName}
-                    onChange={(event) => setPlayerName(event.target.value)}
-                  />
-                </label>
+          <PlayerHandPanel
+            player={player}
+            playerHand={playerHand}
+            getQuartetTitle={getQuartetTitle}
+          />
 
-                <button className="button" onClick={joinRoom}>
-                  Подключиться
-                </button>
-              </div>
-            )}
-
-            {player && (
-              <div className="room-info">
-                <p>
-                  <strong>Мой игрок:</strong>
-                </p>
-                <code>{player.id}</code>
-
-                <p>
-                  <strong>Имя:</strong> {player.name}
-                </p>
-
-                <p>
-                  <strong>Статус:</strong> {player.is_ready ? 'готов' : 'не готов'}
-                </p>
-
-                <button
-                  className="button"
-                  onClick={markReady}
-                  disabled={player.is_ready || room?.status === 'playing'}
-                >
-                  {player.is_ready ? 'Готов' : 'Готовиться'}
-                </button>
-              </div>
-            )}
-
-            {room && room.players.length > 0 && (
-              <div className="players-list">
-                <h3>Игроки</h3>
-
-                {room.players.map((roomPlayer) => (
-                  <div className="player-row" key={roomPlayer.id}>
-                    <span>{roomPlayer.name}</span>
-                    <span>{roomPlayer.is_ready ? 'готов' : 'не готов'}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-            {room && room.players.length >= 2 && (
-              <button
-                className="button start-button"
-                onClick={startGame}
-                disabled={
-                  room.status === 'playing' ||
-                  !room.players.every((roomPlayer) => roomPlayer.is_ready)
-                }
-              >
-                {room.status === 'playing' ? 'Игра началась' : 'Старт игры'}
-              </button>
-            )}
-          </div>
-
-          <div className="panel">
-            <h2>Игра</h2>
-
-            <div className="socket-status">
-              <strong>WebSocket:</strong> {socketStatus}
-            </div>
-
-            {!publicGameState && room?.status !== 'playing' && (
-              <p>Игра ещё не началась.</p>
-            )}
-
-            {!publicGameState && room?.status === 'playing' && (
-              <p className="form-hint">
-                Игра была начата, но состояние игры не восстановлено. Возможно, backend был перезапущен.
-              </p>
-            )}
-
-            {(game || publicGameState) && (
-              <div className="game-info">
-                <p>
-                  <strong>Статус:</strong>{' '}
-                  {publicGameState ? publicGameState.status : game?.Status}
-                </p>
-
-                <p>
-                  <strong>Сейчас ходит:</strong>
-                </p>
-
-                {(() => {
-                  const turnPlayerID =
-                    currentTurnPlayerID ||
-                    publicGameState?.current_player_id ||
-                    game?.CurrentPlayerID ||
-                    ''
-
-                  if (!turnPlayerID) {
-                    return <p>Пока неизвестно.</p>
-                  }
-
-                  return (
-                    <div>
-                      <p className="turn-player-name">
-                        {getPlayerName(turnPlayerID)}
-                        {player?.id === turnPlayerID ? ' — твой ход' : ''}
-                      </p>
-
-                      <small className="technical-id">{turnPlayerID}</small>
-                    </div>
-                  )
-                })()}
-
-                {lastMoveMessage && (
-                  <div className="move-message">
-                    {lastMoveMessage}
-                  </div>
-                )}
-
-                {completedQuartetMessage && (
-                  <div className="quartet-message">
-                    {completedQuartetMessage}
-                  </div>
-                )}
-
-                {gameFinished && (
-                  <div className="game-finished">
-                    <h3>Игра завершена</h3>
-
-                    <p>
-                      <strong>Победители:</strong>{' '}
-                      {gameFinished.winners.map(getPlayerName).join(', ')}
-                    </p>
-
-                    <h4>Счёт</h4>
-
-                    {gameFinished.scores.map((score) => (
-                      <div className="player-row" key={score.player_id}>
-                        <span>{getPlayerName(score.player_id)}</span>
-                        <span>{score.player_id}</span>
-                        <span>{score.score}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {player && publicGameState && (
-                  <div className="request-form">
-                    <h3>Запрос карты</h3>
-
-                    <label>
-                      У кого спросить
-                      <select
-                        className="input"
-                        value={targetPlayerID}
-                        onChange={(event) => setTargetPlayerID(event.target.value)}
-                        disabled={
-                          !player ||
-                          gameFinished !== null ||
-                          socketStatus !== 'connected' ||
-                          currentTurnPlayerID !== player.id
-                        }
-                      >
-                        <option value="">Выбери игрока</option>
-
-                        {publicGameState.players
-                          .filter((gamePlayer) => gamePlayer.id !== player.id)
-                          .map((gamePlayer) => (
-                            <option key={gamePlayer.id} value={gamePlayer.id}>
-                              {gamePlayer.name}
-                            </option>
-                          ))}
-                      </select>
-                    </label>
-
-                    <label>
-                      Какую карту спросить
-                      <select
-                        className="input"
-                        value={selectedCardID}
-                        onChange={(event) => setSelectedCardID(event.target.value)}
-                        disabled={
-                          !player ||
-                          gameFinished !== null ||
-                          socketStatus !== 'connected' ||
-                          currentTurnPlayerID !== player.id ||
-                          availableRequestCards.length === 0
-                        }
-                      >
-                        <option value="">Выбери карту</option>
-
-                        {availableRequestCards.map((card) => (
-                          <option key={card.id} value={card.id}>
-                            {card.title} — {card.quartet_title}
-                          </option>
-                        ))}
-                      </select>
-                      {availableRequestCards.length === 0 && (
-                        <p className="form-hint">
-                          Нет карт, которые можно спросить по текущим квартетам.
-                        </p>
-                      )}
-                    </label>
-
-                    <p className="form-hint">
-                      {currentTurnPlayerID === player?.id
-                        ? 'Сейчас твой ход. Выбери игрока и карту.'
-                        : currentTurnPlayerID
-                          ? `Сейчас ходит ${getPlayerName(currentTurnPlayerID)}.`
-                          : 'Ожидаем состояние игры.'}
-                    </p>
-
-                    <button
-                      className="button"
-                      onClick={requestCard}
-                      disabled={!canRequestCard()}
-                    >
-                      {getRequestButtonText()}
-                    </button>
-                  </div>
-                )}
-
-                <h3>Карты игроков</h3>
-
-                {publicGameState
-                  ? publicGameState.players.map((gamePlayer) => (
-                    <div
-                      className={
-                        gamePlayer.id === currentTurnPlayerID
-                          ? 'player-row player-row-active'
-                          : 'player-row'
-                      }
-                      key={gamePlayer.id}
-                    >
-                      <span>
-                        {gamePlayer.name}
-                        {player?.id === gamePlayer.id ? ' (ты)' : ''}
-                      </span>
-                      <span>{gamePlayer.card_count} карт</span>
-                    </div>
-                  ))
-                  : Object.entries(game?.Hands ?? {}).map(([playerID, cards]) => (
-                    <div className="player-row" key={playerID}>
-                      <span>{getPlayerName(playerID)}</span>
-                      <span>{cards.length} карт</span>
-                    </div>
-                  ))}
-              </div>
-            )}
-
-            <div className="events-list">
-              <h3>Журнал игры</h3>
-
-              {gameLog.length === 0 && <p>Пока событий нет.</p>}
-
-              {gameLog.map((event, index) => (
-                <div className="log-item" key={`${event}-${index}`}>
-                  {event}
-                </div>
-              ))}
-            </div>
-
-            <div className="debug-events">
-              <button
-                className="secondary-button"
-                type="button"
-                onClick={() => setShowDebugEvents((current) => !current)}
-              >
-                {showDebugEvents ? 'Скрыть debug-события' : 'Показать debug-события'}
-              </button>
-
-              {showDebugEvents && (
-                <div className="debug-events-list">
-                  {events.length === 0 && <p>Debug-событий пока нет.</p>}
-
-                  {events.map((event, index) => (
-                    <pre className="event-item" key={`${event}-${index}`}>
-                      {event}
-                    </pre>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="panel">
-            <h2>Моя рука</h2>
-
-            {!player && <p>Сначала подключись к комнате.</p>}
-
-            {player && !game && !playerHand && <p>Карты появятся после старта игры.</p>}
-
-            {player && (playerHand || game) && (
-              <div className="cards-list">
-                {playerHand
-                  ? playerHand.cards.map((card) => (
-                    <div className="card" key={card.id}>
-                      <strong>{card.title}</strong>
-                      <span>Квартет: {getQuartetTitle(card.quartet_id)}</span>
-                      <small>{card.id}</small>
-                    </div>
-                  ))
-                  : (game?.Hands[player.id] ?? []).map((card) => (
-                    <div className="card" key={card.ID}>
-                      <strong>{card.Title}</strong>
-                      <span>Квартет: {getQuartetTitle(card.QuartetID)}</span>
-                    </div>
-                  ))}
-              </div>
-            )}
-          </div>
+          <GameLogPanel
+            gameLog={gameLog}
+            events={events}
+            showDebugEvents={showDebugEvents}
+            onToggleDebugEvents={() => setShowDebugEvents((current) => !current)}
+          />
         </section>
       </section>
     </main>
