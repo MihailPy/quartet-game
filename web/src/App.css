@@ -388,3 +388,21 @@ code {
   border: 1px solid #c7d2fe;
   font-weight: 600;
 }
+
+.hand-quartet-group {
+  display: grid;
+  gap: 6px;
+  padding: 12px;
+  border: 1px solid #e4e4e7;
+  border-radius: 12px;
+  background: #f8fafc;
+}
+
+.hand-quartet-group h4 {
+  margin: 0;
+}
+
+.hand-quartet-group ul {
+  margin: 0;
+  padding-left: 20px;
+}
