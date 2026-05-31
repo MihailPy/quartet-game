@@ -150,26 +150,6 @@ export function GamePanel({
             </div>
           )}
 
-          {gameFinished && (
-            <div className="game-finished">
-              <h3>Игра завершена</h3>
-
-              <p>
-                <strong>Победители:</strong>{' '}
-                {gameFinished.winners.map(getPlayerName).join(', ')}
-              </p>
-
-              <h4>Счёт</h4>
-
-              {gameFinished.scores.map((score) => (
-                <div className="player-row" key={score.player_id}>
-                  <span>{getPlayerName(score.player_id)}</span>
-                  <span>{score.score}</span>
-                </div>
-              ))}
-            </div>
-          )}
-
           <h3>Игроки</h3>
 
           {publicGameState.players.map((gamePlayer) => (
@@ -207,7 +187,31 @@ export function GamePanel({
             </div>
           )}
 
-          {player && publicGameState && (
+          {gameFinished && (
+            <div className="game-finished-box">
+              <h3>Игра завершена</h3>
+
+              <div className="winners-box">
+                <strong>Победители:</strong>
+                <span>
+                  {gameFinished.winners.map(getPlayerName).join(', ')}
+                </span>
+              </div>
+
+              <div className="scores-list">
+                <strong>Итоговый счёт</strong>
+
+                {gameFinished.scores.map((score) => (
+                  <div className="score-row" key={score.player_id}>
+                    <span>{getPlayerName(score.player_id)}</span>
+                    <strong>{score.score}</strong>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {player && publicGameState && !gameFinished && (
             <div className="request-form">
               <h3>Запрос карты</h3>
 
