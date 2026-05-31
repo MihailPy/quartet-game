@@ -100,3 +100,8 @@ export type ServerMessage = {
   type: string
   payload: unknown
 }
+
+export type TemporaryMessage = {
+  id: string
+  text: string
+}

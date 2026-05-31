@@ -4,6 +4,7 @@ import type {
   PublicGameState,
   Room,
   RequestableCard,
+  TemporaryMessage,
 } from '../types'
 
 type GamePanelProps = {
@@ -11,8 +12,7 @@ type GamePanelProps = {
   player: Player | null
   publicGameState: PublicGameState | null
   currentTurnPlayerID: string
-  lastMoveMessage: string
-  completedQuartetMessage: string
+  temporaryMessages: TemporaryMessage[]
   gameFinished: GameFinishedPayload | null
   socketStatus: string
   targetPlayerID: string
@@ -35,8 +35,7 @@ export function GamePanel({
   player,
   publicGameState,
   currentTurnPlayerID,
-  lastMoveMessage,
-  completedQuartetMessage,
+  temporaryMessages,
   gameFinished,
   socketStatus,
   targetPlayerID,
@@ -134,12 +133,14 @@ export function GamePanel({
             )
           })()}
 
-          {lastMoveMessage && (
-            <div className="move-message">{lastMoveMessage}</div>
-          )}
-
-          {completedQuartetMessage && (
-            <div className="quartet-message">{completedQuartetMessage}</div>
+          {temporaryMessages.length > 0 && (
+            <div className="temporary-messages">
+              {temporaryMessages.map((message) => (
+                <div className="temporary-message" key={message.id}>
+                  {message.text}
+                </div>
+              ))}
+            </div>
           )}
 
           {gameFinished && (

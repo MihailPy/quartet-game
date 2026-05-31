@@ -32,6 +32,7 @@ import type {
   PublicGameState,
   RequestableCard,
   Room,
+  TemporaryMessage,
 } from './types'
 import {
   buildRequestCardMessage,
@@ -53,11 +54,10 @@ function App() {
   const [playerHand, setPlayerHand] = useState<PlayerHandPayload | null>(null)
   const [targetPlayerID, setTargetPlayerID] = useState<string>('')
   const [selectedCardID, setSelectedCardID] = useState<string>('')
-  const [lastMoveMessage, setLastMoveMessage] = useState<string>('')
   const [currentTurnPlayerID, setCurrentTurnPlayerID] = useState<string>('')
-  const [completedQuartetMessage, setCompletedQuartetMessage] = useState<string>('')
   const [gameFinished, setGameFinished] = useState<GameFinishedPayload | null>(null)
   const [gameLog, setGameLog] = useState<string[]>([])
+  const [temporaryMessages, setTemporaryMessages] = useState<TemporaryMessage[]>([])
   const [showDebugEvents, setShowDebugEvents] = useState<boolean>(false)
   const [deck, setDeck] = useState<Deck | null>(null)
   const [reconnectAttempt, setReconnectAttempt] = useState<number>(0)
@@ -68,11 +68,10 @@ function App() {
     setPlayerHand(null)
     setTargetPlayerID('')
     setSelectedCardID('')
-    setLastMoveMessage('')
-    setCompletedQuartetMessage('')
     setCurrentTurnPlayerID('')
     setGameFinished(null)
     setGameLog([])
+    setTemporaryMessages([])
     setEvents([])
     setError('')
     setReconnectAttempt(0)
@@ -282,6 +281,24 @@ function App() {
     setGameLog((currentLog) => [message, ...currentLog.slice(0, 9)])
   }
 
+  function showTemporaryMessage(text: string) {
+    const id = crypto.randomUUID()
+
+    setTemporaryMessages((currentMessages) => [
+      ...currentMessages,
+      {
+        id,
+        text,
+      },
+    ])
+
+    window.setTimeout(() => {
+      setTemporaryMessages((currentMessages) =>
+        currentMessages.filter((message) => message.id !== id),
+      )
+    }, 4000)
+  }
+
   function getRequestCardErrorMessage(code?: string): string {
     switch (code) {
       case 'not_your_turn':
@@ -364,6 +381,7 @@ function App() {
     if (!data) {
       setPublicGameState(null)
       setCurrentTurnPlayerID('')
+      showTemporaryMessage('Не удалось восстановить состояние игры после reconnect.')
       addGameLog('Не удалось восстановить состояние игры после reconnect.')
       return
     }
@@ -453,6 +471,7 @@ function App() {
 
           setRoom(payload.room)
           setDeck(payload.deck)
+          showTemporaryMessage('Игра началась.')
           addGameLog('Игра началась.')
 
           void loadGameState(payload.room.id)
@@ -477,6 +496,7 @@ function App() {
           setCurrentTurnPlayerID(payload.current_player_id)
           setTargetPlayerID('')
           setSelectedCardID('')
+          showTemporaryMessage(`Ходит ${getPlayerName(payload.current_player_id)}.`)
           addGameLog(`Ходит ${getPlayerName(payload.current_player_id)}.`)
         }
 
@@ -495,10 +515,10 @@ function App() {
           setCurrentTurnPlayerID(nextPlayerID)
 
           if (success) {
-            setLastMoveMessage('Карта найдена. Игрок продолжает ход.')
+            showTemporaryMessage('Карта найдена. Игрок продолжает ход.')
             addGameLog('Карта найдена. Игрок продолжает ход.')
           } else {
-            setLastMoveMessage('Карты нет. Ход переходит другому игроку.')
+            showTemporaryMessage(`Карты нет. Следующий ходит ${getPlayerName(nextPlayerID)}.`)
             addGameLog(`Карты нет. Следующий ходит ${getPlayerName(nextPlayerID)}.`)
           }
         }
@@ -512,6 +532,7 @@ function App() {
           const errorMessage = getRequestCardErrorMessage(payload.code)
 
           setError(errorMessage)
+          showTemporaryMessage(errorMessage)
           addGameLog(errorMessage)
         }
 
@@ -524,7 +545,7 @@ function App() {
 
           const messageText = `${playerName} собрал квартет: ${quartetTitles}`
 
-          setCompletedQuartetMessage(messageText)
+          showTemporaryMessage(messageText)
           addGameLog(messageText)
         }
 
@@ -532,10 +553,13 @@ function App() {
           const payload = message.payload as GameFinishedPayload
 
           setGameFinished(payload)
-          setLastMoveMessage('Игра завершена.')
-          addGameLog(
-            `Игра завершена. Победители: ${payload.winners.map(getPlayerName).join(', ')}`,
-          )
+
+          const finishedMessage = `Игра завершена. Победители: ${payload.winners
+            .map(getPlayerName)
+            .join(', ')}`
+
+          showTemporaryMessage(finishedMessage)
+          addGameLog(finishedMessage)
         }
       } catch {
         // ignore invalid websocket message
@@ -654,8 +678,7 @@ function App() {
             player={player}
             publicGameState={publicGameState}
             currentTurnPlayerID={currentTurnPlayerID}
-            lastMoveMessage={lastMoveMessage}
-            completedQuartetMessage={completedQuartetMessage}
+            temporaryMessages={temporaryMessages}
             gameFinished={gameFinished}
             socketStatus={socketStatus}
             targetPlayerID={targetPlayerID}

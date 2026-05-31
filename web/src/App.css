@@ -375,3 +375,16 @@ code {
   margin: 0;
   padding-left: 20px;
 }
+
+.temporary-messages {
+  display: grid;
+  gap: 8px;
+}
+
+.temporary-message {
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #eef2ff;
+  border: 1px solid #c7d2fe;
+  font-weight: 600;
+}
