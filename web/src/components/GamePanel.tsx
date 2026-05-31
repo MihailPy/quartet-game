@@ -22,6 +22,7 @@ type GamePanelProps = {
   onSelectedCardIDChange: (value: string) => void
   onRequestCard: () => void
   onStartGame: () => void
+  isRoomOwner: boolean
   getPlayerName: (playerID: string) => string
   canRequestCard: () => boolean
   getRequestButtonText: () => string
@@ -43,6 +44,7 @@ export function GamePanel({
   onSelectedCardIDChange,
   onRequestCard,
   onStartGame,
+  isRoomOwner,
   getPlayerName,
   canRequestCard,
   getRequestButtonText,
@@ -56,9 +58,21 @@ export function GamePanel({
       </div>
 
       {room && player && room.status !== 'playing' && (
-        <button className="button" onClick={onStartGame}>
-          Старт игры
-        </button>
+        <div className="start-game-block">
+          <button
+            className="button"
+            onClick={onStartGame}
+            disabled={!isRoomOwner}
+          >
+            {isRoomOwner ? 'Старт игры' : 'Стартовать может только владелец комнаты'}
+          </button>
+
+          {!isRoomOwner && (
+            <p className="form-hint">
+              Владелец комнаты — первый подключившийся игрок.
+            </p>
+          )}
+        </div>
       )}
 
       {!publicGameState && room?.status !== 'playing' && (

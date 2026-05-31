@@ -323,4 +323,7 @@ code {
   background: #f4f4f5;
 }
 
-
+.start-game-block {
+  display: grid;
+  gap: 8px;
+}

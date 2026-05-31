@@ -174,14 +174,19 @@ function App() {
       return
     }
 
+    if (!player) {
+      setError('Сначала подключись к комнате.')
+      return
+    }
+
+    if (!isRoomOwner()) {
+      setError('Стартовать игру может только владелец комнаты.')
+      return
+    }
+
     setError('')
 
     try {
-      if (!player) {
-        setError('Сначала подключись к комнате.')
-        return
-      }
-
       const data = await startGameRequest(room.id, player.id)
 
       setRoom(data.room)
@@ -371,6 +376,10 @@ function App() {
     }
 
     setPlayerHand(data)
+  }
+
+  function isRoomOwner(): boolean {
+    return Boolean(room && player && room.owner_player_id === player.id)
   }
 
   useEffect(() => {
@@ -617,6 +626,7 @@ function App() {
             onSelectedCardIDChange={setSelectedCardID}
             onRequestCard={requestCard}
             onStartGame={startGame}
+            isRoomOwner={isRoomOwner()}
             getPlayerName={getPlayerName}
             canRequestCard={canRequestCard}
             getRequestButtonText={getRequestButtonText}

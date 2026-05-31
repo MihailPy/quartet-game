@@ -1,6 +1,7 @@
 export type Room = {
   id: string
   status: string
+  owner_player_id: string
   players: Player[]
 }
 
