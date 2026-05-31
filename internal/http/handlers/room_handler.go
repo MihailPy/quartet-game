@@ -221,6 +221,18 @@ func (h *RoomHandler) StartRoom(w http.ResponseWriter, r *http.Request, roomID r
 		return
 	}
 
+	if len(currentRoom.Players) < 2 {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	for _, player := range currentRoom.Players {
+		if !player.IsReady {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+	}
+
 	startedRoom, err := h.manager.StartRoom(r.Context(), roomID)
 	if err != nil {
 		switch err {

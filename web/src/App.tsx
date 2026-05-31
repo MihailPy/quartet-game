@@ -184,6 +184,11 @@ function App() {
       return
     }
 
+    if (!canStartGame()) {
+      setError('Для старта нужно минимум два игрока, и все должны быть готовы.')
+      return
+    }
+
     setError('')
 
     try {
@@ -380,6 +385,22 @@ function App() {
 
   function isRoomOwner(): boolean {
     return Boolean(room && player && room.owner_player_id === player.id)
+  }
+
+  function canStartGame(): boolean {
+    if (!room || !player) {
+      return false
+    }
+
+    if (!isRoomOwner()) {
+      return false
+    }
+
+    if (room.players.length < 2) {
+      return false
+    }
+
+    return room.players.every((roomPlayer) => roomPlayer.is_ready)
   }
 
   useEffect(() => {
@@ -628,6 +649,7 @@ function App() {
             onRequestCard={requestCard}
             onStartGame={startGame}
             isRoomOwner={isRoomOwner()}
+            canStartGame={canStartGame()}
             getPlayerName={getPlayerName}
             canRequestCard={canRequestCard}
             getRequestButtonText={getRequestButtonText}

@@ -3,6 +3,7 @@ package gameapp
 import (
 	"context"
 	"errors"
+	"sync"
 
 	"github.com/MihailPy/quartet-game/internal/game"
 	"github.com/MihailPy/quartet-game/internal/room"
@@ -23,6 +24,7 @@ type DeckService interface {
 }
 
 type Service struct {
+	mu             sync.Mutex
 	deckService    DeckService
 	gameRepository GameRepository
 	deckID         game.DeckID
@@ -85,18 +87,26 @@ func (s *Service) StartGame(ctx context.Context, currentRoom room.Room) (game.Ga
 		}
 	}
 
+	s.mu.Lock()
 	s.games[currentRoom.ID] = state
+	s.mu.Unlock()
 
 	return state, nil
 }
 
 func (s *Service) GetGame(roomID room.RoomID) (game.GameState, bool) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
 	state, ok := s.games[roomID]
 	return state, ok
 }
 
 func (s *Service) FinishGame(ctx context.Context, roomID room.RoomID) (game.GameResult, error) {
+	s.mu.Lock()
 	state, ok := s.games[roomID]
+	s.mu.Unlock()
+
 	if !ok {
 		return game.GameResult{}, ErrCannotStartGame
 	}
@@ -115,7 +125,9 @@ func (s *Service) FinishGame(ctx context.Context, roomID room.RoomID) (game.Game
 		}
 	}
 
+	s.mu.Lock()
 	s.games[roomID] = state
+	s.mu.Unlock()
 
 	return result, nil
 }
@@ -127,7 +139,10 @@ func (s *Service) RequestCard(
 	targetPlayerID room.PlayerID,
 	cardID game.CardID,
 ) (game.RequestCardResult, game.GameState, error) {
+	s.mu.Lock()
 	state, ok := s.games[roomID]
+	s.mu.Unlock()
+
 	if !ok {
 		return game.RequestCardResult{}, game.GameState{}, ErrCannotStartGame
 	}
@@ -158,7 +173,9 @@ func (s *Service) RequestCard(
 		}
 	}
 
+	s.mu.Lock()
 	s.games[roomID] = state
+	s.mu.Unlock()
 
 	if err := s.gameRepository.UpdateGameState(ctx, state); err != nil {
 		return game.RequestCardResult{}, game.GameState{}, err
@@ -168,7 +185,10 @@ func (s *Service) RequestCard(
 }
 
 func (s *Service) GetGameState(ctx context.Context, roomID room.RoomID) (game.GameState, bool) {
+	s.mu.Lock()
 	state, ok := s.games[roomID]
+	s.mu.Unlock()
+
 	if ok {
 		return state, true
 	}
@@ -178,7 +198,9 @@ func (s *Service) GetGameState(ctx context.Context, roomID room.RoomID) (game.Ga
 		return game.GameState{}, false
 	}
 
+	s.mu.Lock()
 	s.games[roomID] = state
+	s.mu.Unlock()
 
 	return state, true
 }

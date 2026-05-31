@@ -23,6 +23,7 @@ type GamePanelProps = {
   onRequestCard: () => void
   onStartGame: () => void
   isRoomOwner: boolean
+  canStartGame: boolean
   getPlayerName: (playerID: string) => string
   canRequestCard: () => boolean
   getRequestButtonText: () => string
@@ -45,6 +46,7 @@ export function GamePanel({
   onRequestCard,
   onStartGame,
   isRoomOwner,
+  canStartGame,
   getPlayerName,
   canRequestCard,
   getRequestButtonText,
@@ -62,16 +64,30 @@ export function GamePanel({
           <button
             className="button"
             onClick={onStartGame}
-            disabled={!isRoomOwner}
+            disabled={!canStartGame}
           >
-            {isRoomOwner ? 'Старт игры' : 'Стартовать может только владелец комнаты'}
+            {canStartGame ? 'Старт игры' : 'Старт игры недоступен'}
           </button>
 
           {!isRoomOwner && (
             <p className="form-hint">
-              Владелец комнаты — первый подключившийся игрок.
+              Стартовать может только владелец комнаты.
             </p>
           )}
+
+          {isRoomOwner && room.players.length < 2 && (
+            <p className="form-hint">
+              Для старта нужно минимум два игрока.
+            </p>
+          )}
+
+          {isRoomOwner &&
+            room.players.length >= 2 &&
+            !room.players.every((roomPlayer) => roomPlayer.is_ready) && (
+              <p className="form-hint">
+                Для старта все игроки должны быть готовы.
+              </p>
+            )}
         </div>
       )}
 
