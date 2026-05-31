@@ -69,6 +69,10 @@ type CardState struct {
 	Title     string `json:"title"`
 }
 
+type StartRoomRequest struct {
+	PlayerID room.PlayerID `json:"player_id"`
+}
+
 func NewRoomHandler(
 	manager *room.Manager,
 	gameStarter GameStarter,
@@ -193,6 +197,40 @@ func (h *RoomHandler) StartRoom(w http.ResponseWriter, r *http.Request, roomID r
 	if r.Method != http.MethodPost {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
+	}
+
+	var request StartRoomRequest
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	if request.PlayerID == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	currentRoom, err := h.manager.GetRoom(r.Context(), roomID)
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	if currentRoom.OwnerPlayerID != request.PlayerID {
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+
+	if len(currentRoom.Players) < 2 {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	for _, player := range currentRoom.Players {
+		if !player.IsReady {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
 	}
 
 	startedRoom, err := h.manager.StartRoom(r.Context(), roomID)

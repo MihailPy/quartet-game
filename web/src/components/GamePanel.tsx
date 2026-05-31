@@ -4,6 +4,7 @@ import type {
   PublicGameState,
   Room,
   RequestableCard,
+  TemporaryMessage,
 } from '../types'
 
 type GamePanelProps = {
@@ -11,20 +12,28 @@ type GamePanelProps = {
   player: Player | null
   publicGameState: PublicGameState | null
   currentTurnPlayerID: string
-  lastMoveMessage: string
-  completedQuartetMessage: string
+  temporaryMessages: TemporaryMessage[]
   gameFinished: GameFinishedPayload | null
   socketStatus: string
   targetPlayerID: string
   selectedCardID: string
   availableRequestCards: RequestableCard[]
+  availableRequestCardsByQuartet: Record<string, RequestableCard[]>
   onTargetPlayerIDChange: (value: string) => void
   onSelectedCardIDChange: (value: string) => void
   onRequestCard: () => void
   onStartGame: () => void
+  isRoomOwner: boolean
+  canStartGame: boolean
   getPlayerName: (playerID: string) => string
   canRequestCard: () => boolean
   getRequestButtonText: () => string
+  completedQuartets: {
+    playerID: string
+    playerName: string
+    quartetID: string
+    quartetTitle: string
+  }[]
 }
 
 export function GamePanel({
@@ -32,20 +41,23 @@ export function GamePanel({
   player,
   publicGameState,
   currentTurnPlayerID,
-  lastMoveMessage,
-  completedQuartetMessage,
+  temporaryMessages,
   gameFinished,
   socketStatus,
   targetPlayerID,
   selectedCardID,
   availableRequestCards,
+  availableRequestCardsByQuartet,
   onTargetPlayerIDChange,
   onSelectedCardIDChange,
   onRequestCard,
   onStartGame,
+  isRoomOwner,
+  canStartGame,
   getPlayerName,
   canRequestCard,
   getRequestButtonText,
+  completedQuartets
 }: GamePanelProps) {
   return (
     <div className="panel">
@@ -56,9 +68,35 @@ export function GamePanel({
       </div>
 
       {room && player && room.status !== 'playing' && (
-        <button className="button" onClick={onStartGame}>
-          Старт игры
-        </button>
+        <div className="start-game-block">
+          <button
+            className="button"
+            onClick={onStartGame}
+            disabled={!canStartGame}
+          >
+            {canStartGame ? 'Старт игры' : 'Старт игры недоступен'}
+          </button>
+
+          {!isRoomOwner && (
+            <p className="form-hint">
+              Стартовать может только владелец комнаты.
+            </p>
+          )}
+
+          {isRoomOwner && room.players.length < 2 && (
+            <p className="form-hint">
+              Для старта нужно минимум два игрока.
+            </p>
+          )}
+
+          {isRoomOwner &&
+            room.players.length >= 2 &&
+            !room.players.every((roomPlayer) => roomPlayer.is_ready) && (
+              <p className="form-hint">
+                Для старта все игроки должны быть готовы.
+              </p>
+            )}
+        </div>
       )}
 
       {!publicGameState && room?.status !== 'playing' && (
@@ -102,29 +140,11 @@ export function GamePanel({
             )
           })()}
 
-          {lastMoveMessage && (
-            <div className="move-message">{lastMoveMessage}</div>
-          )}
-
-          {completedQuartetMessage && (
-            <div className="quartet-message">{completedQuartetMessage}</div>
-          )}
-
-          {gameFinished && (
-            <div className="game-finished">
-              <h3>Игра завершена</h3>
-
-              <p>
-                <strong>Победители:</strong>{' '}
-                {gameFinished.winners.map(getPlayerName).join(', ')}
-              </p>
-
-              <h4>Счёт</h4>
-
-              {gameFinished.scores.map((score) => (
-                <div className="player-row" key={score.player_id}>
-                  <span>{getPlayerName(score.player_id)}</span>
-                  <span>{score.score}</span>
+          {temporaryMessages.length > 0 && (
+            <div className="temporary-messages">
+              {temporaryMessages.map((message) => (
+                <div className="temporary-message" key={message.id}>
+                  {message.text}
                 </div>
               ))}
             </div>
@@ -149,7 +169,49 @@ export function GamePanel({
             </div>
           ))}
 
-          {player && publicGameState && (
+          {completedQuartets.length > 0 && (
+            <div className="completed-quartets-box">
+              <h3>Собранные квартеты</h3>
+
+              <div className="completed-quartets-list">
+                {completedQuartets.map((quartet) => (
+                  <div
+                    className="completed-quartet-item"
+                    key={`${quartet.playerID}-${quartet.quartetID}`}
+                  >
+                    <strong>{quartet.quartetTitle}</strong>
+                    <span>Собрал: {quartet.playerName}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {gameFinished && (
+            <div className="game-finished-box">
+              <h3>Игра завершена</h3>
+
+              <div className="winners-box">
+                <strong>Победители:</strong>
+                <span>
+                  {gameFinished.winners.map(getPlayerName).join(', ')}
+                </span>
+              </div>
+
+              <div className="scores-list">
+                <strong>Итоговый счёт</strong>
+
+                {gameFinished.scores.map((score) => (
+                  <div className="score-row" key={score.player_id}>
+                    <span>{getPlayerName(score.player_id)}</span>
+                    <strong>{score.score}</strong>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {player && publicGameState && !gameFinished && (
             <div className="request-form">
               <h3>Запрос карты</h3>
 
@@ -185,25 +247,33 @@ export function GamePanel({
                 <select
                   className="input"
                   value={selectedCardID}
-                  onChange={(event) =>
-                    onSelectedCardIDChange(event.target.value)
-                  }
-                  disabled={
-                    !player ||
-                    gameFinished !== null ||
-                    socketStatus !== 'connected' ||
-                    currentTurnPlayerID !== player.id ||
-                    availableRequestCards.length === 0
-                  }
+                  onChange={(event) => onSelectedCardIDChange(event.target.value)}
                 >
                   <option value="">Выбери карту</option>
 
-                  {availableRequestCards.map((card) => (
-                    <option key={card.id} value={card.id}>
-                      {card.title} — {card.quartet_title}
-                    </option>
-                  ))}
+                  {Object.entries(availableRequestCardsByQuartet).map(
+                    ([quartetID, cards]) => (
+                      <optgroup key={quartetID} label={cards[0]?.quartet_title ?? quartetID}>
+                        {cards.map((card) => (
+                          <option key={card.id} value={card.id}>
+                            {card.title}
+                          </option>
+                        ))}
+                      </optgroup>
+                    ),
+                  )}
                 </select>
+                {availableRequestCards.length === 0 && (
+                  <p className="form-hint">
+                    Нет доступных карт для запроса. Нужно иметь хотя бы одну карту из квартета.
+                  </p>
+                )}
+
+                {availableRequestCards.length > 0 && (
+                  <p className="form-hint">
+                    Можно просить только карты из квартетов, которые уже есть у тебя в руке.
+                  </p>
+                )}
               </label>
 
               {availableRequestCards.length === 0 && (

@@ -323,4 +323,169 @@ code {
   background: #f4f4f5;
 }
 
+.start-game-block {
+  display: grid;
+  gap: 8px;
+}
 
+.ready-badge,
+.not-ready-badge {
+  border-radius: 999px;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.ready-badge {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.not-ready-badge {
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.waiting-box {
+  display: grid;
+  gap: 6px;
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid #e4e4e7;
+  border-radius: 12px;
+  background: #f8fafc;
+}
+
+.waiting-box p {
+  margin: 0;
+}
+
+.current-player-warning {
+  margin: 0;
+  font-weight: 700;
+  color: #991b1b;
+}
+
+.not-ready-list {
+  display: grid;
+  gap: 4px;
+}
+
+.not-ready-list ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.temporary-messages {
+  display: grid;
+  gap: 8px;
+}
+
+.temporary-message {
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #eef2ff;
+  border: 1px solid #c7d2fe;
+  font-weight: 600;
+}
+
+.hand-quartet-group {
+  display: grid;
+  gap: 6px;
+  padding: 12px;
+  border: 1px solid #e4e4e7;
+  border-radius: 12px;
+  background: #f8fafc;
+}
+
+.hand-quartet-group h4 {
+  margin: 0;
+}
+
+.hand-quartet-group ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.hand-quartet-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.quartet-progress {
+  border-radius: 999px;
+  padding: 4px 8px;
+  background: #eef2ff;
+  border: 1px solid #c7d2fe;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.quartet-complete-hint {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: #166534;
+}
+
+.completed-quartets-box {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid #bbf7d0;
+  border-radius: 12px;
+  background: #f0fdf4;
+}
+
+.completed-quartets-box h3 {
+  margin: 0;
+}
+
+.completed-quartets-list {
+  display: grid;
+  gap: 8px;
+}
+
+.completed-quartet-item {
+  display: grid;
+  gap: 4px;
+  padding: 10px;
+  border-radius: 10px;
+  background: #ffffff;
+  border: 1px solid #dcfce7;
+}
+
+.game-finished-box {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid #fde68a;
+  border-radius: 12px;
+  background: #fffbeb;
+}
+
+.game-finished-box h3 {
+  margin: 0;
+}
+
+.winners-box {
+  display: grid;
+  gap: 4px;
+}
+
+.scores-list {
+  display: grid;
+  gap: 8px;
+}
+
+.score-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: #ffffff;
+  border: 1px solid #fef3c7;
+}

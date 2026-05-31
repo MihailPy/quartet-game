@@ -79,9 +79,18 @@ export async function markReadyRequest(
   return (await response.json()) as Room
 }
 
-export async function startGameRequest(roomID: string): Promise<StartGameResponse> {
+export async function startGameRequest(
+  roomID: string,
+  playerID: string,
+): Promise<StartGameResponse> {
   const response = await fetch(`${API_URL}/rooms/${roomID}/start`, {
     method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      player_id: playerID,
+    }),
   })
 
   if (!response.ok) {

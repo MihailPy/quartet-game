@@ -20,9 +20,13 @@ func NewRoomRepository(db *sql.DB) *RoomRepository {
 
 func (r *RoomRepository) SaveRoom(ctx context.Context, currentRoom room.Room) error {
 	_, err := r.db.ExecContext(ctx, `
-		INSERT INTO rooms (id, status)
-		VALUES ($1, $2)
-	`, string(currentRoom.ID), string(currentRoom.Status))
+		INSERT INTO rooms (id, status, owner_player_id)
+		VALUES ($1, $2, $3)
+		ON CONFLICT (id) DO UPDATE
+		SET
+			status = EXCLUDED.status,
+			owner_player_id = EXCLUDED.owner_player_id
+	`, string(currentRoom.ID), string(currentRoom.Status), string(currentRoom.OwnerPlayerID))
 
 	return err
 }
@@ -88,14 +92,16 @@ func (r *RoomRepository) UpdateRoomPlayerConnected(
 
 func (r *RoomRepository) FindRoomByID(ctx context.Context, roomID room.RoomID) (room.Room, error) {
 	var currentRoom room.Room
+	var ownerPlayerID string
 
 	err := r.db.QueryRowContext(ctx, `
-		SELECT id, status
-		FROM rooms
+		SELECT id, status, owner_player_id 
+		FROM rooms 
 		WHERE id = $1
 	`, string(roomID)).Scan(
 		&currentRoom.ID,
 		&currentRoom.Status,
+		&ownerPlayerID,
 	)
 
 	if err != nil {
@@ -105,6 +111,8 @@ func (r *RoomRepository) FindRoomByID(ctx context.Context, roomID room.RoomID) (
 
 		return room.Room{}, err
 	}
+
+	currentRoom.OwnerPlayerID = room.PlayerID(ownerPlayerID)
 
 	players, err := r.FindRoomPlayers(ctx, roomID)
 	if err != nil {
