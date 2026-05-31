@@ -18,6 +18,7 @@ type GamePanelProps = {
   targetPlayerID: string
   selectedCardID: string
   availableRequestCards: RequestableCard[]
+  availableRequestCardsByQuartet: Record<string, RequestableCard[]>
   onTargetPlayerIDChange: (value: string) => void
   onSelectedCardIDChange: (value: string) => void
   onRequestCard: () => void
@@ -41,6 +42,7 @@ export function GamePanel({
   targetPlayerID,
   selectedCardID,
   availableRequestCards,
+  availableRequestCardsByQuartet,
   onTargetPlayerIDChange,
   onSelectedCardIDChange,
   onRequestCard,
@@ -215,25 +217,33 @@ export function GamePanel({
                 <select
                   className="input"
                   value={selectedCardID}
-                  onChange={(event) =>
-                    onSelectedCardIDChange(event.target.value)
-                  }
-                  disabled={
-                    !player ||
-                    gameFinished !== null ||
-                    socketStatus !== 'connected' ||
-                    currentTurnPlayerID !== player.id ||
-                    availableRequestCards.length === 0
-                  }
+                  onChange={(event) => onSelectedCardIDChange(event.target.value)}
                 >
                   <option value="">Выбери карту</option>
 
-                  {availableRequestCards.map((card) => (
-                    <option key={card.id} value={card.id}>
-                      {card.title} — {card.quartet_title}
-                    </option>
-                  ))}
+                  {Object.entries(availableRequestCardsByQuartet).map(
+                    ([quartetID, cards]) => (
+                      <optgroup key={quartetID} label={cards[0]?.quartet_title ?? quartetID}>
+                        {cards.map((card) => (
+                          <option key={card.id} value={card.id}>
+                            {card.title}
+                          </option>
+                        ))}
+                      </optgroup>
+                    ),
+                  )}
                 </select>
+                {availableRequestCards.length === 0 && (
+                  <p className="form-hint">
+                    Нет доступных карт для запроса. Нужно иметь хотя бы одну карту из квартета.
+                  </p>
+                )}
+
+                {availableRequestCards.length > 0 && (
+                  <p className="form-hint">
+                    Можно просить только карты из квартетов, которые уже есть у тебя в руке.
+                  </p>
+                )}
               </label>
 
               {availableRequestCards.length === 0 && (

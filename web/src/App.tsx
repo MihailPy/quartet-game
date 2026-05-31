@@ -403,6 +403,23 @@ function App() {
     return room.players.every((roomPlayer) => roomPlayer.is_ready)
   }
 
+  function getAvailableRequestCardsByQuartet() {
+    return availableRequestCards.reduce<Record<string, RequestableCard[]>>(
+      (groups, card) => {
+        const key = card.quartet_id
+
+        if (!groups[key]) {
+          groups[key] = []
+        }
+
+        groups[key].push(card)
+
+        return groups
+      },
+      {},
+    )
+  }
+
   useEffect(() => {
     if (!room || !player) return
 
@@ -644,6 +661,7 @@ function App() {
             targetPlayerID={targetPlayerID}
             selectedCardID={selectedCardID}
             availableRequestCards={availableRequestCards}
+            availableRequestCardsByQuartet={getAvailableRequestCardsByQuartet()}
             onTargetPlayerIDChange={setTargetPlayerID}
             onSelectedCardIDChange={setSelectedCardID}
             onRequestCard={requestCard}
