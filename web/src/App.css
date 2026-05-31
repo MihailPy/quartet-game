@@ -327,3 +327,35 @@ code {
   display: grid;
   gap: 8px;
 }
+
+.ready-badge,
+.not-ready-badge {
+  border-radius: 999px;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.ready-badge {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.not-ready-badge {
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.waiting-box {
+  display: grid;
+  gap: 6px;
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid #e4e4e7;
+  border-radius: 12px;
+  background: #f8fafc;
+}
+
+.waiting-box p {
+  margin: 0;
+}

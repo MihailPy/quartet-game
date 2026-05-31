@@ -595,6 +595,7 @@ function App() {
         <section className="game-layout">
           <RoomPanel
             room={room}
+            currentPlayerID={player?.id ?? null}
             roomIdInput={roomIdInput}
             onRoomIdInputChange={setRoomIdInput}
             onCreateRoom={createRoom}

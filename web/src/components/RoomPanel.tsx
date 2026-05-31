@@ -2,6 +2,7 @@ import type { Room } from '../types'
 
 type RoomPanelProps = {
   room: Room | null
+  currentPlayerID: string | null
   roomIdInput: string
   onRoomIdInputChange: (value: string) => void
   onCreateRoom: () => void
@@ -10,11 +11,20 @@ type RoomPanelProps = {
 
 export function RoomPanel({
   room,
+  currentPlayerID,
   roomIdInput,
   onRoomIdInputChange,
   onCreateRoom,
   onLoadRoom,
 }: RoomPanelProps) {
+  const readyPlayersCount =
+    room?.players.filter((roomPlayer) => roomPlayer.is_ready).length ?? 0
+
+  const totalPlayersCount = room?.players.length ?? 0
+
+  const allPlayersReady =
+    totalPlayersCount > 0 && readyPlayersCount === totalPlayersCount
+
   return (
     <div className="panel">
       <h2>Комната</h2>
@@ -52,10 +62,45 @@ export function RoomPanel({
 
           {room.players.map((roomPlayer) => (
             <div className="player-row" key={roomPlayer.id}>
-              <span>{roomPlayer.name}</span>
-              <span>{roomPlayer.is_ready ? 'готов' : 'не готов'}</span>
+              <span>
+                {roomPlayer.name}
+                {roomPlayer.id === currentPlayerID ? ' (ты)' : ''}
+                {roomPlayer.id === room.owner_player_id ? ' 👑' : ''}
+              </span>
+
+              <span className={roomPlayer.is_ready ? 'ready-badge' : 'not-ready-badge'}>
+                {roomPlayer.is_ready ? 'готов' : 'не готов'}
+              </span>
             </div>
           ))}
+
+          {room.status !== 'playing' && (
+            <div className="waiting-box">
+              <strong>Ожидание старта</strong>
+
+              <p>
+                Готовы {readyPlayersCount} из {totalPlayersCount} игроков.
+              </p>
+
+              {totalPlayersCount < 2 && (
+                <p className="form-hint">
+                  Для игры нужно минимум два игрока.
+                </p>
+              )}
+
+              {totalPlayersCount >= 2 && !allPlayersReady && (
+                <p className="form-hint">
+                  Все игроки должны нажать “Готовиться”.
+                </p>
+              )}
+
+              {totalPlayersCount >= 2 && allPlayersReady && (
+                <p className="form-hint">
+                  Все готовы. Владелец комнаты может начать игру.
+                </p>
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>
