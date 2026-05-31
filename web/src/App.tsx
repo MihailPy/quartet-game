@@ -506,20 +506,41 @@ function App() {
         }
 
         if (message.type === 'card_request_result') {
-          const success = message.payload.success as boolean
-          const nextPlayerID = message.payload.next_player_id as string
+          const payload = message.payload as {
+            success: boolean
+            next_player_id: string
+            requested_card?: {
+              title?: string
+              Title?: string
+            }
+            requested_card_title?: string
+            card_title?: string
+          }
+
+          const cardTitle =
+            payload.requested_card?.title ??
+            payload.requested_card?.Title ??
+            payload.requested_card_title ??
+            payload.card_title ??
+            'запрошенную карту'
+
+          const nextPlayerName = getPlayerName(payload.next_player_id)
 
           setError('')
           setTargetPlayerID('')
           setSelectedCardID('')
-          setCurrentTurnPlayerID(nextPlayerID)
+          setCurrentTurnPlayerID(payload.next_player_id)
 
-          if (success) {
-            showTemporaryMessage('Карта найдена. Игрок продолжает ход.')
-            addGameLog('Карта найдена. Игрок продолжает ход.')
+          if (payload.success) {
+            const resultMessage = `Карта “${cardTitle}” найдена. Игрок продолжает ход.`
+
+            showTemporaryMessage(resultMessage)
+            addGameLog(resultMessage)
           } else {
-            showTemporaryMessage(`Карты нет. Следующий ходит ${getPlayerName(nextPlayerID)}.`)
-            addGameLog(`Карты нет. Следующий ходит ${getPlayerName(nextPlayerID)}.`)
+            const resultMessage = `Карты “${cardTitle}” нет. Следующий ходит ${nextPlayerName}.`
+
+            showTemporaryMessage(resultMessage)
+            addGameLog(resultMessage)
           }
         }
 
