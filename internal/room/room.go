@@ -17,7 +17,8 @@ type Player struct {
 }
 
 type Room struct {
-	ID      RoomID     `json:"id"`
-	Status  RoomStatus `json:"status"`
-	Players []Player   `json:"players"`
+	ID            RoomID     `json:"id"`
+	Status        RoomStatus `json:"status"`
+	Players       []Player   `json:"players"`
+	OwnerPlayerID PlayerID   `json:"owner_player_id"`
 }

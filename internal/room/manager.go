@@ -154,13 +154,26 @@ func (m *Manager) JoinRoom(ctx context.Context, roomID RoomID, playerName string
 		IsConnected: false,
 	}
 
+	isFirstPlayer := len(currentRoom.Players) == 0
+
+	if isFirstPlayer {
+		currentRoom.OwnerPlayerID = player.ID
+	}
+
 	if m.repository != nil {
+		if isFirstPlayer {
+			if err := m.repository.SaveRoom(ctx, currentRoom); err != nil {
+				return Player{}, Room{}, err
+			}
+		}
 		if err := m.repository.SaveRoomPlayer(ctx, roomID, player); err != nil {
 			return Player{}, Room{}, err
 		}
+
 	}
 
 	currentRoom.Players = append(currentRoom.Players, player)
+
 	m.rooms[roomID] = currentRoom
 
 	return player, currentRoom, nil
