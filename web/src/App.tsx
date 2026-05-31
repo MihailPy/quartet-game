@@ -177,7 +177,12 @@ function App() {
     setError('')
 
     try {
-      const data = await startGameRequest(room.id)
+      if (!player) {
+        setError('Сначала подключись к комнате.')
+        return
+      }
+
+      const data = await startGameRequest(room.id, player.id)
 
       setRoom(data.room)
       setPublicGameState(data.state)
