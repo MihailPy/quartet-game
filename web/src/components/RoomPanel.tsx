@@ -25,6 +25,13 @@ export function RoomPanel({
   const allPlayersReady =
     totalPlayersCount > 0 && readyPlayersCount === totalPlayersCount
 
+  const currentPlayer = room?.players.find(
+    (roomPlayer) => roomPlayer.id === currentPlayerID,
+  )
+
+  const notReadyPlayers =
+    room?.players.filter((roomPlayer) => !roomPlayer.is_ready) ?? []
+
   return (
     <div className="panel">
       <h2>Комната</h2>
@@ -81,6 +88,30 @@ export function RoomPanel({
               <p>
                 Готовы {readyPlayersCount} из {totalPlayersCount} игроков.
               </p>
+
+              {currentPlayer && !currentPlayer.is_ready && (
+                <p className="current-player-warning">
+                  Ты ещё не готов. Нажми “Готовиться”.
+                </p>
+              )}
+
+              {currentPlayer?.is_ready && !allPlayersReady && (
+                <p className="form-hint">
+                  Ты готов. Осталось дождаться остальных игроков.
+                </p>
+              )}
+
+              {notReadyPlayers.length > 0 && (
+                <div className="not-ready-list">
+                  <strong>Ещё не готовы:</strong>
+
+                  <ul>
+                    {notReadyPlayers.map((roomPlayer) => (
+                      <li key={roomPlayer.id}>{roomPlayer.name}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
 
               {totalPlayersCount < 2 && (
                 <p className="form-hint">
