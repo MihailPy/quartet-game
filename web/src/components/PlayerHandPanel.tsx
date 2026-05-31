@@ -25,6 +25,10 @@ export function PlayerHandPanel({
       {},
     ) ?? {}
 
+  function getQuartetProgress(cardsCount: number): string {
+    return `${cardsCount} / 4`
+  }
+
   return (
     <div className="panel">
       <h2>Моя рука</h2>
@@ -37,7 +41,19 @@ export function PlayerHandPanel({
         <div className="hand-quartets-list">
           {Object.entries(cardsByQuartet).map(([quartetID, cards]) => (
             <div className="hand-quartet-group" key={quartetID}>
-              <h3>{getQuartetTitle(quartetID)}</h3>
+              <div className="hand-quartet-header">
+                <h3>{getQuartetTitle(quartetID)}</h3>
+
+                <span className="quartet-progress">
+                  {getQuartetProgress(cards.length)}
+                </span>
+              </div>
+
+              {cards.length === 4 && (
+                <p className="quartet-complete-hint">
+                  Квартет собран
+                </p>
+              )}
 
               <div className="cards-list">
                 {cards.map((card) => (
