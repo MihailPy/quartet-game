@@ -438,6 +438,22 @@ function App() {
     )
   }
 
+  function getCompletedQuartets() {
+    if (!publicGameState) {
+      return []
+    }
+
+    return Object.entries(publicGameState.completed).flatMap(
+      ([playerID, quartetIDs]) =>
+        quartetIDs.map((quartetID) => ({
+          playerID,
+          playerName: getPlayerName(playerID),
+          quartetID,
+          quartetTitle: getQuartetTitle(quartetID),
+        })),
+    )
+  }
+
   useEffect(() => {
     if (!room || !player) return
 
@@ -715,6 +731,7 @@ function App() {
             getPlayerName={getPlayerName}
             canRequestCard={canRequestCard}
             getRequestButtonText={getRequestButtonText}
+            completedQuartets={getCompletedQuartets()}
           />
 
           <PlayerHandPanel

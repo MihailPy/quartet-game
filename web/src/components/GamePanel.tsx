@@ -28,6 +28,12 @@ type GamePanelProps = {
   getPlayerName: (playerID: string) => string
   canRequestCard: () => boolean
   getRequestButtonText: () => string
+  completedQuartets: {
+    playerID: string
+    playerName: string
+    quartetID: string
+    quartetTitle: string
+  }[]
 }
 
 export function GamePanel({
@@ -51,6 +57,7 @@ export function GamePanel({
   getPlayerName,
   canRequestCard,
   getRequestButtonText,
+  completedQuartets
 }: GamePanelProps) {
   return (
     <div className="panel">
@@ -181,6 +188,24 @@ export function GamePanel({
               <span>{gamePlayer.card_count} карт</span>
             </div>
           ))}
+
+          {completedQuartets.length > 0 && (
+            <div className="completed-quartets-box">
+              <h3>Собранные квартеты</h3>
+
+              <div className="completed-quartets-list">
+                {completedQuartets.map((quartet) => (
+                  <div
+                    className="completed-quartet-item"
+                    key={`${quartet.playerID}-${quartet.quartetID}`}
+                  >
+                    <strong>{quartet.quartetTitle}</strong>
+                    <span>Собрал: {quartet.playerName}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {player && publicGameState && (
             <div className="request-form">

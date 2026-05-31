@@ -430,4 +430,29 @@ code {
   color: #166534;
 }
 
+.completed-quartets-box {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid #bbf7d0;
+  border-radius: 12px;
+  background: #f0fdf4;
+}
 
+.completed-quartets-box h3 {
+  margin: 0;
+}
+
+.completed-quartets-list {
+  display: grid;
+  gap: 8px;
+}
+
+.completed-quartet-item {
+  display: grid;
+  gap: 4px;
+  padding: 10px;
+  border-radius: 10px;
+  background: #ffffff;
+  border: 1px solid #dcfce7;
+}
