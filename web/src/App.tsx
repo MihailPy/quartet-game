@@ -60,10 +60,11 @@ function App() {
   const [temporaryMessages, setTemporaryMessages] = useState<TemporaryMessage[]>([])
   const [showDebugEvents, setShowDebugEvents] = useState<boolean>(false)
   const [deck, setDeck] = useState<Deck | null>(null)
+  const deckRef = useRef<Deck | null>(null)
   const [reconnectAttempt, setReconnectAttempt] = useState<number>(0)
 
   function resetGameState() {
-    setDeck(null)
+    updateDeck(null)
     setPublicGameState(null)
     setPlayerHand(null)
     setTargetPlayerID('')
@@ -246,10 +247,19 @@ function App() {
   }
 
   function getQuartetTitle(quartetID: string): string {
-    return (
-      deck?.Quartets.find((quartet) => quartet.ID === quartetID)?.Title ??
-      quartetID
+    const currentDeck = deckRef.current as unknown as {
+      Quartets?: { ID?: string; Title?: string; id?: string; title?: string }[]
+      quartets?: { ID?: string; Title?: string; id?: string; title?: string }[]
+    } | null
+
+    const quartets = currentDeck?.Quartets ?? currentDeck?.quartets ?? []
+
+    const quartet = quartets.find(
+      (currentQuartet) =>
+        currentQuartet.ID === quartetID || currentQuartet.id === quartetID,
     )
+
+    return quartet?.Title ?? quartet?.title ?? quartetID
   }
 
   function getAvailableRequestCards(): RequestableCard[] {
@@ -372,7 +382,12 @@ function App() {
       return
     }
 
-    setDeck(data.deck)
+    updateDeck(data.deck)
+  }
+
+  function updateDeck(nextDeck: Deck | null) {
+    deckRef.current = nextDeck
+    setDeck(nextDeck)
   }
 
   async function loadGameState(roomID: string) {
@@ -486,7 +501,7 @@ function App() {
           const payload = message.payload as GameStartedPayload
 
           setRoom(payload.room)
-          setDeck(payload.deck)
+          updateDeck(payload.deck)
           showTemporaryMessage('Игра началась.')
           addGameLog('Игра началась.')
 
@@ -574,13 +589,16 @@ function App() {
         }
 
         if (message.type === 'quartet_completed') {
-          const playerID = message.payload.player_id as string
-          const quartets = message.payload.quartets as string[]
+          const payload = message.payload as {
+            player_id: string
+            quartets: string[]
+          }
 
-          const playerName = getPlayerName(playerID)
-          const quartetTitles = quartets.map(getQuartetTitle).join(', ')
+          const quartetTitles = payload.quartets
+            .map((quartetID) => getQuartetTitle(quartetID))
+            .join(', ')
 
-          const messageText = `${playerName} собрал квартет: ${quartetTitles}`
+          const messageText = `${getPlayerName(payload.player_id)} собрал квартет “${quartetTitles}”.`
 
           showTemporaryMessage(messageText)
           addGameLog(messageText)
