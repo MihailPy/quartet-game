@@ -529,8 +529,10 @@ function App() {
 
         if (message.type === 'game_state') {
           const payload = message.payload as PublicGameState
+
           setPublicGameState(payload)
           setCurrentTurnPlayerID(payload.current_player_id)
+
           addGameLog(`Сейчас ходит ${getPlayerName(payload.current_player_id)}.`)
         }
 
@@ -540,10 +542,15 @@ function App() {
           }
 
           setCurrentTurnPlayerID(payload.current_player_id)
-          setTargetPlayerID('')
-          setSelectedCardID('')
-          showTemporaryMessage(`Ходит ${getPlayerName(payload.current_player_id)}.`)
-          addGameLog(`Ходит ${getPlayerName(payload.current_player_id)}.`)
+
+          const playerName = getPlayerName(payload.current_player_id)
+          const messageText =
+            player?.id === payload.current_player_id
+              ? 'Сейчас твой ход.'
+              : `Сейчас ходит ${playerName}.`
+
+          showTemporaryMessage(messageText)
+          addGameLog(messageText)
         }
 
         if (message.type === 'player_hand') {
@@ -570,8 +577,6 @@ function App() {
             payload.card_title ??
             'запрошенную карту'
 
-          const nextPlayerName = getPlayerName(payload.next_player_id)
-
           setError('')
           setTargetPlayerID('')
           setSelectedCardID('')
@@ -583,7 +588,7 @@ function App() {
             showTemporaryMessage(resultMessage)
             addGameLog(resultMessage)
           } else {
-            const resultMessage = `Карты “${cardTitle}” нет. Следующий ходит ${nextPlayerName}.`
+            const resultMessage = `Карты “${cardTitle}” нет.`
 
             showTemporaryMessage(resultMessage)
             addGameLog(resultMessage)
