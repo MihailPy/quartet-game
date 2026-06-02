@@ -201,7 +201,7 @@ function App() {
 
       await loadDeck(data.room.id)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error')
+      setError(err instanceof Error ? err.message : 'Не удалось начать игру.')
     }
   }
 

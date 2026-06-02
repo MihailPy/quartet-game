@@ -94,7 +94,11 @@ export async function startGameRequest(
   })
 
   if (!response.ok) {
-    throw new Error('Failed to start game')
+    const errorPayload = await response.json().catch(() => null)
+
+    throw new Error(
+      errorPayload?.error ?? 'Не удалось начать игру.',
+    )
   }
 
   return (await response.json()) as StartGameResponse
