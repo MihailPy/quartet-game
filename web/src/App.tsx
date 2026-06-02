@@ -616,6 +616,12 @@ function App() {
           showTemporaryMessage(finishedMessage)
           addGameLog(finishedMessage)
         }
+
+        if (message.type === 'room_updated') {
+          const payload = message.payload as Room
+
+          setRoom(payload)
+        }
       } catch {
         // ignore invalid websocket message
       }

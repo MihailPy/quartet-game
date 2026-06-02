@@ -126,6 +126,13 @@ func (h *RoomHandler) JoinRoom(w http.ResponseWriter, r *http.Request, roomID ro
 		return
 	}
 
+	if h.eventBroadcaster != nil {
+		h.eventBroadcaster.BroadcastToRoom(roomID, ws.Event{
+			Type:    "room_updated",
+			Payload: joinedRoom,
+		})
+	}
+
 	response := JoinRoomResponse{
 		Player: player,
 		Room:   joinedRoom,
@@ -185,6 +192,13 @@ func (h *RoomHandler) MarkPlayerReady(w http.ResponseWriter, r *http.Request, ro
 		}
 
 		return
+	}
+
+	if h.eventBroadcaster != nil {
+		h.eventBroadcaster.BroadcastToRoom(roomID, ws.Event{
+			Type:    "room_updated",
+			Payload: updatedRoom,
+		})
 	}
 
 	w.Header().Set("Content-Type", "application/json")
