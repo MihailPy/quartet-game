@@ -617,11 +617,12 @@ function App() {
           addGameLog(finishedMessage)
         }
 
-        if (message.type === 'room_updated') {
+        if (message.type === 'room_updated' || message.type === 'room_state') {
           const payload = message.payload as Room
 
           setRoom(payload)
         }
+
       } catch {
         // ignore invalid websocket message
       }
