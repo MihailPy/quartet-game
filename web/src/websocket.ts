@@ -1,9 +1,11 @@
+const WS_URL = import.meta.env.VITE_WS_URL ?? 'ws://localhost:8080'
+
 export function buildRoomWebSocketURL(roomID: string, playerID: string): string {
   const params = new URLSearchParams({
     player_id: playerID,
   })
 
-  return `ws://localhost:8080/rooms/${roomID}/ws?${params.toString()}`
+  return `${WS_URL}/rooms/${roomID}/ws?${params.toString()}`
 }
 
 export type RequestCardMessage = {
