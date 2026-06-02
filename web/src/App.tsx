@@ -41,6 +41,7 @@ import {
 
 function App() {
   const [room, setRoom] = useState<Room | null>(null)
+  const roomRef = useRef<Room | null>(null)
   const [error, setError] = useState<string>('')
   const [player, setPlayer] = useState<Player | null>(null)
   const [playerName, setPlayerName] = useState<string>('Mihail')
@@ -84,7 +85,7 @@ function App() {
     try {
       const createdRoom = await createRoomRequest()
 
-      setRoom(createdRoom)
+      updateRoom(createdRoom)
       setPlayer(null)
       setRoomIdInput(createdRoom.id)
       resetGameState()
@@ -108,7 +109,7 @@ function App() {
     try {
       const loadedRoom = await loadRoomRequest(roomIdInput)
 
-      setRoom(loadedRoom)
+      updateRoom(loadedRoom)
       setPlayer(null)
       resetGameState()
 
@@ -131,7 +132,7 @@ function App() {
     try {
       const data = await joinRoomRequest(room.id, playerName)
 
-      setRoom(data.room)
+      updateRoom(data.room)
       setPlayer(data.player)
       resetGameState()
 
@@ -154,7 +155,7 @@ function App() {
     try {
       const updatedRoom = await markReadyRequest(room.id, player.id)
 
-      setRoom(updatedRoom)
+      updateRoom(updatedRoom)
 
       const updatedPlayer = updatedRoom.players.find(
         (roomPlayer) => roomPlayer.id === player.id,
@@ -194,7 +195,7 @@ function App() {
     try {
       const data = await startGameRequest(room.id, player.id)
 
-      setRoom(data.room)
+      updateRoom(data.room)
       setPublicGameState(data.state)
       setCurrentTurnPlayerID(data.state.current_player_id)
 
@@ -238,10 +239,10 @@ function App() {
   }
 
   function getPlayerName(playerID: string): string {
+    const currentRoom = roomRef.current
+
     return (
-      publicGameState?.players.find((gamePlayer) => gamePlayer.id === playerID)
-        ?.name ??
-      room?.players.find((roomPlayer) => roomPlayer.id === playerID)?.name ??
+      currentRoom?.players.find((roomPlayer) => roomPlayer.id === playerID)?.name ??
       playerID
     )
   }
@@ -258,6 +259,7 @@ function App() {
       (currentQuartet) =>
         currentQuartet.ID === quartetID || currentQuartet.id === quartetID,
     )
+
 
     return quartet?.Title ?? quartet?.title ?? quartetID
   }
@@ -291,8 +293,16 @@ function App() {
     setGameLog((currentLog) => [message, ...currentLog.slice(0, 9)])
   }
 
+  function createTemporaryMessageID(): string {
+    if (crypto.randomUUID) {
+      return crypto.randomUUID()
+    }
+
+    return `${Date.now()}-${Math.random().toString(16).slice(2)}`
+  }
+
   function showTemporaryMessage(text: string) {
-    const id = crypto.randomUUID()
+    const id = createTemporaryMessageID()
 
     setTemporaryMessages((currentMessages) => [
       ...currentMessages,
@@ -388,6 +398,11 @@ function App() {
   function updateDeck(nextDeck: Deck | null) {
     deckRef.current = nextDeck
     setDeck(nextDeck)
+  }
+
+  function updateRoom(nextRoom: Room | null) {
+    roomRef.current = nextRoom
+    setRoom(nextRoom)
   }
 
   async function loadGameState(roomID: string) {
@@ -500,7 +515,7 @@ function App() {
         if (message.type === 'game_started') {
           const payload = message.payload as GameStartedPayload
 
-          setRoom(payload.room)
+          updateRoom(payload.room)
           updateDeck(payload.deck)
           showTemporaryMessage('Игра началась.')
           addGameLog('Игра началась.')
@@ -620,11 +635,10 @@ function App() {
         if (message.type === 'room_updated' || message.type === 'room_state') {
           const payload = message.payload as Room
 
-          setRoom(payload)
+          updateRoom(payload)
         }
-
-      } catch {
-        // ignore invalid websocket message
+      } catch (err) {
+        console.error('Failed to handle websocket message:', err, event.data)
       }
     }
 
@@ -670,7 +684,7 @@ function App() {
           return
         }
 
-        setRoom(loadedRoom)
+        updateRoom(loadedRoom)
         setRoomIdInput(loadedRoom.id)
 
         if (loadedRoom.status === 'playing') {
