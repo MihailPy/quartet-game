@@ -7,7 +7,7 @@ import type {
   StartGameResponse,
 } from './types'
 
-const API_URL = 'http://localhost:8080'
+const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8080'
 
 export async function createRoomRequest(): Promise<Room> {
   const response = await fetch(`${API_URL}/rooms`, {
@@ -94,7 +94,11 @@ export async function startGameRequest(
   })
 
   if (!response.ok) {
-    throw new Error('Failed to start game')
+    const errorPayload = await response.json().catch(() => null)
+
+    throw new Error(
+      errorPayload?.error ?? 'Не удалось начать игру.',
+    )
   }
 
   return (await response.json()) as StartGameResponse

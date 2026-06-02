@@ -74,10 +74,15 @@ export function RoomPanel({
                 {roomPlayer.id === currentPlayerID ? ' (ты)' : ''}
                 {roomPlayer.id === room.owner_player_id ? ' 👑' : ''}
               </span>
+              <div className="player-badges">
+                <span className={roomPlayer.is_connected ? 'connected-badge' : 'disconnected-badge'}>
+                  {roomPlayer.is_connected ? 'онлайн' : 'офлайн'}
+                </span>
 
-              <span className={roomPlayer.is_ready ? 'ready-badge' : 'not-ready-badge'}>
-                {roomPlayer.is_ready ? 'готов' : 'не готов'}
-              </span>
+                <span className={roomPlayer.is_ready ? 'ready-badge' : 'not-ready-badge'}>
+                  {roomPlayer.is_ready ? 'готов' : 'не готов'}
+                </span>
+              </div>
             </div>
           ))}
 

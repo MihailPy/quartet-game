@@ -162,7 +162,7 @@ func (h *Handler) HandleConnection(w http.ResponseWriter, r *http.Request, roomI
 		var message ClientMessage
 
 		if err := json.Unmarshal(data, &message); err != nil {
-			_ = conn.WriteJSON(Event{
+			h.hub.SendToPlayer(roomID, playerID, Event{
 				Type: "error",
 				Payload: map[string]string{
 					"message": "invalid message format",
@@ -175,7 +175,7 @@ func (h *Handler) HandleConnection(w http.ResponseWriter, r *http.Request, roomI
 		case "request_card":
 			h.handleRequestCard(r.Context(), roomID, playerID, message.Payload)
 		default:
-			_ = conn.WriteJSON(Event{
+			h.hub.SendToPlayer(roomID, playerID, Event{
 				Type: "error",
 				Payload: map[string]string{
 					"message": "unknown message type",

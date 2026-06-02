@@ -126,6 +126,13 @@ func (h *RoomHandler) JoinRoom(w http.ResponseWriter, r *http.Request, roomID ro
 		return
 	}
 
+	if h.eventBroadcaster != nil {
+		h.eventBroadcaster.BroadcastToRoom(roomID, ws.Event{
+			Type:    "room_updated",
+			Payload: joinedRoom,
+		})
+	}
+
 	response := JoinRoomResponse{
 		Player: player,
 		Room:   joinedRoom,
@@ -187,6 +194,13 @@ func (h *RoomHandler) MarkPlayerReady(w http.ResponseWriter, r *http.Request, ro
 		return
 	}
 
+	if h.eventBroadcaster != nil {
+		h.eventBroadcaster.BroadcastToRoom(roomID, ws.Event{
+			Type:    "room_updated",
+			Payload: updatedRoom,
+		})
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
@@ -195,18 +209,18 @@ func (h *RoomHandler) MarkPlayerReady(w http.ResponseWriter, r *http.Request, ro
 
 func (h *RoomHandler) StartRoom(w http.ResponseWriter, r *http.Request, roomID room.RoomID) {
 	if r.Method != http.MethodPost {
-		w.WriteHeader(http.StatusMethodNotAllowed)
+		writeError(w, http.StatusMethodNotAllowed, "method not allowed")
 		return
 	}
 
 	var request StartRoomRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+		writeError(w, http.StatusBadRequest, "invalid start game request")
 		return
 	}
 
 	if request.PlayerID == "" {
-		w.WriteHeader(http.StatusBadRequest)
+		writeError(w, http.StatusBadRequest, "player_id is required")
 		return
 	}
 
@@ -217,33 +231,25 @@ func (h *RoomHandler) StartRoom(w http.ResponseWriter, r *http.Request, roomID r
 	}
 
 	if currentRoom.OwnerPlayerID != request.PlayerID {
-		w.WriteHeader(http.StatusForbidden)
+		writeError(w, http.StatusForbidden, "only room owner can start game")
 		return
 	}
 
 	if len(currentRoom.Players) < 2 {
-		w.WriteHeader(http.StatusBadRequest)
+		writeError(w, http.StatusBadRequest, "at least two players are required to start the game")
 		return
 	}
 
 	for _, player := range currentRoom.Players {
 		if !player.IsReady {
-			w.WriteHeader(http.StatusBadRequest)
+			writeError(w, http.StatusBadRequest, "all players must be ready to start the game")
 			return
 		}
 	}
 
 	startedRoom, err := h.manager.StartRoom(r.Context(), roomID)
 	if err != nil {
-		switch err {
-		case room.ErrRoomNotFound:
-			w.WriteHeader(http.StatusNotFound)
-		case room.ErrNotEnoughPlayers, room.ErrNotAllPlayersReady, room.ErrRoomAlreadyStarted:
-			w.WriteHeader(http.StatusBadRequest)
-		default:
-			w.WriteHeader(http.StatusInternalServerError)
-		}
-
+		writeError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -381,6 +387,15 @@ func (h *RoomHandler) GetGameState(w http.ResponseWriter, r *http.Request, roomI
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(payload)
+}
+
+func writeError(w http.ResponseWriter, statusCode int, message string) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(statusCode)
+
+	_ = json.NewEncoder(w).Encode(map[string]string{
+		"error": message,
+	})
 }
 
 func buildGameStatePayload(state game.GameState) GameStatePayload {

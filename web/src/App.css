@@ -489,3 +489,28 @@ code {
   background: #ffffff;
   border: 1px solid #fef3c7;
 }
+
+.player-badges {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.connected-badge,
+.disconnected-badge {
+  border-radius: 999px;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.connected-badge {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.disconnected-badge {
+  background: #f4f4f5;
+  color: #52525b;
+}
