@@ -539,3 +539,12 @@ code {
   background: #fee2e2;
   color: #991b1b;
 }
+
+.dev-diagnostics {
+  margin-top: 12px;
+}
+
+.dev-diagnostics summary {
+  cursor: pointer;
+  font-weight: 700;
+}

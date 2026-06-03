@@ -63,6 +63,7 @@ function App() {
   const [deck, setDeck] = useState<Deck | null>(null)
   const deckRef = useRef<Deck | null>(null)
   const [reconnectAttempt, setReconnectAttempt] = useState<number>(0)
+  const isDevMode = import.meta.env.DEV
 
   function resetGameState() {
     updateDeck(null)
@@ -803,6 +804,16 @@ function App() {
             events={events}
             showDebugEvents={showDebugEvents}
             onToggleDebugEvents={() => setShowDebugEvents((current) => !current)}
+            isDevMode={isDevMode}
+            diagnostics={{
+              room,
+              player,
+              socketStatus,
+              publicGameState,
+              playerHand,
+              currentTurnPlayerID,
+              gameFinished,
+            }}
           />
         </section>
       </section>
