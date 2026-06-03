@@ -3,6 +3,8 @@ type GameLogPanelProps = {
   events: string[]
   showDebugEvents: boolean
   onToggleDebugEvents: () => void
+  isDevMode: boolean
+  diagnostics: unknown
 }
 
 export function GameLogPanel({
@@ -10,6 +12,8 @@ export function GameLogPanel({
   events,
   showDebugEvents,
   onToggleDebugEvents,
+  isDevMode,
+  diagnostics,
 }: GameLogPanelProps) {
   return (
     <div className="panel">
@@ -46,6 +50,18 @@ export function GameLogPanel({
           </div>
         )}
       </div>
+
+      {isDevMode && (
+        <div className="debug-events">
+          <details className="dev-diagnostics">
+            <summary>Dev diagnostics</summary>
+
+            <pre className="event-item">
+              {JSON.stringify(diagnostics, null, 2)}
+            </pre>
+          </details>
+        </div>
+      )}
     </div>
   )
 }

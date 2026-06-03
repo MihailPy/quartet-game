@@ -2,6 +2,7 @@ package http
 
 import (
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/MihailPy/quartet-game/internal/http/handlers"
@@ -77,17 +78,30 @@ func healthHandler(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write([]byte("OK"))
 }
 
+func allowedOrigins() []string {
+	origins := []string{
+		"http://localhost:5173",
+		"http://127.0.0.1:5173",
+	}
+
+	if value := os.Getenv("ALLOWED_ORIGINS"); value != "" {
+		for _, origin := range strings.Split(value, ",") {
+			origin = strings.TrimSpace(origin)
+			if origin != "" {
+				origins = append(origins, origin)
+			}
+		}
+	}
+
+	return origins
+}
+
 func isAllowedOrigin(origin string) bool {
 	if origin == "" {
 		return true
 	}
 
-	allowedOrigins := []string{
-		"http://localhost:5173",
-		"http://192.168.1.5:5173",
-	}
-
-	for _, allowedOrigin := range allowedOrigins {
+	for _, allowedOrigin := range allowedOrigins() {
 		if origin == allowedOrigin {
 			return true
 		}

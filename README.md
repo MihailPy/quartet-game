@@ -61,6 +61,9 @@ feature modules:
 
 ## Run locally with PostgreSQL
 
+Backend requires Go, Docker, PostgreSQL, and the `migrate` CLI. Frontend
+requires Node.js and npm.
+
 Start PostgreSQL:
 
 ```bash
@@ -79,6 +82,17 @@ Run backend:
 make run
 ```
 
+If you need custom backend env values, copy `.env.example` and export it before
+starting the backend:
+
+```bash
+cp .env.example .env
+set -a
+source .env
+set +a
+make run
+```
+
 Healthcheck:
 
 ```bash
@@ -90,6 +104,7 @@ Run frontend:
 ```bash
 cd web
 npm install
+cp .env.example .env.local
 npm run dev
 ```
 
@@ -98,12 +113,63 @@ Frontend runs on `http://localhost:5173` and connects to the backend at
 
 ## Environment
 
+Example files:
+
+- `.env.example` contains backend environment variables.
+- `web/.env.example` contains frontend Vite environment variables.
+
 Default values:
 
 ```text
 HTTP_ADDR=:8080
 DATABASE_URL=postgres://quartet_user:quartet_password@localhost:5432/quartet_game?sslmode=disable
 DEFAULT_DECK_ID=00000000-0000-0000-0000-000000000001
+ALLOWED_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
+VITE_API_URL=http://localhost:8080
+VITE_WS_URL=ws://localhost:8080
+```
+
+Backend variables are read from the process environment. Frontend variables must
+be placed in `web/.env.local` or another Vite env file and require restarting
+Vite after changes.
+
+## Run in one Wi-Fi network
+
+Use this mode when frontend is opened from another device on the same Wi-Fi
+network, for example a phone or another laptop.
+
+Find the local IP address of the computer running backend and frontend:
+
+```bash
+ipconfig getifaddr en0
+```
+
+Assume the IP is `192.168.1.45`.
+
+Start backend with the frontend origin allowed:
+
+```bash
+ALLOWED_ORIGINS=http://192.168.1.45:5173 make run
+```
+
+Configure frontend URLs in `web/.env.local`:
+
+```text
+VITE_API_URL=http://192.168.1.45:8080
+VITE_WS_URL=ws://192.168.1.45:8080
+```
+
+Start Vite so it accepts connections from the local network:
+
+```bash
+cd web
+npm run dev -- --host 0.0.0.0
+```
+
+Open frontend from another device:
+
+```text
+http://192.168.1.45:5173
 ```
 
 ## Run with Docker
@@ -147,6 +213,20 @@ npm run dev
 npm run build
 npm run lint
 ```
+
+## Troubleshooting
+
+Если frontend открывается, но игра не получает события:
+
+- проверь `VITE_WS_URL`;
+- убедись, что WebSocket URL содержит IP компьютера, а не `localhost`;
+- перезапусти Vite после изменения `.env.local`;
+- проверь, что backend запущен с правильным `ALLOWED_ORIGINS`.
+
+Если запросы к backend блокируются CORS:
+
+- проверь `ALLOWED_ORIGINS`;
+- origin должен совпадать с адресом frontend, например `http://192.168.1.45:5173`.
 
 ## API
 

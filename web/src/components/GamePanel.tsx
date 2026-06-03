@@ -36,6 +36,26 @@ type GamePanelProps = {
   }[]
 }
 
+function getSocketStatusLabel(status: string): string {
+  if (status === 'connected') {
+    return 'подключено'
+  }
+
+  if (status === 'connecting') {
+    return 'подключение...'
+  }
+
+  if (status === 'reconnecting') {
+    return 'переподключение...'
+  }
+
+  if (status === 'error') {
+    return 'ошибка подключения'
+  }
+
+  return 'отключено'
+}
+
 export function GamePanel({
   room,
   player,
@@ -65,6 +85,9 @@ export function GamePanel({
 
       <div className="socket-status">
         <strong>WebSocket:</strong> {socketStatus}
+      </div>
+      <div className={`connection-status connection-status-${socketStatus}`}>
+        Соединение: {getSocketStatusLabel(socketStatus)}
       </div>
 
       {room && player && room.status !== 'playing' && (

@@ -63,6 +63,7 @@ function App() {
   const [deck, setDeck] = useState<Deck | null>(null)
   const deckRef = useRef<Deck | null>(null)
   const [reconnectAttempt, setReconnectAttempt] = useState<number>(0)
+  const isDevMode = import.meta.env.DEV
 
   function resetGameState() {
     updateDeck(null)
@@ -497,6 +498,8 @@ function App() {
 
     socket.onopen = () => {
       setSocketStatus('connected')
+      setError('')
+      addGameLog('WebSocket подключён.')
 
       void loadDeck(room.id)
       void loadGameState(room.id)
@@ -643,19 +646,31 @@ function App() {
           updateRoom(payload)
         }
       } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : 'Не удалось обработать websocket-сообщение.'
+
         console.error('Failed to handle websocket message:', err, event.data)
+        setError(errorMessage)
+        addGameLog(`Ошибка websocket-сообщения: ${errorMessage}`)
       }
+
     }
 
     socket.onerror = () => {
       setSocketStatus('error')
+      setError('Ошибка websocket-подключения.')
+      addGameLog('Ошибка websocket-подключения.')
     }
 
     socket.onclose = () => {
       setSocketStatus('disconnected')
+      addGameLog('WebSocket отключён.')
+
       if (!shouldReconnect) {
         return
       }
+
+      setSocketStatus('reconnecting')
 
       window.setTimeout(() => {
         setReconnectAttempt((currentAttempt) => currentAttempt + 1)
@@ -789,6 +804,16 @@ function App() {
             events={events}
             showDebugEvents={showDebugEvents}
             onToggleDebugEvents={() => setShowDebugEvents((current) => !current)}
+            isDevMode={isDevMode}
+            diagnostics={{
+              room,
+              player,
+              socketStatus,
+              publicGameState,
+              playerHand,
+              currentTurnPlayerID,
+              gameFinished,
+            }}
           />
         </section>
       </section>
