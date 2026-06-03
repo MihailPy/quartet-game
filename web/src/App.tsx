@@ -497,6 +497,8 @@ function App() {
 
     socket.onopen = () => {
       setSocketStatus('connected')
+      setError('')
+      addGameLog('WebSocket подключён.')
 
       void loadDeck(room.id)
       void loadGameState(room.id)
@@ -643,16 +645,26 @@ function App() {
           updateRoom(payload)
         }
       } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : 'Не удалось обработать websocket-сообщение.'
+
         console.error('Failed to handle websocket message:', err, event.data)
+        setError(errorMessage)
+        addGameLog(`Ошибка websocket-сообщения: ${errorMessage}`)
       }
+
     }
 
     socket.onerror = () => {
       setSocketStatus('error')
+      setError('Ошибка websocket-подключения.')
+      addGameLog('Ошибка websocket-подключения.')
     }
 
     socket.onclose = () => {
       setSocketStatus('disconnected')
+      addGameLog('WebSocket отключён.')
+
       if (!shouldReconnect) {
         return
       }
