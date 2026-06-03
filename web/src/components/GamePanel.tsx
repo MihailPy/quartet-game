@@ -83,9 +83,6 @@ export function GamePanel({
     <div className="panel">
       <h2>Игра</h2>
 
-      <div className="socket-status">
-        <strong>WebSocket:</strong> {socketStatus}
-      </div>
       <div className={`connection-status connection-status-${socketStatus}`}>
         Соединение: {getSocketStatusLabel(socketStatus)}
       </div>
