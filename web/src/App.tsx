@@ -669,6 +669,8 @@ function App() {
         return
       }
 
+      setSocketStatus('reconnecting')
+
       window.setTimeout(() => {
         setReconnectAttempt((currentAttempt) => currentAttempt + 1)
       }, 2000)
