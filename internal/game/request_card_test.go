@@ -371,3 +371,77 @@ func TestRequestCardFinishesGameWhenNobodyCanTakeTurn(t *testing.T) {
 		t.Fatalf("expected one completed quartet, got %d", len(result.CompletedQuartets))
 	}
 }
+
+func TestRequestCardCompletedQuartetMovesTurnWhenActorHasNoCards(t *testing.T) {
+	deck := testDeck()
+
+	deck.Quartets = append(deck.Quartets, Quartet{
+		ID:    "quartet_2",
+		Title: "Другой квартет",
+		Cards: []Card{
+			{ID: "card_5", QuartetID: "quartet_2", Title: "Другая карта"},
+			{ID: "card_6", QuartetID: "quartet_2", Title: "Другая карта 2"},
+			{ID: "card_7", QuartetID: "quartet_2", Title: "Другая карта 3"},
+			{ID: "card_8", QuartetID: "quartet_2", Title: "Другая карта 4"},
+		},
+	})
+
+	players := testPlayers()
+
+	state, err := NewGame("game_1", deck, players)
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	state.Status = GameStatusPlaying
+	state.CurrentPlayerID = "player_1"
+
+	state.Hands["player_1"] = []Card{
+		{ID: "card_1", QuartetID: "quartet_1", Title: "Boeing 747"},
+		{ID: "card_2", QuartetID: "quartet_1", Title: "Airbus A380"},
+		{ID: "card_3", QuartetID: "quartet_1", Title: "Concorde"},
+	}
+
+	state.Hands["player_2"] = []Card{
+		{ID: "card_4", QuartetID: "quartet_1", Title: "Ан-225"},
+		{ID: "card_5", QuartetID: "quartet_2", Title: "Другая карта"},
+	}
+
+	command, err := NewRequestCardCommand("player_1", "player_2", "card_4")
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	result, err := RequestCard(&state, command)
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	if !result.Success {
+		t.Fatal("expected request to succeed")
+	}
+
+	if state.Status != GameStatusPlaying {
+		t.Fatalf("expected game to stay playing, got %s", state.Status)
+	}
+
+	if len(result.CompletedQuartets) != 1 {
+		t.Fatalf("expected one completed quartet, got %d", len(result.CompletedQuartets))
+	}
+
+	if len(state.Hands["player_1"]) != 0 {
+		t.Fatalf("expected player_1 to have no cards, got %d", len(state.Hands["player_1"]))
+	}
+
+	if result.NextPlayerID == "player_1" {
+		t.Fatal("expected next player not to stay player_1")
+	}
+
+	if result.NextPlayerID != "player_2" {
+		t.Fatalf("expected next player to be player_2, got %s", result.NextPlayerID)
+	}
+
+	if state.CurrentPlayerID != "player_2" {
+		t.Fatalf("expected current player to be player_2, got %s", state.CurrentPlayerID)
+	}
+}
