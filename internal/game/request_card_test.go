@@ -282,3 +282,47 @@ func TestRequestCardFailsWhenTargetPlayerHasNoCards(t *testing.T) {
 		t.Fatalf("expected current player to stay player_1, got %s", state.CurrentPlayerID)
 	}
 }
+
+func TestRequestCardFailureSkipsPlayersWithoutCards(t *testing.T) {
+	deck := testDeck()
+	players := testPlayers()
+	players = append(players, Player{ID: "player_3", Name: "Player 3"})
+
+	state, err := NewGame("game_1", deck, players)
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	state.Status = GameStatusPlaying
+	state.CurrentPlayerID = "player_1"
+
+	state.Hands["player_1"] = []Card{
+		{ID: "card_2", QuartetID: "quartet_1", Title: "Airbus A380"},
+	}
+	state.Hands["player_2"] = []Card{}
+	state.Hands["player_3"] = []Card{
+		{ID: "card_5", QuartetID: "quartet_2", Title: "Другая карта"},
+	}
+
+	command, err := NewRequestCardCommand("player_1", "player_3", "card_1")
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	result, err := RequestCard(&state, command)
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	if result.Success {
+		t.Fatal("expected request to fail")
+	}
+
+	if result.NextPlayerID != "player_3" {
+		t.Fatalf("expected next player to be player_3, got %s", result.NextPlayerID)
+	}
+
+	if state.CurrentPlayerID != "player_3" {
+		t.Fatalf("expected current player to be player_3, got %s", state.CurrentPlayerID)
+	}
+}

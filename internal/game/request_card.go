@@ -70,13 +70,24 @@ func RequestCard(state *GameState, command RequestCardCommand) (RequestCardResul
 		}, nil
 	}
 
-	if err := ChangeTurnTo(state, command.TargetPlayerID); err != nil {
+	nextPlayerID, ok := FindNextPlayerWhoCanTakeTurn(state, command.ActorID)
+	if !ok {
+		FinishGame(state)
+
+		return RequestCardResult{
+			Success:       false,
+			RequestedCard: requestedCard,
+			NextPlayerID:  "",
+		}, nil
+	}
+
+	if err := ChangeTurnTo(state, nextPlayerID); err != nil {
 		return RequestCardResult{}, err
 	}
 
 	return RequestCardResult{
 		Success:       false,
 		RequestedCard: requestedCard,
-		NextPlayerID:  command.TargetPlayerID,
+		NextPlayerID:  nextPlayerID,
 	}, nil
 }
