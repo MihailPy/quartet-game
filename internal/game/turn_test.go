@@ -154,3 +154,122 @@ func TestChangeTurnToInvalid(t *testing.T) {
 		})
 	}
 }
+
+func TestPlayerCanTakeTurnReturnsTrueWhenPlayerHasCards(t *testing.T) {
+	deck := testDeck()
+	players := testPlayers()
+
+	state, err := NewGame("game_1", deck, players)
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	state.Hands["player_1"] = []Card{
+		{ID: "card_1", QuartetID: "quartet_1", Title: "Boeing 747"},
+	}
+
+	if !PlayerCanTakeTurn(&state, "player_1") {
+		t.Fatal("expected player_1 to be able to take turn")
+	}
+}
+
+func TestPlayerCanTakeTurnReturnsFalseWhenPlayerHasNoCards(t *testing.T) {
+	deck := testDeck()
+	players := testPlayers()
+
+	state, err := NewGame("game_1", deck, players)
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	state.Hands["player_1"] = []Card{}
+
+	if PlayerCanTakeTurn(&state, "player_1") {
+		t.Fatal("expected player_1 to be unable to take turn")
+	}
+}
+
+func TestPlayerCanTakeTurnReturnsFalseForUnknownPlayer(t *testing.T) {
+	deck := testDeck()
+	players := testPlayers()
+
+	state, err := NewGame("game_1", deck, players)
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	if PlayerCanTakeTurn(&state, "unknown_player") {
+		t.Fatal("expected unknown player to be unable to take turn")
+	}
+}
+
+func TestFindNextPlayerWhoCanTakeTurnReturnsNextPlayerWithCards(t *testing.T) {
+	deck := testDeck()
+	players := testPlayers()
+
+	state, err := NewGame("game_1", deck, players)
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	state.Hands["player_1"] = []Card{}
+	state.Hands["player_2"] = []Card{
+		{ID: "card_5", QuartetID: "quartet_2", Title: "Другая карта"},
+	}
+
+	nextPlayerID, ok := FindNextPlayerWhoCanTakeTurn(&state, "player_1")
+	if !ok {
+		t.Fatal("expected next player to be found")
+	}
+
+	if nextPlayerID != "player_2" {
+		t.Fatalf("expected next player to be player_2, got %s", nextPlayerID)
+	}
+}
+
+func TestFindNextPlayerWhoCanTakeTurnSkipsPlayersWithoutCards(t *testing.T) {
+	deck := testDeck()
+	players := testPlayers()
+
+	state, err := NewGame("game_1", deck, players)
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	state.Players = append(state.Players, Player{ID: "player_3", Name: "Player 3"})
+
+	state.Hands["player_1"] = []Card{
+		{ID: "card_1", QuartetID: "quartet_1", Title: "Boeing 747"},
+	}
+	state.Hands["player_2"] = []Card{}
+	state.Hands["player_3"] = []Card{
+		{ID: "card_5", QuartetID: "quartet_2", Title: "Другая карта"},
+	}
+
+	nextPlayerID, ok := FindNextPlayerWhoCanTakeTurn(&state, "player_1")
+	if !ok {
+		t.Fatal("expected next player to be found")
+	}
+
+	if nextPlayerID != "player_3" {
+		t.Fatalf("expected next player to be player_3, got %s", nextPlayerID)
+	}
+}
+
+func TestFindNextPlayerWhoCanTakeTurnReturnsFalseWhenNobodyCanMove(t *testing.T) {
+	deck := testDeck()
+	players := testPlayers()
+
+	state, err := NewGame("game_1", deck, players)
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	state.Hands["player_1"] = []Card{}
+	state.Hands["player_2"] = []Card{}
+
+	_, ok := FindNextPlayerWhoCanTakeTurn(&state, "player_1")
+	if ok {
+		t.Fatal("expected no next player to be found")
+	}
+}

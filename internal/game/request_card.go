@@ -3,6 +3,7 @@ package game
 import "errors"
 
 var ErrCannotRequestCard = errors.New("cannot request card")
+var ErrTargetPlayerHasNoCards = errors.New("target player has no cards")
 
 type RequestCardResult struct {
 	Success           bool
@@ -33,6 +34,10 @@ func RequestCard(state *GameState, command RequestCardCommand) (RequestCardResul
 		return RequestCardResult{}, err
 	}
 
+	if !PlayerCanTakeTurn(state, command.TargetPlayerID) {
+		return RequestCardResult{}, ErrTargetPlayerHasNoCards
+	}
+
 	if PlayerHasCard(state, command.TargetPlayerID, command.CardID) {
 		if err := TransferCard(state, command.TargetPlayerID, command.ActorID, command.CardID); err != nil {
 			return RequestCardResult{}, err
@@ -42,21 +47,47 @@ func RequestCard(state *GameState, command RequestCardCommand) (RequestCardResul
 
 		FinishGame(state)
 
+		nextPlayerID := command.ActorID
+
+		if state.Status == GameStatusPlaying && !PlayerCanTakeTurn(state, command.ActorID) {
+			foundNextPlayerID, ok := FindNextPlayerWhoCanTakeTurn(state, command.ActorID)
+			if !ok {
+				FinishGame(state)
+			} else {
+				nextPlayerID = foundNextPlayerID
+
+				if err := ChangeTurnTo(state, nextPlayerID); err != nil {
+					return RequestCardResult{}, err
+				}
+			}
+		}
+
 		return RequestCardResult{
 			Success:           true,
 			RequestedCard:     requestedCard,
 			CompletedQuartets: completed,
-			NextPlayerID:      command.ActorID,
+			NextPlayerID:      nextPlayerID,
 		}, nil
 	}
 
-	if err := ChangeTurnTo(state, command.TargetPlayerID); err != nil {
+	nextPlayerID, ok := FindNextPlayerWhoCanTakeTurn(state, command.ActorID)
+	if !ok {
+		FinishGame(state)
+
+		return RequestCardResult{
+			Success:       false,
+			RequestedCard: requestedCard,
+			NextPlayerID:  "",
+		}, nil
+	}
+
+	if err := ChangeTurnTo(state, nextPlayerID); err != nil {
 		return RequestCardResult{}, err
 	}
 
 	return RequestCardResult{
 		Success:       false,
 		RequestedCard: requestedCard,
-		NextPlayerID:  command.TargetPlayerID,
+		NextPlayerID:  nextPlayerID,
 	}, nil
 }

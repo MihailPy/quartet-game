@@ -79,6 +79,13 @@ export function GamePanel({
   getRequestButtonText,
   completedQuartets
 }: GamePanelProps) {
+
+  const requestTargetPlayers =
+    publicGameState?.players.filter(
+      (gamePlayer) =>
+        gamePlayer.id !== player?.id && gamePlayer.card_count > 0,
+    ) ?? []
+
   return (
     <div className="panel">
       <h2>Игра</h2>
@@ -235,6 +242,12 @@ export function GamePanel({
             <div className="request-form">
               <h3>Запрос карты</h3>
 
+              {requestTargetPlayers.length === 0 && (
+                <p className="muted-text">
+                  Нет игроков с картами, у которых можно спросить карту.
+                </p>
+              )}
+
               <label>
                 У кого спросить
                 <select
@@ -247,18 +260,16 @@ export function GamePanel({
                     !player ||
                     gameFinished !== null ||
                     socketStatus !== 'connected' ||
-                    currentTurnPlayerID !== player.id
+                    currentTurnPlayerID !== player.id ||
+                    requestTargetPlayers.length === 0
                   }
                 >
                   <option value="">Выбери игрока</option>
-
-                  {publicGameState.players
-                    .filter((gamePlayer) => gamePlayer.id !== player.id)
-                    .map((gamePlayer) => (
-                      <option key={gamePlayer.id} value={gamePlayer.id}>
-                        {gamePlayer.name}
-                      </option>
-                    ))}
+                  {requestTargetPlayers.map((gamePlayer) => (
+                    <option key={gamePlayer.id} value={gamePlayer.id}>
+                      {getPlayerName(gamePlayer.id)} — карт: {gamePlayer.card_count}
+                    </option>
+                  ))}
                 </select>
               </label>
 
@@ -313,7 +324,7 @@ export function GamePanel({
               <button
                 className="button"
                 onClick={onRequestCard}
-                disabled={!canRequestCard()}
+                disabled={!canRequestCard() || requestTargetPlayers.length === 0}
               >
                 {getRequestButtonText()}
               </button>
