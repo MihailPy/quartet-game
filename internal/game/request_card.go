@@ -3,6 +3,7 @@ package game
 import "errors"
 
 var ErrCannotRequestCard = errors.New("cannot request card")
+var ErrTargetPlayerHasNoCards = errors.New("target player has no cards")
 
 type RequestCardResult struct {
 	Success           bool
@@ -31,6 +32,10 @@ func RequestCard(state *GameState, command RequestCardCommand) (RequestCardResul
 
 	if err := EnsurePlayerHasCardFromQuartet(state, command.ActorID, requestedCard.QuartetID); err != nil {
 		return RequestCardResult{}, err
+	}
+
+	if !PlayerCanTakeTurn(state, command.TargetPlayerID) {
+		return RequestCardResult{}, ErrTargetPlayerHasNoCards
 	}
 
 	if PlayerHasCard(state, command.TargetPlayerID, command.CardID) {
