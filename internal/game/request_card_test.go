@@ -326,3 +326,48 @@ func TestRequestCardFailureSkipsPlayersWithoutCards(t *testing.T) {
 		t.Fatalf("expected current player to be player_3, got %s", state.CurrentPlayerID)
 	}
 }
+
+func TestRequestCardFinishesGameWhenNobodyCanTakeTurn(t *testing.T) {
+	deck := testDeck()
+	players := testPlayers()
+
+	state, err := NewGame("game_1", deck, players)
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	state.Status = GameStatusPlaying
+	state.CurrentPlayerID = "player_1"
+
+	state.Hands["player_1"] = []Card{
+		{ID: "card_1", QuartetID: "quartet_1", Title: "Boeing 747"},
+		{ID: "card_2", QuartetID: "quartet_1", Title: "Airbus A380"},
+		{ID: "card_3", QuartetID: "quartet_1", Title: "Concorde"},
+	}
+
+	state.Hands["player_2"] = []Card{
+		{ID: "card_4", QuartetID: "quartet_1", Title: "Ан-225"},
+	}
+
+	command, err := NewRequestCardCommand("player_1", "player_2", "card_4")
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	result, err := RequestCard(&state, command)
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	if !result.Success {
+		t.Fatal("expected request to succeed")
+	}
+
+	if state.Status != GameStatusFinished {
+		t.Fatalf("expected game to be finished, got %s", state.Status)
+	}
+
+	if len(result.CompletedQuartets) != 1 {
+		t.Fatalf("expected one completed quartet, got %d", len(result.CompletedQuartets))
+	}
+}
