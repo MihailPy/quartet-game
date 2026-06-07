@@ -105,3 +105,8 @@ export type TemporaryMessage = {
   id: string
   text: string
 }
+
+export type RequestCardErrorPayload = {
+  code: string
+  message: string
+}
