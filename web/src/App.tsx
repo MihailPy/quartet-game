@@ -738,6 +738,20 @@ function App() {
     void restoreSession()
   }, [])
 
+  useEffect(() => {
+    if (!targetPlayerID) {
+      return
+    }
+
+    const targetPlayer = publicGameState?.players.find(
+      (gamePlayer) => gamePlayer.id === targetPlayerID,
+    )
+
+    if (!targetPlayer || targetPlayer.card_count === 0) {
+      setTargetPlayerID('')
+    }
+  }, [publicGameState, targetPlayerID])
+
   const availableRequestCards = getAvailableRequestCards()
 
   return (
