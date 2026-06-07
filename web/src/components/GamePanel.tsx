@@ -86,6 +86,17 @@ export function GamePanel({
         gamePlayer.id !== player?.id && gamePlayer.card_count > 0,
     ) ?? []
 
+  const isCurrentPlayerTurn = player !== null && currentTurnPlayerID === player.id
+
+  const hasAvailableRequestCards = availableRequestCards.length > 0
+  const hasRequestTargetPlayers = requestTargetPlayers.length > 0
+
+  const currentPlayerCannotRequest =
+    isCurrentPlayerTurn &&
+    gameFinished === null &&
+    socketStatus === 'connected' &&
+    (!hasAvailableRequestCards || !hasRequestTargetPlayers)
+
   return (
     <div className="panel">
       <h2>Игра</h2>
@@ -242,7 +253,7 @@ export function GamePanel({
             <div className="request-form">
               <h3>Запрос карты</h3>
 
-              {requestTargetPlayers.length === 0 && (
+              {!hasRequestTargetPlayers && (
                 <p className="muted-text">
                   Нет игроков с картами, у которых можно спросить карту.
                 </p>
@@ -261,7 +272,7 @@ export function GamePanel({
                     gameFinished !== null ||
                     socketStatus !== 'connected' ||
                     currentTurnPlayerID !== player.id ||
-                    requestTargetPlayers.length === 0
+                    !hasRequestTargetPlayers
                   }
                 >
                   <option value="">Выбери игрока</option>
@@ -283,7 +294,7 @@ export function GamePanel({
                     gameFinished !== null ||
                     socketStatus !== 'connected' ||
                     currentTurnPlayerID !== player.id ||
-                    availableRequestCards.length === 0
+                    !hasAvailableRequestCards
                   }
                 >
                   <option value="">Выбери карту</option>
@@ -300,7 +311,7 @@ export function GamePanel({
                     ),
                   )}
                 </select>
-                {availableRequestCards.length === 0 && (
+                {!hasAvailableRequestCards && (
                   <p className="form-hint">
                     Нет доступных карт для запроса. Нужно иметь хотя бы одну карту из квартета.
                   </p>
@@ -313,6 +324,22 @@ export function GamePanel({
                 )}
               </label>
 
+              {currentPlayerCannotRequest && (
+                <div className="form-hint">
+                  {!hasAvailableRequestCards && (
+                    <p>
+                      Сейчас твой ход, но нет карт, которые можно спросить. Нужно иметь хотя бы одну карту из квартета.
+                    </p>
+                  )}
+
+                  {hasAvailableRequestCards && !hasRequestTargetPlayers && (
+                    <p>
+                      Сейчас твой ход, но нет игроков с картами, у которых можно спросить карту.
+                    </p>
+                  )}
+                </div>
+              )}
+
               <p className="form-hint">
                 {currentTurnPlayerID === player?.id
                   ? 'Сейчас твой ход. Выбери игрока и карту.'
@@ -324,14 +351,15 @@ export function GamePanel({
               <button
                 className="button"
                 onClick={onRequestCard}
-                disabled={!canRequestCard() || requestTargetPlayers.length === 0 || availableRequestCards.length === 0}
+                disabled={!canRequestCard() || !hasRequestTargetPlayers || !hasAvailableRequestCards}
               >
                 {getRequestButtonText()}
               </button>
             </div>
           )}
         </div>
-      )}
-    </div>
+      )
+      }
+    </div >
   )
 }
