@@ -33,6 +33,7 @@ import type {
   RequestableCard,
   Room,
   TemporaryMessage,
+  RequestCardErrorPayload,
 } from './types'
 import {
   buildRequestCardMessage,
@@ -320,21 +321,36 @@ function App() {
     }, 4000)
   }
 
-  function getRequestCardErrorMessage(code?: string): string {
-    switch (code) {
-      case 'not_your_turn':
-        return 'Сейчас не твой ход.'
-      case 'card_not_found':
-        return 'Такая карта не найдена.'
-      case 'target_player_not_found':
-        return 'Такой игрок не найден.'
-      case 'player_does_not_have_quartet_card':
-        return 'Можно спрашивать только карту из квартета, который есть у тебя в руке.'
-      case 'cannot_request_card':
-        return 'Сейчас нельзя запросить карту.'
-      default:
-        return 'Не удалось выполнить ход.'
+  function getRequestCardErrorMessage(payload: RequestCardErrorPayload): string {
+    if (payload.code === 'not_player_turn') {
+      return 'Сейчас не твой ход.'
     }
+
+    if (payload.code === 'card_not_found') {
+      return 'Такая карта не найдена.'
+    }
+
+    if (payload.code === 'player_has_no_card_from_quartet') {
+      return 'Можно спрашивать только карты из квартета, который есть у тебя в руке.'
+    }
+
+    if (payload.code === 'target_player_has_no_cards') {
+      return 'У выбранного игрока больше нет карт.'
+    }
+
+    if (payload.code === 'invalid_request_card_command') {
+      return 'Запрос карты заполнен некорректно.'
+    }
+
+    if (payload.code === 'cannot_request_card') {
+      return 'Сейчас нельзя запросить карту.'
+    }
+
+    if (payload.code === 'cannot_transfer_card') {
+      return 'Не удалось передать карту.'
+    }
+
+    return payload.message || 'Не удалось запросить карту.'
   }
 
   function canRequestCard(): boolean {
@@ -599,16 +615,12 @@ function App() {
         }
 
         if (message.type === 'request_card_error') {
-          const payload = message.payload as {
-            code?: string
-            message?: string
-          }
-
-          const errorMessage = getRequestCardErrorMessage(payload.code)
+          const payload = message.payload as RequestCardErrorPayload
+          const errorMessage = getRequestCardErrorMessage(payload)
 
           setError(errorMessage)
           showTemporaryMessage(errorMessage)
-          addGameLog(errorMessage)
+          addGameLog(`Ошибка запроса карты: ${errorMessage}`)
         }
 
         if (message.type === 'quartet_completed') {
@@ -738,7 +750,35 @@ function App() {
     void restoreSession()
   }, [])
 
+  useEffect(() => {
+    if (!targetPlayerID) {
+      return
+    }
+
+    const targetPlayer = publicGameState?.players.find(
+      (gamePlayer) => gamePlayer.id === targetPlayerID,
+    )
+
+    if (!targetPlayer || targetPlayer.card_count === 0) {
+      setTargetPlayerID('')
+    }
+  }, [publicGameState, targetPlayerID])
+
   const availableRequestCards = getAvailableRequestCards()
+
+  useEffect(() => {
+    if (!selectedCardID) {
+      return
+    }
+
+    const selectedCardIsAvailable = availableRequestCards.some(
+      (card) => card.id === selectedCardID,
+    )
+
+    if (!selectedCardIsAvailable) {
+      setSelectedCardID('')
+    }
+  }, [availableRequestCards, selectedCardID])
 
   return (
     <main className="app">

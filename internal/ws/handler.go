@@ -385,6 +385,8 @@ func requestCardErrorCode(err error) string {
 		return "cannot_request_card"
 	case game.ErrCannotTransferCard:
 		return "cannot_transfer_card"
+	case game.ErrTargetPlayerHasNoCards:
+		return "target_player_has_no_cards"
 	default:
 		return "unknown_error"
 	}
