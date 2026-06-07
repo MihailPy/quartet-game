@@ -754,6 +754,20 @@ function App() {
 
   const availableRequestCards = getAvailableRequestCards()
 
+  useEffect(() => {
+    if (!selectedCardID) {
+      return
+    }
+
+    const selectedCardIsAvailable = availableRequestCards.some(
+      (card) => card.id === selectedCardID,
+    )
+
+    if (!selectedCardIsAvailable) {
+      setSelectedCardID('')
+    }
+  }, [availableRequestCards, selectedCardID])
+
   return (
     <main className="app">
       <section className="game-page">
