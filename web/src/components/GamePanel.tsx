@@ -279,6 +279,12 @@ export function GamePanel({
                   className="input"
                   value={selectedCardID}
                   onChange={(event) => onSelectedCardIDChange(event.target.value)}
+                  disabled={
+                    gameFinished !== null ||
+                    socketStatus !== 'connected' ||
+                    currentTurnPlayerID !== player.id ||
+                    availableRequestCards.length === 0
+                  }
                 >
                   <option value="">Выбери карту</option>
 
@@ -307,12 +313,6 @@ export function GamePanel({
                 )}
               </label>
 
-              {availableRequestCards.length === 0 && (
-                <p className="form-hint">
-                  Нет карт, которые можно спросить по текущим квартетам.
-                </p>
-              )}
-
               <p className="form-hint">
                 {currentTurnPlayerID === player?.id
                   ? 'Сейчас твой ход. Выбери игрока и карту.'
@@ -324,7 +324,7 @@ export function GamePanel({
               <button
                 className="button"
                 onClick={onRequestCard}
-                disabled={!canRequestCard() || requestTargetPlayers.length === 0}
+                disabled={!canRequestCard() || requestTargetPlayers.length === 0 || availableRequestCards.length === 0}
               >
                 {getRequestButtonText()}
               </button>
