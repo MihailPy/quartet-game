@@ -97,6 +97,19 @@ export function GamePanel({
     socketStatus === 'connected' &&
     (!hasAvailableRequestCards || !hasRequestTargetPlayers)
 
+  const winnerNames =
+    gameFinished?.winners.map(getPlayerName).join(', ') ?? ''
+
+  const winnerLabel =
+    gameFinished && gameFinished.winners.length > 1
+      ? 'Победители'
+      : 'Победитель'
+
+  const sortedFinalScores =
+    gameFinished?.scores
+      .slice()
+      .sort((firstScore, secondScore) => secondScore.score - firstScore.score) ?? []
+
   return (
     <div className="panel">
       <h2>Игра</h2>
@@ -230,21 +243,29 @@ export function GamePanel({
               <h3>Игра завершена</h3>
 
               <div className="winners-box">
-                <strong>Победители:</strong>
-                <span>
-                  {gameFinished.winners.map(getPlayerName).join(', ')}
-                </span>
+                <strong>{winnerLabel}:</strong>
+                <span>{winnerNames}</span>
               </div>
 
               <div className="scores-list">
                 <strong>Итоговый счёт</strong>
 
-                {gameFinished.scores.map((score) => (
-                  <div className="score-row" key={score.player_id}>
-                    <span>{getPlayerName(score.player_id)}</span>
-                    <strong>{score.score}</strong>
-                  </div>
-                ))}
+                {sortedFinalScores.map((score) => {
+                  const isWinner = gameFinished.winners.includes(score.player_id)
+
+                  return (
+                    <div
+                      className={`score-row ${isWinner ? 'score-row-winner' : ''}`}
+                      key={score.player_id}
+                    >
+                      <span>
+                        {getPlayerName(score.player_id)}
+                        {isWinner ? ' 👑' : ''}
+                      </span>
+                      <strong>{score.score}</strong>
+                    </div>
+                  )
+                })}
               </div>
             </div>
           )}

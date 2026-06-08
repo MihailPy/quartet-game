@@ -490,6 +490,10 @@ code {
   border: 1px solid #fef3c7;
 }
 
+.score-row-winner {
+  background: #fef9c3;
+}
+
 .player-badges {
   display: flex;
   gap: 6px;

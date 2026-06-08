@@ -422,12 +422,32 @@ function App() {
     setRoom(nextRoom)
   }
 
+  function buildGameFinishedFromState(state: PublicGameState): GameFinishedPayload {
+    const scores = state.players.map((statePlayer) => ({
+      player_id: statePlayer.id,
+      score: state.completed[statePlayer.id]?.length ?? 0,
+    }))
+
+    const maxScore = Math.max(...scores.map((score) => score.score))
+
+    const winners = scores
+      .filter((score) => score.score === maxScore)
+      .map((score) => score.player_id)
+
+    return {
+      game_id: state.game_id,
+      winners,
+      scores,
+    }
+  }
+
   async function loadGameState(roomID: string) {
     const data = await loadGameStateRequest(roomID)
 
     if (!data) {
       setPublicGameState(null)
       setCurrentTurnPlayerID('')
+      setGameFinished(null)
       showTemporaryMessage('Не удалось восстановить состояние игры после reconnect.')
       addGameLog('Не удалось восстановить состояние игры после reconnect.')
       return
@@ -435,6 +455,12 @@ function App() {
 
     setPublicGameState(data)
     setCurrentTurnPlayerID(data.current_player_id)
+
+    if (data.status === 'finished') {
+      setGameFinished(buildGameFinishedFromState(data))
+    } else {
+      setGameFinished(null)
+    }
   }
 
   async function loadPlayerHand(roomID: string, playerID: string) {
@@ -644,9 +670,9 @@ function App() {
 
           setGameFinished(payload)
 
-          const finishedMessage = `Игра завершена. Победители: ${payload.winners
-            .map(getPlayerName)
-            .join(', ')}`
+          const winnerNames = payload.winners.map(getPlayerName).join(', ')
+          const winnerLabel = payload.winners.length > 1 ? 'Победители' : 'Победитель'
+          const finishedMessage = `Игра завершена. ${winnerLabel}: ${winnerNames}`
 
           showTemporaryMessage(finishedMessage)
           addGameLog(finishedMessage)
