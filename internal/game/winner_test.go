@@ -53,6 +53,17 @@ func TestCalculateGameResultTie(t *testing.T) {
 		t.Fatalf("expected 2 winners, got %d", len(result.Winners))
 	}
 
+	expectedWinners := map[PlayerID]bool{
+		"player_1": true,
+		"player_2": true,
+	}
+
+	for _, winnerID := range result.Winners {
+		if !expectedWinners[winnerID] {
+			t.Fatalf("unexpected winner %s", winnerID)
+		}
+	}
+
 	if result.Scores["player_1"] != 1 {
 		t.Fatalf("expected player_1 score 1, got %d", result.Scores["player_1"])
 	}
