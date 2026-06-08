@@ -644,9 +644,9 @@ function App() {
 
           setGameFinished(payload)
 
-          const finishedMessage = `Игра завершена. Победители: ${payload.winners
-            .map(getPlayerName)
-            .join(', ')}`
+          const winnerNames = payload.winners.map(getPlayerName).join(', ')
+          const winnerLabel = payload.winners.length > 1 ? 'Победители' : 'Победитель'
+          const finishedMessage = `Игра завершена. ${winnerLabel}: ${winnerNames}`
 
           showTemporaryMessage(finishedMessage)
           addGameLog(finishedMessage)

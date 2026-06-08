@@ -230,7 +230,7 @@ export function GamePanel({
               <h3>Игра завершена</h3>
 
               <div className="winners-box">
-                <strong>Победители:</strong>
+                <strong>{gameFinished.winners.length > 1 ? 'Победители:' : 'Победитель:'}</strong>
                 <span>
                   {gameFinished.winners.map(getPlayerName).join(', ')}
                 </span>
