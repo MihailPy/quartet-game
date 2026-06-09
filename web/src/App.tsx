@@ -85,18 +85,18 @@ function App() {
     setError('')
 
     try {
-      const createdRoom = await createRoomRequest()
+      const data = await createRoomRequest(playerName)
 
-      updateRoom(createdRoom)
-      setPlayer(null)
-      setRoomIdInput(createdRoom.id)
+      updateRoom(data.room)
+      setPlayer(data.player)
+      setRoomIdInput(data.room.id)
       resetGameState()
 
-      saveRoomID(createdRoom.id)
-      clearPlayer()
+      saveRoomID(data.room.id)
+      savePlayer(data.player)
 
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error')
+      setError(err instanceof Error ? err.message : 'Не удалось создать комнату.')
     }
   }
 
