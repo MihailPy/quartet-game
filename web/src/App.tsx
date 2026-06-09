@@ -821,7 +821,9 @@ function App() {
             room={room}
             currentPlayerID={player?.id ?? null}
             roomIdInput={roomIdInput}
+            playerName={playerName}
             onRoomIdInputChange={setRoomIdInput}
+            onPlayerNameChange={setPlayerName}
             onCreateRoom={createRoom}
             onLoadRoom={loadRoom}
           />
