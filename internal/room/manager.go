@@ -45,25 +45,41 @@ func NewMemoryManager() *Manager {
 	}
 }
 
-func (m *Manager) CreateRoom(ctx context.Context) (Room, error) {
+func (m *Manager) CreateRoom(ctx context.Context, playerName string) (Player, Room, error) {
+	if playerName == "" {
+		return Player{}, Room{}, ErrInvalidPlayerName
+	}
+
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
+	player := Player{
+		ID:          PlayerID(generateID()),
+		Name:        playerName,
+		IsReady:     false,
+		IsConnected: false,
+	}
+
 	currentRoom := Room{
-		ID:      RoomID(generateID()),
-		Status:  RoomStatusWaiting,
-		Players: []Player{},
+		ID:            RoomID(generateID()),
+		Status:        RoomStatusWaiting,
+		Players:       []Player{player},
+		OwnerPlayerID: player.ID,
 	}
 
 	if m.repository != nil {
 		if err := m.repository.SaveRoom(ctx, currentRoom); err != nil {
-			return Room{}, err
+			return Player{}, Room{}, err
+		}
+
+		if err := m.repository.SaveRoomPlayer(ctx, currentRoom.ID, player); err != nil {
+			return Player{}, Room{}, err
 		}
 	}
 
 	m.rooms[currentRoom.ID] = currentRoom
 
-	return currentRoom, nil
+	return player, currentRoom, nil
 }
 
 func (m *Manager) GetRoom(ctx context.Context, id RoomID) (Room, error) {

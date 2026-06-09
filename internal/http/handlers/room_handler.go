@@ -25,6 +25,10 @@ type JoinRoomRequest struct {
 	Name string `json:"name"`
 }
 
+type CreateRoomRequest struct {
+	Name string `json:"name"`
+}
+
 type JoinRoomResponse struct {
 	Player room.Player `json:"player"`
 	Room   room.Room   `json:"room"`
@@ -87,19 +91,37 @@ func NewRoomHandler(
 
 func (h *RoomHandler) CreateRoom(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		w.WriteHeader(http.StatusMethodNotAllowed)
+		writeError(w, http.StatusMethodNotAllowed, "method not allowed")
 		return
 	}
-	createdRoom, err := h.manager.CreateRoom(r.Context())
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+
+	var req CreateRoomRequest
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeError(w, http.StatusBadRequest, "invalid create room request")
 		return
+	}
+
+	player, createdRoom, err := h.manager.CreateRoom(r.Context(), req.Name)
+	if err != nil {
+		if err == room.ErrInvalidPlayerName {
+			writeError(w, http.StatusBadRequest, "player name is required")
+			return
+		}
+
+		writeError(w, http.StatusInternalServerError, "failed to create room")
+		return
+	}
+
+	response := JoinRoomResponse{
+		Player: player,
+		Room:   createdRoom,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 
-	_ = json.NewEncoder(w).Encode(createdRoom)
+	_ = json.NewEncoder(w).Encode(response)
 }
 
 func (h *RoomHandler) JoinRoom(w http.ResponseWriter, r *http.Request, roomID room.RoomID) {
