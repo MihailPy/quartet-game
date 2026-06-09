@@ -21,11 +21,16 @@ type RoomHandler struct {
 	eventBroadcaster EventBroadcaster
 }
 
-type JoinRoomRequest struct {
+type CreateRoomRequest struct {
 	Name string `json:"name"`
 }
 
-type CreateRoomRequest struct {
+type CreateRoomResponse struct {
+	Player room.Player `json:"player"`
+	Room   room.Room   `json:"room"`
+}
+
+type JoinRoomRequest struct {
 	Name string `json:"name"`
 }
 
@@ -113,7 +118,7 @@ func (h *RoomHandler) CreateRoom(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := JoinRoomResponse{
+	response := CreateRoomResponse{
 		Player: player,
 		Room:   createdRoom,
 	}
