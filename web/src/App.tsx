@@ -142,7 +142,10 @@ function App() {
       savePlayer(data.player)
 
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error')
+      const message =
+        err instanceof Error ? err.message : 'Не удалось подключиться к комнате.'
+
+      setError(getJoinRoomErrorMessage(message))
     }
   }
 
@@ -525,6 +528,28 @@ function App() {
           quartetTitle: getQuartetTitle(quartetID),
         })),
     )
+  }
+
+  function getJoinRoomErrorMessage(message: string): string {
+    const normalizedMessage = message.trim().toLowerCase()
+
+    if (normalizedMessage === 'room is full') {
+      return 'Комната заполнена.'
+    }
+
+    if (normalizedMessage === 'room already started') {
+      return 'Игра в этой комнате уже началась.'
+    }
+
+    if (normalizedMessage === 'room not found') {
+      return 'Комната не найдена.'
+    }
+
+    if (normalizedMessage === 'player name is required') {
+      return 'Введите имя игрока.'
+    }
+
+    return message
   }
 
   useEffect(() => {
