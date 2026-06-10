@@ -142,13 +142,21 @@ function App() {
       savePlayer(data.player)
 
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error')
+      const message =
+        err instanceof Error ? err.message : 'Не удалось подключиться к комнате.'
+
+      setError(getJoinRoomErrorMessage(message))
     }
   }
 
   async function markReady() {
     if (!room || !player) {
       setError('Join room first')
+      return
+    }
+
+    if (!isCurrentPlayerConnected()) {
+      setError('Ты не подключён к комнате.')
       return
     }
 
@@ -174,6 +182,11 @@ function App() {
   async function startGame() {
     if (!room) {
       setError('Create room first')
+      return
+    }
+
+    if (!isCurrentPlayerConnected()) {
+      setError('Ты не подключён к комнате.')
       return
     }
 
@@ -478,8 +491,30 @@ function App() {
     return Boolean(room && player && room.owner_player_id === player.id)
   }
 
+  function getCurrentRoomPlayer(): Player | null {
+    if (!room || !player) {
+      return null
+    }
+
+    return room.players.find((roomPlayer) => roomPlayer.id === player.id) ?? null
+  }
+
+  function isCurrentPlayerInRoom(): boolean {
+    return getCurrentRoomPlayer() !== null
+  }
+
+  function isCurrentPlayerConnected(): boolean {
+    const currentRoomPlayer = getCurrentRoomPlayer()
+
+    return currentRoomPlayer?.is_connected === true
+  }
+
   function canStartGame(): boolean {
     if (!room || !player) {
+      return false
+    }
+
+    if (!isCurrentPlayerConnected()) {
       return false
     }
 
@@ -525,6 +560,28 @@ function App() {
           quartetTitle: getQuartetTitle(quartetID),
         })),
     )
+  }
+
+  function getJoinRoomErrorMessage(message: string): string {
+    const normalizedMessage = message.trim().toLowerCase()
+
+    if (normalizedMessage === 'room is full') {
+      return 'Комната заполнена.'
+    }
+
+    if (normalizedMessage === 'room already started') {
+      return 'Игра в этой комнате уже началась.'
+    }
+
+    if (normalizedMessage === 'room not found') {
+      return 'Комната не найдена.'
+    }
+
+    if (normalizedMessage === 'player name is required') {
+      return 'Введите имя игрока.'
+    }
+
+    return message
   }
 
   useEffect(() => {
@@ -835,6 +892,7 @@ function App() {
             onPlayerNameChange={setPlayerName}
             onJoinRoom={joinRoom}
             onMarkReady={markReady}
+            isCurrentPlayerInRoom={isCurrentPlayerInRoom()}
           />
 
           <GamePanel

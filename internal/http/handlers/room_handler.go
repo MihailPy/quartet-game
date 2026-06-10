@@ -144,12 +144,27 @@ func (h *RoomHandler) JoinRoom(w http.ResponseWriter, r *http.Request, roomID ro
 
 	player, joinedRoom, err := h.manager.JoinRoom(r.Context(), roomID, req.Name)
 	if err != nil {
-		if err == room.ErrRoomNotFound {
-			w.WriteHeader(http.StatusNotFound)
+		if err == room.ErrInvalidPlayerName {
+			writeError(w, http.StatusBadRequest, "player name is required")
 			return
 		}
 
-		w.WriteHeader(http.StatusBadRequest)
+		if err == room.ErrRoomNotFound {
+			writeError(w, http.StatusNotFound, "room not found")
+			return
+		}
+
+		if err == room.ErrRoomAlreadyStarted {
+			writeError(w, http.StatusConflict, "room already started")
+			return
+		}
+
+		if err == room.ErrRoomFull {
+			writeError(w, http.StatusConflict, "room is full")
+			return
+		}
+
+		writeError(w, http.StatusInternalServerError, "failed to join room")
 		return
 	}
 

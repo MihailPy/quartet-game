@@ -6,7 +6,7 @@ import (
 )
 
 func TestCreateRoomCreatesOwnerPlayer(t *testing.T) {
-	manager := NewManager(nil)
+	manager := NewManager(nil, 8)
 
 	player, createdRoom, err := manager.CreateRoom(context.Background(), "Mihail")
 	if err != nil {
@@ -43,7 +43,7 @@ func TestCreateRoomCreatesOwnerPlayer(t *testing.T) {
 }
 
 func TestJoinRoomDoesNotChangeOwner(t *testing.T) {
-	manager := NewManager(nil)
+	manager := NewManager(nil, 8)
 
 	owner, createdRoom, err := manager.CreateRoom(context.Background(), "Mihail")
 	if err != nil {
@@ -77,10 +77,63 @@ func TestJoinRoomDoesNotChangeOwner(t *testing.T) {
 }
 
 func TestCreateRoomRequiresPlayerName(t *testing.T) {
-	manager := NewManager(nil)
+	manager := NewManager(nil, 8)
 
 	_, _, err := manager.CreateRoom(context.Background(), "")
 	if err != ErrInvalidPlayerName {
 		t.Fatalf("expected ErrInvalidPlayerName, got %v", err)
+	}
+}
+
+func TestJoinRoomFailsWhenRoomIsFull(t *testing.T) {
+	manager := NewManager(nil, 2)
+
+	_, createdRoom, err := manager.CreateRoom(context.Background(), "Mihail")
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	_, _, err = manager.JoinRoom(context.Background(), createdRoom.ID, "Anna")
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	_, _, err = manager.JoinRoom(context.Background(), createdRoom.ID, "John")
+	if err != ErrRoomFull {
+		t.Fatalf("expected ErrRoomFull, got %v", err)
+	}
+}
+
+func TestJoinRoomFailsWhenRoomAlreadyStarted(t *testing.T) {
+	manager := NewManager(nil, 4)
+
+	owner, createdRoom, err := manager.CreateRoom(context.Background(), "Mihail")
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	secondPlayer, currentRoom, err := manager.JoinRoom(context.Background(), createdRoom.ID, "Anna")
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	currentRoom, err = manager.MarkPlayerReady(context.Background(), currentRoom.ID, owner.ID)
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	currentRoom, err = manager.MarkPlayerReady(context.Background(), currentRoom.ID, secondPlayer.ID)
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	_, err = manager.StartRoom(context.Background(), currentRoom.ID)
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	_, _, err = manager.JoinRoom(context.Background(), currentRoom.ID, "John")
+	if err != ErrRoomAlreadyStarted {
+		t.Fatalf("expected ErrRoomAlreadyStarted, got %v", err)
 	}
 }

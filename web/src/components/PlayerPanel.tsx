@@ -7,6 +7,7 @@ type PlayerPanelProps = {
   onPlayerNameChange: (value: string) => void
   onJoinRoom: () => void
   onMarkReady: () => void
+  isCurrentPlayerInRoom: boolean
 }
 
 export function PlayerPanel({
@@ -16,6 +17,7 @@ export function PlayerPanel({
   onPlayerNameChange,
   onJoinRoom,
   onMarkReady,
+  isCurrentPlayerInRoom,
 }: PlayerPanelProps) {
   return (
     <div className="panel">
@@ -23,7 +25,7 @@ export function PlayerPanel({
 
       {!room && <p>Сначала создай или загрузи комнату.</p>}
 
-      {room && !player && (
+      {room && !isCurrentPlayerInRoom && (
         <>
           <input
             className="input"
@@ -38,7 +40,7 @@ export function PlayerPanel({
         </>
       )}
 
-      {player && (
+      {player && isCurrentPlayerInRoom && (
         <div className="player-info">
           <p>
             <strong>Имя:</strong> {player.name}

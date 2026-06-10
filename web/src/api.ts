@@ -64,7 +64,11 @@ export async function joinRoomRequest(
   })
 
   if (!response.ok) {
-    throw new Error('Failed to join room')
+    const errorPayload = await response.json().catch(() => null)
+
+    throw new Error(
+      errorPayload?.error ?? 'Не удалось подключиться к комнате.',
+    )
   }
 
   return (await response.json()) as {
