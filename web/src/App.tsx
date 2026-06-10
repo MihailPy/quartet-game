@@ -491,14 +491,16 @@ function App() {
     return Boolean(room && player && room.owner_player_id === player.id)
   }
 
-  function getCurrentRoomPlayer() {
+  function getCurrentRoomPlayer(): Player | null {
     if (!room || !player) {
       return null
     }
 
-    return (
-      room.players.find((roomPlayer) => roomPlayer.id === player.id) ?? null
-    )
+    return room.players.find((roomPlayer) => roomPlayer.id === player.id) ?? null
+  }
+
+  function isCurrentPlayerInRoom(): boolean {
+    return getCurrentRoomPlayer() !== null
   }
 
   function isCurrentPlayerConnected(): boolean {
@@ -890,6 +892,7 @@ function App() {
             onPlayerNameChange={setPlayerName}
             onJoinRoom={joinRoom}
             onMarkReady={markReady}
+            isCurrentPlayerInRoom={isCurrentPlayerInRoom()}
           />
 
           <GamePanel
