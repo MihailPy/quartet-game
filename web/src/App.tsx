@@ -155,6 +155,11 @@ function App() {
       return
     }
 
+    if (!isCurrentPlayerConnected()) {
+      setError('Ты не подключён к комнате.')
+      return
+    }
+
     setError('')
 
     try {
@@ -177,6 +182,11 @@ function App() {
   async function startGame() {
     if (!room) {
       setError('Create room first')
+      return
+    }
+
+    if (!isCurrentPlayerConnected()) {
+      setError('Ты не подключён к комнате.')
       return
     }
 
@@ -481,8 +491,28 @@ function App() {
     return Boolean(room && player && room.owner_player_id === player.id)
   }
 
+  function getCurrentRoomPlayer() {
+    if (!room || !player) {
+      return null
+    }
+
+    return (
+      room.players.find((roomPlayer) => roomPlayer.id === player.id) ?? null
+    )
+  }
+
+  function isCurrentPlayerConnected(): boolean {
+    const currentRoomPlayer = getCurrentRoomPlayer()
+
+    return currentRoomPlayer?.is_connected === true
+  }
+
   function canStartGame(): boolean {
     if (!room || !player) {
+      return false
+    }
+
+    if (!isCurrentPlayerConnected()) {
       return false
     }
 
