@@ -166,6 +166,10 @@ func (m *Manager) JoinRoom(ctx context.Context, roomID RoomID, playerName string
 		currentRoom = loadedRoom
 	}
 
+	if currentRoom.Status != RoomStatusWaiting {
+		return Player{}, Room{}, ErrRoomAlreadyStarted
+	}
+
 	player := Player{
 		ID:          PlayerID(generateID()),
 		Name:        playerName,
