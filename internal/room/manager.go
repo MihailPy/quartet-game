@@ -14,6 +14,7 @@ var ErrPlayerNotFound = errors.New("player not found")
 var ErrNotEnoughPlayers = errors.New("not enough players")
 var ErrNotAllPlayersReady = errors.New("not all players ready")
 var ErrRoomAlreadyStarted = errors.New("room already started")
+var ErrRoomFull = errors.New("room is full")
 
 type Repository interface {
 	SaveRoom(ctx context.Context, currentRoom Room) error
@@ -168,6 +169,10 @@ func (m *Manager) JoinRoom(ctx context.Context, roomID RoomID, playerName string
 
 	if currentRoom.Status != RoomStatusWaiting {
 		return Player{}, Room{}, ErrRoomAlreadyStarted
+	}
+
+	if m.maxPlayers > 0 && len(currentRoom.Players) >= m.maxPlayers {
+		return Player{}, Room{}, ErrRoomFull
 	}
 
 	player := Player{

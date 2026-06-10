@@ -84,3 +84,22 @@ func TestCreateRoomRequiresPlayerName(t *testing.T) {
 		t.Fatalf("expected ErrInvalidPlayerName, got %v", err)
 	}
 }
+
+func TestJoinRoomFailsWhenRoomIsFull(t *testing.T) {
+	manager := NewManager(nil, 2)
+
+	_, createdRoom, err := manager.CreateRoom(context.Background(), "Mihail")
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	_, _, err = manager.JoinRoom(context.Background(), createdRoom.ID, "Anna")
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	_, _, err = manager.JoinRoom(context.Background(), createdRoom.ID, "John")
+	if err != ErrRoomFull {
+		t.Fatalf("expected ErrRoomFull, got %v", err)
+	}
+}
