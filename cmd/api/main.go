@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
 
@@ -24,9 +25,18 @@ func main() {
 
 	deckRepository := postgres.NewDeckRepository(db)
 	deckService := deck.NewService(deckRepository)
+	defaultDeck, err := deckService.LoadDeck(
+		context.Background(),
+		game.DeckID(cfg.DefaultDeckID),
+	)
+	if err != nil {
+		log.Fatalf("failed to load default deck: %v", err)
+	}
+
+	maxPlayers := game.MaxPlayersForDeck(defaultDeck)
 
 	roomRepository := postgres.NewRoomRepository(db)
-	roomManager := room.NewManager(roomRepository)
+	roomManager := room.NewManager(roomRepository, maxPlayers)
 
 	gameRepository := postgres.NewGameRepository(db)
 

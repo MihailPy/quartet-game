@@ -6,7 +6,7 @@ import (
 )
 
 func TestCreateRoomCreatesOwnerPlayer(t *testing.T) {
-	manager := NewManager(nil)
+	manager := NewManager(nil, 8)
 
 	player, createdRoom, err := manager.CreateRoom(context.Background(), "Mihail")
 	if err != nil {
@@ -43,7 +43,7 @@ func TestCreateRoomCreatesOwnerPlayer(t *testing.T) {
 }
 
 func TestJoinRoomDoesNotChangeOwner(t *testing.T) {
-	manager := NewManager(nil)
+	manager := NewManager(nil, 8)
 
 	owner, createdRoom, err := manager.CreateRoom(context.Background(), "Mihail")
 	if err != nil {
@@ -77,7 +77,7 @@ func TestJoinRoomDoesNotChangeOwner(t *testing.T) {
 }
 
 func TestCreateRoomRequiresPlayerName(t *testing.T) {
-	manager := NewManager(nil)
+	manager := NewManager(nil, 8)
 
 	_, _, err := manager.CreateRoom(context.Background(), "")
 	if err != ErrInvalidPlayerName {

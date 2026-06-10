@@ -30,18 +30,21 @@ type Manager struct {
 	mu         sync.RWMutex
 	rooms      map[RoomID]Room
 	repository Repository
+	maxPlayers int
 }
 
-func NewManager(repository Repository) *Manager {
+func NewManager(repository Repository, maxPlayers int) *Manager {
 	return &Manager{
 		rooms:      make(map[RoomID]Room),
 		repository: repository,
+		maxPlayers: maxPlayers,
 	}
 }
 
 func NewMemoryManager() *Manager {
 	return &Manager{
-		rooms: make(map[RoomID]Room),
+		rooms:      make(map[RoomID]Room),
+		maxPlayers: 8,
 	}
 }
 
