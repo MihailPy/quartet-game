@@ -3,23 +3,13 @@ import type { Room } from '../types'
 type RoomPanelProps = {
   room: Room | null
   currentPlayerID: string | null
-  roomIdInput: string
-  playerName: string
-  onRoomIdInputChange: (value: string) => void
-  onPlayerNameChange: (value: string) => void
-  onCreateRoom: () => void
-  onLoadRoom: () => void
+  onLeaveRoom: () => void
 }
 
 export function RoomPanel({
   room,
   currentPlayerID,
-  roomIdInput,
-  playerName,
-  onRoomIdInputChange,
-  onPlayerNameChange,
-  onCreateRoom,
-  onLoadRoom,
+  onLeaveRoom,
 }: RoomPanelProps) {
   const readyPlayersCount =
     room?.players.filter((roomPlayer) => roomPlayer.is_ready).length ?? 0
@@ -40,41 +30,17 @@ export function RoomPanel({
     <div className="panel">
       <h2>Комната</h2>
 
-      <div className="create-room-box">
-        <input
-          className="input"
-          placeholder="Имя игрока"
-          value={playerName}
-          onChange={(event) => onPlayerNameChange(event.target.value)}
-        />
-
-        <button
-          className="button"
-          onClick={onCreateRoom}
-          disabled={playerName.trim() === ''}
-        >
-          Создать комнату
-        </button>
-      </div>
-
-      <div className="join-existing-room">
-        <input
-          className="input"
-          placeholder="ID комнаты"
-          value={roomIdInput}
-          onChange={(event) => onRoomIdInputChange(event.target.value)}
-        />
-
-        <button className="button" onClick={onLoadRoom}>
-          Подключиться к комнате
-        </button>
-      </div>
+      {!room && <p>Комната не загружена.</p>}
 
       {room && (
         <div className="room-info">
           <p>
             <strong>ID:</strong> <code>{room.id}</code>
           </p>
+
+          <button className="button secondary-button" onClick={onLeaveRoom}>
+            Выйти из комнаты
+          </button>
 
           <p>
             <strong>Статус:</strong> {room.status}

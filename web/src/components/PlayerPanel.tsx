@@ -1,46 +1,21 @@
-import type { Player, Room } from '../types'
+import type { Player } from '../types'
 
 type PlayerPanelProps = {
-  room: Room | null
   player: Player | null
-  playerName: string
-  onPlayerNameChange: (value: string) => void
-  onJoinRoom: () => void
   onMarkReady: () => void
-  isCurrentPlayerInRoom: boolean
 }
 
 export function PlayerPanel({
-  room,
   player,
-  playerName,
-  onPlayerNameChange,
-  onJoinRoom,
   onMarkReady,
-  isCurrentPlayerInRoom,
 }: PlayerPanelProps) {
   return (
     <div className="panel">
       <h2>Мой игрок</h2>
 
-      {!room && <p>Сначала создай или загрузи комнату.</p>}
+      {!player && <p>Игрок не загружен.</p>}
 
-      {room && !isCurrentPlayerInRoom && (
-        <>
-          <input
-            className="input"
-            placeholder="Имя игрока"
-            value={playerName}
-            onChange={(event) => onPlayerNameChange(event.target.value)}
-          />
-
-          <button className="button" onClick={onJoinRoom}>
-            Подключиться
-          </button>
-        </>
-      )}
-
-      {player && isCurrentPlayerInRoom && (
+      {player && (
         <div className="player-info">
           <p>
             <strong>Имя:</strong> {player.name}
@@ -57,7 +32,7 @@ export function PlayerPanel({
           <button
             className="button"
             onClick={onMarkReady}
-            disabled={player.is_ready || room?.status === 'playing'}
+            disabled={player.is_ready}
           >
             {player.is_ready ? 'Готов' : 'Готовиться'}
           </button>
