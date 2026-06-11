@@ -65,6 +65,7 @@ function App() {
   const deckRef = useRef<Deck | null>(null)
   const [reconnectAttempt, setReconnectAttempt] = useState<number>(0)
   const isDevMode = import.meta.env.DEV
+  const [isSessionRestored, setIsSessionRestored] = useState<boolean>(false)
 
   function resetGameState() {
     updateDeck(null)
@@ -780,6 +781,7 @@ function App() {
       const savedPlayer = loadPlayer()
 
       if (!savedRoomID) {
+        setIsSessionRestored(true)
         return
       }
 
@@ -790,7 +792,6 @@ function App() {
           loadedRoom = await loadRoomRequest(savedRoomID)
         } catch {
           clearSession()
-
           return
         }
 
@@ -819,9 +820,10 @@ function App() {
         }
 
         clearSession()
-
       } catch {
         clearSession()
+      } finally {
+        setIsSessionRestored(true)
       }
     }
 
@@ -870,8 +872,14 @@ function App() {
 
         {error && <div className="error">{error}</div>}
 
+        {!isSessionRestored && (
+          <div className="panel">
+            <p>Восстанавливаем session...</p>
+          </div>
+        )}
+
         <section className="game-layout">
-          {!isEntered && (
+          {isSessionRestored && !isEntered && (
             <EntryPanel
               playerName={playerName}
               roomIdInput={roomIdInput}
@@ -882,7 +890,7 @@ function App() {
             />
           )}
 
-          {isEntered && (
+          {isSessionRestored && isEntered && (
             <>
               <RoomPanel
                 room={room}
