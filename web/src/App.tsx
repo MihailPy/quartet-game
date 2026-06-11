@@ -15,6 +15,7 @@ import { GamePanel } from './components/GamePanel'
 import { PlayerHandPanel } from './components/PlayerHandPanel'
 import { PlayerPanel } from './components/PlayerPanel'
 import { RoomPanel } from './components/RoomPanel'
+import { EntryPanel } from './components/EntryPanel'
 import {
   clearPlayer,
   clearSession,
@@ -144,6 +145,37 @@ function App() {
     } catch (err) {
       const message =
         err instanceof Error ? err.message : 'Не удалось подключиться к комнате.'
+
+      setError(getJoinRoomErrorMessage(message))
+    }
+  }
+
+  async function joinRoomByID() {
+    if (!roomIdInput.trim()) {
+      setError('Введите ID комнаты.')
+      return
+    }
+
+    if (!playerName.trim()) {
+      setError('Введите имя игрока.')
+      return
+    }
+
+    setError('')
+
+    try {
+      const loadedRoom = await loadRoomRequest(roomIdInput.trim())
+      const data = await joinRoomRequest(loadedRoom.id, playerName)
+
+      updateRoom(data.room)
+      setPlayer(data.player)
+      resetGameState()
+
+      saveRoomID(data.room.id)
+      savePlayer(data.player)
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : 'Не удалось войти в комнату.'
 
       setError(getJoinRoomErrorMessage(message))
     }
@@ -863,6 +895,8 @@ function App() {
     }
   }, [availableRequestCards, selectedCardID])
 
+  const isEntered = room !== null && player !== null && isCurrentPlayerInRoom()
+
   return (
     <main className="app">
       <section className="game-page">
@@ -874,73 +908,88 @@ function App() {
         {error && <div className="error">{error}</div>}
 
         <section className="game-layout">
-          <RoomPanel
-            room={room}
-            currentPlayerID={player?.id ?? null}
-            roomIdInput={roomIdInput}
-            playerName={playerName}
-            onRoomIdInputChange={setRoomIdInput}
-            onPlayerNameChange={setPlayerName}
-            onCreateRoom={createRoom}
-            onLoadRoom={loadRoom}
-          />
+          {!isEntered && (
+            <EntryPanel
+              playerName={playerName}
+              roomIdInput={roomIdInput}
+              onPlayerNameChange={setPlayerName}
+              onRoomIdInputChange={setRoomIdInput}
+              onCreateRoom={createRoom}
+              onJoinRoomByID={joinRoomByID}
+            />
+          )}
 
-          <PlayerPanel
-            room={room}
-            player={player}
-            playerName={playerName}
-            onPlayerNameChange={setPlayerName}
-            onJoinRoom={joinRoom}
-            onMarkReady={markReady}
-            isCurrentPlayerInRoom={isCurrentPlayerInRoom()}
-          />
+          {isEntered && (
+            <>
+              <RoomPanel
+                room={room}
+                currentPlayerID={player?.id ?? null}
+                roomIdInput={roomIdInput}
+                playerName={playerName}
+                onRoomIdInputChange={setRoomIdInput}
+                onPlayerNameChange={setPlayerName}
+                onCreateRoom={createRoom}
+                onLoadRoom={loadRoom}
+              />
 
-          <GamePanel
-            room={room}
-            player={player}
-            publicGameState={publicGameState}
-            currentTurnPlayerID={currentTurnPlayerID}
-            temporaryMessages={temporaryMessages}
-            gameFinished={gameFinished}
-            socketStatus={socketStatus}
-            targetPlayerID={targetPlayerID}
-            selectedCardID={selectedCardID}
-            availableRequestCards={availableRequestCards}
-            availableRequestCardsByQuartet={getAvailableRequestCardsByQuartet()}
-            onTargetPlayerIDChange={setTargetPlayerID}
-            onSelectedCardIDChange={setSelectedCardID}
-            onRequestCard={requestCard}
-            onStartGame={startGame}
-            isRoomOwner={isRoomOwner()}
-            canStartGame={canStartGame()}
-            getPlayerName={getPlayerName}
-            canRequestCard={canRequestCard}
-            getRequestButtonText={getRequestButtonText}
-            completedQuartets={getCompletedQuartets()}
-          />
+              <PlayerPanel
+                room={room}
+                player={player}
+                playerName={playerName}
+                onPlayerNameChange={setPlayerName}
+                onJoinRoom={joinRoom}
+                onMarkReady={markReady}
+                isCurrentPlayerInRoom={isCurrentPlayerInRoom()}
+              />
 
-          <PlayerHandPanel
-            player={player}
-            playerHand={playerHand}
-            getQuartetTitle={getQuartetTitle}
-          />
+              <GamePanel
+                room={room}
+                player={player}
+                publicGameState={publicGameState}
+                currentTurnPlayerID={currentTurnPlayerID}
+                temporaryMessages={temporaryMessages}
+                gameFinished={gameFinished}
+                socketStatus={socketStatus}
+                targetPlayerID={targetPlayerID}
+                selectedCardID={selectedCardID}
+                availableRequestCards={availableRequestCards}
+                availableRequestCardsByQuartet={getAvailableRequestCardsByQuartet()}
+                onTargetPlayerIDChange={setTargetPlayerID}
+                onSelectedCardIDChange={setSelectedCardID}
+                onRequestCard={requestCard}
+                onStartGame={startGame}
+                isRoomOwner={isRoomOwner()}
+                canStartGame={canStartGame()}
+                getPlayerName={getPlayerName}
+                canRequestCard={canRequestCard}
+                getRequestButtonText={getRequestButtonText}
+                completedQuartets={getCompletedQuartets()}
+              />
 
-          <GameLogPanel
-            gameLog={gameLog}
-            events={events}
-            showDebugEvents={showDebugEvents}
-            onToggleDebugEvents={() => setShowDebugEvents((current) => !current)}
-            isDevMode={isDevMode}
-            diagnostics={{
-              room,
-              player,
-              socketStatus,
-              publicGameState,
-              playerHand,
-              currentTurnPlayerID,
-              gameFinished,
-            }}
-          />
+              <PlayerHandPanel
+                player={player}
+                playerHand={playerHand}
+                getQuartetTitle={getQuartetTitle}
+              />
+
+              <GameLogPanel
+                gameLog={gameLog}
+                events={events}
+                showDebugEvents={showDebugEvents}
+                onToggleDebugEvents={() => setShowDebugEvents((current) => !current)}
+                isDevMode={isDevMode}
+                diagnostics={{
+                  room,
+                  player,
+                  socketStatus,
+                  publicGameState,
+                  playerHand,
+                  currentTurnPlayerID,
+                  gameFinished,
+                }}
+              />
+            </>
+          )}
         </section>
       </section>
     </main>
