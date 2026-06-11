@@ -113,32 +113,6 @@ function App() {
     }
   }
 
-  async function joinRoom() {
-    if (!room) {
-      setError('Create room first')
-      return
-    }
-
-    setError('')
-
-    try {
-      const data = await joinRoomRequest(room.id, playerName)
-
-      updateRoom(data.room)
-      setPlayer(data.player)
-      resetGameState()
-
-      saveRoomID(data.room.id)
-      savePlayer(data.player)
-
-    } catch (err) {
-      const message =
-        err instanceof Error ? err.message : 'Не удалось подключиться к комнате.'
-
-      setError(getJoinRoomErrorMessage(message))
-    }
-  }
-
   async function joinRoomByID() {
     if (!roomIdInput.trim()) {
       setError('Введите ID комнаты.')
@@ -917,13 +891,8 @@ function App() {
               />
 
               <PlayerPanel
-                room={room}
                 player={player}
-                playerName={playerName}
-                onPlayerNameChange={setPlayerName}
-                onJoinRoom={joinRoom}
                 onMarkReady={markReady}
-                isCurrentPlayerInRoom={isCurrentPlayerInRoom()}
               />
 
               <GamePanel
