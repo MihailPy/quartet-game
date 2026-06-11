@@ -13,6 +13,8 @@ export function PlayerPanel({
     <div className="panel">
       <h2>Мой игрок</h2>
 
+      {!player && <p>Игрок не загружен.</p>}
+
       {player && (
         <div className="player-info">
           <p>
