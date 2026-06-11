@@ -30,6 +30,8 @@ export function RoomPanel({
     <div className="panel">
       <h2>Комната</h2>
 
+      {!room && <p>Комната не загружена.</p>}
+
       {room && (
         <div className="room-info">
           <p>
