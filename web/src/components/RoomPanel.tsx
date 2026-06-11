@@ -9,6 +9,7 @@ type RoomPanelProps = {
   onPlayerNameChange: (value: string) => void
   onCreateRoom: () => void
   onLoadRoom: () => void
+  onLeaveRoom: () => void
 }
 
 export function RoomPanel({
@@ -20,6 +21,7 @@ export function RoomPanel({
   onPlayerNameChange,
   onCreateRoom,
   onLoadRoom,
+  onLeaveRoom,
 }: RoomPanelProps) {
   const readyPlayersCount =
     room?.players.filter((roomPlayer) => roomPlayer.is_ready).length ?? 0
@@ -75,6 +77,10 @@ export function RoomPanel({
           <p>
             <strong>ID:</strong> <code>{room.id}</code>
           </p>
+
+          <button className="button secondary-button" onClick={onLeaveRoom}>
+            Выйти из комнаты
+          </button>
 
           <p>
             <strong>Статус:</strong> {room.status}

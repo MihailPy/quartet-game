@@ -82,6 +82,19 @@ function App() {
     setReconnectAttempt(0)
   }
 
+  function leaveRoom() {
+    if (socketRef.current) {
+      socketRef.current.close()
+      socketRef.current = null
+    }
+
+    updateRoom(null)
+    setPlayer(null)
+    setRoomIdInput('')
+    clearSession()
+    resetGameState()
+  }
+
   async function createRoom() {
     setError('')
 
@@ -930,6 +943,7 @@ function App() {
                 onPlayerNameChange={setPlayerName}
                 onCreateRoom={createRoom}
                 onLoadRoom={loadRoom}
+                onLeaveRoom={leaveRoom}
               />
 
               <PlayerPanel
