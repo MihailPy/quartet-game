@@ -17,7 +17,6 @@ import { PlayerPanel } from './components/PlayerPanel'
 import { RoomPanel } from './components/RoomPanel'
 import { EntryPanel } from './components/EntryPanel'
 import {
-  clearPlayer,
   clearSession,
   loadPlayer,
   loadRoomID,
@@ -111,29 +110,6 @@ function App() {
 
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Не удалось создать комнату.')
-    }
-  }
-
-  async function loadRoom() {
-    if (!roomIdInput) {
-      setError('Enter room id')
-      return
-    }
-
-    setError('')
-
-    try {
-      const loadedRoom = await loadRoomRequest(roomIdInput)
-
-      updateRoom(loadedRoom)
-      setPlayer(null)
-      resetGameState()
-
-      saveRoomID(loadedRoom.id)
-      clearPlayer()
-
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error')
     }
   }
 
@@ -937,12 +913,6 @@ function App() {
               <RoomPanel
                 room={room}
                 currentPlayerID={player?.id ?? null}
-                roomIdInput={roomIdInput}
-                playerName={playerName}
-                onRoomIdInputChange={setRoomIdInput}
-                onPlayerNameChange={setPlayerName}
-                onCreateRoom={createRoom}
-                onLoadRoom={loadRoom}
                 onLeaveRoom={leaveRoom}
               />
 

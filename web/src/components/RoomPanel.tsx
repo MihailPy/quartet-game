@@ -3,24 +3,12 @@ import type { Room } from '../types'
 type RoomPanelProps = {
   room: Room | null
   currentPlayerID: string | null
-  roomIdInput: string
-  playerName: string
-  onRoomIdInputChange: (value: string) => void
-  onPlayerNameChange: (value: string) => void
-  onCreateRoom: () => void
-  onLoadRoom: () => void
   onLeaveRoom: () => void
 }
 
 export function RoomPanel({
   room,
   currentPlayerID,
-  roomIdInput,
-  playerName,
-  onRoomIdInputChange,
-  onPlayerNameChange,
-  onCreateRoom,
-  onLoadRoom,
   onLeaveRoom,
 }: RoomPanelProps) {
   const readyPlayersCount =
@@ -41,36 +29,6 @@ export function RoomPanel({
   return (
     <div className="panel">
       <h2>Комната</h2>
-
-      <div className="create-room-box">
-        <input
-          className="input"
-          placeholder="Имя игрока"
-          value={playerName}
-          onChange={(event) => onPlayerNameChange(event.target.value)}
-        />
-
-        <button
-          className="button"
-          onClick={onCreateRoom}
-          disabled={playerName.trim() === ''}
-        >
-          Создать комнату
-        </button>
-      </div>
-
-      <div className="join-existing-room">
-        <input
-          className="input"
-          placeholder="ID комнаты"
-          value={roomIdInput}
-          onChange={(event) => onRoomIdInputChange(event.target.value)}
-        />
-
-        <button className="button" onClick={onLoadRoom}>
-          Подключиться к комнате
-        </button>
-      </div>
 
       {room && (
         <div className="room-info">
