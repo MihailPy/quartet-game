@@ -34,9 +34,10 @@ export function RoomPanel({
 
       {room && (
         <div className="room-info">
-          <p>
-            <strong>ID:</strong> <code>{room.id}</code>
-          </p>
+          <div className="room-id-box">
+            <span className="field-label">ID комнаты</span>
+            <code className="room-id">{room.id}</code>
+          </div>
 
           <button className="button secondary-button" onClick={onLeaveRoom}>
             Выйти из комнаты

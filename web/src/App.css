@@ -153,6 +153,22 @@ body {
   margin: 0;
 }
 
+.room-id-box {
+  display: grid;
+  gap: 6px;
+}
+
+.field-label {
+  color: #52525b;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.room-id {
+  user-select: all;
+  cursor: text;
+}
+
 .player-info {
   display: grid;
   gap: 10px;
