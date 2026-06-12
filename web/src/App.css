@@ -145,19 +145,24 @@ body {
 }
 
 .room-info {
-  margin-top: 16px;
+  display: grid;
+  gap: 16px;
 }
 
 .room-info p {
-  margin: 12px 0 6px;
+  margin: 0;
 }
 
 code {
   display: block;
-  padding: 10px;
+  padding: 10px 12px;
   overflow-wrap: anywhere;
   background: #f4f4f5;
-  border-radius: 8px;
+  border: 1px solid #e4e4e7;
+  border-radius: 10px;
+  color: #52525b;
+  font-size: 13px;
+  line-height: 1.35;
 }
 
 .error {
@@ -218,11 +223,17 @@ code {
 
 .player-row {
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  padding: 8px 0;
-  border-bottom: 1px solid #e4e4e7;
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 1px solid #f1f5f9;
   font-size: 14px;
+  line-height: 1.25;
+}
+
+.player-row:last-child {
+  border-bottom: 0;
 }
 
 .button:disabled {
@@ -410,11 +421,18 @@ code {
 }
 
 .ready-badge,
-.not-ready-badge {
+.not-ready-badge,
+.connected-badge,
+.disconnected-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 22px;
   border-radius: 999px;
-  padding: 4px 8px;
+  padding: 3px 8px;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 800;
+  line-height: 1;
 }
 
 .ready-badge {
@@ -429,12 +447,11 @@ code {
 
 .waiting-box {
   display: grid;
-  gap: 6px;
-  margin-top: 12px;
-  padding: 12px;
-  border: 1px solid #e4e4e7;
-  border-radius: 12px;
-  background: #f8fafc;
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid #dbeafe;
+  border-radius: 14px;
+  background: #eff6ff;
 }
 
 .waiting-box p {
@@ -577,17 +594,9 @@ code {
 
 .player-badges {
   display: flex;
-  gap: 6px;
+  gap: 5px;
   flex-wrap: wrap;
   justify-content: flex-end;
-}
-
-.connected-badge,
-.disconnected-badge {
-  border-radius: 999px;
-  padding: 4px 8px;
-  font-size: 12px;
-  font-weight: 700;
 }
 
 .connected-badge {
