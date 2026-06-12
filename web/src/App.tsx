@@ -878,7 +878,7 @@ function App() {
           </div>
         )}
 
-        <section className="game-layout">
+        <section className={isEntered ? 'game-layout' : 'game-layout entry-layout'}>
           {isSessionRestored && !isEntered && (
             <EntryPanel
               playerName={playerName}
