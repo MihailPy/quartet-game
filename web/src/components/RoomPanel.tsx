@@ -4,12 +4,14 @@ type RoomPanelProps = {
   room: Room | null
   currentPlayerID: string | null
   onLeaveRoom: () => void
+  onCopyRoomID: () => void
 }
 
 export function RoomPanel({
   room,
   currentPlayerID,
   onLeaveRoom,
+  onCopyRoomID,
 }: RoomPanelProps) {
   const readyPlayersCount =
     room?.players.filter((roomPlayer) => roomPlayer.is_ready).length ?? 0
@@ -36,7 +38,18 @@ export function RoomPanel({
         <div className="room-info">
           <div className="room-id-box">
             <span className="field-label">ID комнаты</span>
-            <code className="room-id">{room.id}</code>
+
+            <div className="room-id-row">
+              <code className="room-id">{room.id}</code>
+
+              <button
+                className="secondary-button room-id-copy-button"
+                type="button"
+                onClick={onCopyRoomID}
+              >
+                Копировать
+              </button>
+            </div>
           </div>
 
           <button className="button secondary-button" onClick={onLeaveRoom}>

@@ -158,6 +158,19 @@ body {
   gap: 6px;
 }
 
+.room-id-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.room-id-copy-button {
+  width: auto;
+  white-space: nowrap;
+  padding-inline: 12px;
+}
+
 .field-label {
   color: #52525b;
   font-size: 13px;

@@ -95,6 +95,19 @@ function App() {
     resetGameState()
   }
 
+  async function copyRoomID() {
+    if (!room) {
+      return
+    }
+
+    try {
+      await navigator.clipboard.writeText(room.id)
+      showTemporaryMessage('ID комнаты скопирован.')
+    } catch {
+      setError('Не удалось скопировать ID комнаты.')
+    }
+  }
+
   async function createRoom() {
     setError('')
 
@@ -897,6 +910,7 @@ function App() {
                   room={room}
                   currentPlayerID={player?.id ?? null}
                   onLeaveRoom={leaveRoom}
+                  onCopyRoomID={copyRoomID}
                 />
 
                 <PlayerHandPanel
