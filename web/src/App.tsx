@@ -95,6 +95,19 @@ function App() {
     resetGameState()
   }
 
+  async function copyRoomID() {
+    if (!room) {
+      return
+    }
+
+    try {
+      await navigator.clipboard.writeText(room.id)
+      showTemporaryMessage('ID комнаты скопирован.')
+    } catch {
+      setError('Не удалось скопировать ID комнаты.')
+    }
+  }
+
   async function createRoom() {
     setError('')
 
@@ -878,7 +891,7 @@ function App() {
           </div>
         )}
 
-        <section className="game-layout">
+        <section className={isEntered ? 'game-layout' : 'game-layout entry-layout'}>
           {isSessionRestored && !isEntered && (
             <EntryPanel
               playerName={playerName}
@@ -892,63 +905,70 @@ function App() {
 
           {isSessionRestored && isEntered && (
             <>
-              <RoomPanel
-                room={room}
-                currentPlayerID={player?.id ?? null}
-                onLeaveRoom={leaveRoom}
-              />
+              <div className="layout-main-column">
+                <RoomPanel
+                  room={room}
+                  currentPlayerID={player?.id ?? null}
+                  onLeaveRoom={leaveRoom}
+                  onCopyRoomID={copyRoomID}
+                />
 
-              <PlayerPanel
-                player={player}
-                onMarkReady={markReady}
-              />
+                <PlayerHandPanel
+                  player={player}
+                  playerHand={playerHand}
+                  getQuartetTitle={getQuartetTitle}
+                />
+              </div>
 
-              <GamePanel
-                room={room}
-                player={player}
-                publicGameState={publicGameState}
-                currentTurnPlayerID={currentTurnPlayerID}
-                temporaryMessages={temporaryMessages}
-                gameFinished={gameFinished}
-                socketStatus={socketStatus}
-                targetPlayerID={targetPlayerID}
-                selectedCardID={selectedCardID}
-                availableRequestCards={availableRequestCards}
-                availableRequestCardsByQuartet={getAvailableRequestCardsByQuartet()}
-                onTargetPlayerIDChange={setTargetPlayerID}
-                onSelectedCardIDChange={setSelectedCardID}
-                onRequestCard={requestCard}
-                onStartGame={startGame}
-                isRoomOwner={isRoomOwner()}
-                canStartGame={canStartGame()}
-                getPlayerName={getPlayerName}
-                canRequestCard={canRequestCard}
-                getRequestButtonText={getRequestButtonText}
-                completedQuartets={getCompletedQuartets()}
-              />
+              <div className="layout-center-column">
+                <GamePanel
+                  room={room}
+                  player={player}
+                  publicGameState={publicGameState}
+                  currentTurnPlayerID={currentTurnPlayerID}
+                  temporaryMessages={temporaryMessages}
+                  gameFinished={gameFinished}
+                  socketStatus={socketStatus}
+                  targetPlayerID={targetPlayerID}
+                  selectedCardID={selectedCardID}
+                  availableRequestCards={availableRequestCards}
+                  availableRequestCardsByQuartet={getAvailableRequestCardsByQuartet()}
+                  onTargetPlayerIDChange={setTargetPlayerID}
+                  onSelectedCardIDChange={setSelectedCardID}
+                  onRequestCard={requestCard}
+                  onStartGame={startGame}
+                  isRoomOwner={isRoomOwner()}
+                  canStartGame={canStartGame()}
+                  getPlayerName={getPlayerName}
+                  canRequestCard={canRequestCard}
+                  getRequestButtonText={getRequestButtonText}
+                  completedQuartets={getCompletedQuartets()}
+                />
+              </div>
 
-              <PlayerHandPanel
-                player={player}
-                playerHand={playerHand}
-                getQuartetTitle={getQuartetTitle}
-              />
+              <div className="layout-side-column">
+                <PlayerPanel
+                  player={player}
+                  onMarkReady={markReady}
+                />
 
-              <GameLogPanel
-                gameLog={gameLog}
-                events={events}
-                showDebugEvents={showDebugEvents}
-                onToggleDebugEvents={() => setShowDebugEvents((current) => !current)}
-                isDevMode={isDevMode}
-                diagnostics={{
-                  room,
-                  player,
-                  socketStatus,
-                  publicGameState,
-                  playerHand,
-                  currentTurnPlayerID,
-                  gameFinished,
-                }}
-              />
+                <GameLogPanel
+                  gameLog={gameLog}
+                  events={events}
+                  showDebugEvents={showDebugEvents}
+                  onToggleDebugEvents={() => setShowDebugEvents((current) => !current)}
+                  isDevMode={isDevMode}
+                  diagnostics={{
+                    room,
+                    player,
+                    socketStatus,
+                    publicGameState,
+                    playerHand,
+                    currentTurnPlayerID,
+                    gameFinished,
+                  }}
+                />
+              </div>
             </>
           )}
         </section>
