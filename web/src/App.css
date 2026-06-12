@@ -153,6 +153,27 @@ body {
   margin: 0;
 }
 
+.player-info {
+  display: grid;
+  gap: 10px;
+}
+
+.player-info p {
+  margin: 0;
+}
+
+.player-info strong {
+  color: #52525b;
+}
+
+.player-info code {
+  margin-top: 4px;
+}
+
+.player-info .button {
+  margin-top: 2px;
+}
+
 code {
   display: block;
   padding: 10px 12px;
