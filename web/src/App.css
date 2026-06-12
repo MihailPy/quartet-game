@@ -53,6 +53,39 @@ body {
   justify-content: center;
 }
 
+.entry-panel {
+  gap: 18px;
+  padding: 24px;
+}
+
+.entry-panel h2 {
+  margin-bottom: 2px;
+}
+
+.form-field {
+  display: grid;
+  gap: 7px;
+  font-size: 14px;
+  font-weight: 650;
+  color: #27272a;
+}
+
+.form-field span {
+  line-height: 1.2;
+}
+
+.entry-actions {
+  display: grid;
+  gap: 10px;
+}
+
+.join-existing-room {
+  display: grid;
+  gap: 10px;
+  padding-top: 18px;
+  border-top: 1px solid #e4e4e7;
+}
+
 .panel {
   display: grid;
   gap: 12px;
@@ -81,17 +114,26 @@ body {
 
 .button {
   width: 100%;
+  min-height: 42px;
   padding: 10px 14px;
   border: 0;
-  border-radius: 10px;
+  border-radius: 12px;
   background: #18181b;
   color: white;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
+  transition:
+    transform 0.12s ease,
+    background 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
 .button:hover {
   background: #3f3f46;
+}
+
+.button:active {
+  transform: translateY(1px);
 }
 
 .room-info {
@@ -134,10 +176,27 @@ code {
 
 .input {
   width: 100%;
+  min-height: 42px;
   padding: 10px 12px;
   border: 1px solid #d4d4d8;
-  border-radius: 10px;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #18181b;
   font: inherit;
+  outline: none;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background 0.15s ease;
+}
+
+.input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+}
+
+.input::placeholder {
+  color: #a1a1aa;
 }
 
 .players-list {
@@ -161,6 +220,8 @@ code {
 .button:disabled {
   cursor: not-allowed;
   background: #a1a1aa;
+  box-shadow: none;
+  transform: none;
 }
 
 .start-button {
