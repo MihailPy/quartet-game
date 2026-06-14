@@ -69,6 +69,7 @@ function App() {
   const [isCreatingRoom, setIsCreatingRoom] = useState<boolean>(false)
   const [isJoiningRoom, setIsJoiningRoom] = useState<boolean>(false)
   const [isMarkingReady, setIsMarkingReady] = useState<boolean>(false)
+  const [isStartingGame, setIsStartingGame] = useState<boolean>(false)
 
   function resetGameState() {
     updateDeck(null)
@@ -212,6 +213,10 @@ function App() {
   }
 
   async function startGame() {
+    if (isStartingGame) {
+      return
+    }
+
     if (!room) {
       setError('Create room first')
       return
@@ -237,6 +242,7 @@ function App() {
       return
     }
 
+    setIsStartingGame(true)
     setError('')
 
     try {
@@ -249,6 +255,8 @@ function App() {
       await loadDeck(data.room.id)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Не удалось начать игру.')
+    } finally {
+      setIsStartingGame(false)
     }
   }
 
@@ -968,6 +976,7 @@ function App() {
                   canRequestCard={canRequestCard}
                   getRequestButtonText={getRequestButtonText}
                   completedQuartets={getCompletedQuartets()}
+                  isStartingGame={isStartingGame}
                 />
               </div>
 
