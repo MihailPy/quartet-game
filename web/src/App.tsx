@@ -66,6 +66,7 @@ function App() {
   const [reconnectAttempt, setReconnectAttempt] = useState<number>(0)
   const isDevMode = import.meta.env.DEV
   const [isSessionRestored, setIsSessionRestored] = useState<boolean>(false)
+  const [isCreatingRoom, setIsCreatingRoom] = useState<boolean>(false)
 
   function resetGameState() {
     updateDeck(null)
@@ -109,6 +110,11 @@ function App() {
   }
 
   async function createRoom() {
+    if (isCreatingRoom) {
+      return
+    }
+
+    setIsCreatingRoom(true)
     setError('')
 
     try {
@@ -121,9 +127,10 @@ function App() {
 
       saveRoomID(data.room.id)
       savePlayer(data.player)
-
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Не удалось создать комнату.')
+    } finally {
+      setIsCreatingRoom(false)
     }
   }
 
@@ -900,6 +907,7 @@ function App() {
               onRoomIdInputChange={setRoomIdInput}
               onCreateRoom={createRoom}
               onJoinRoomByID={joinRoomByID}
+              isCreatingRoom={isCreatingRoom}
             />
           )}
 
