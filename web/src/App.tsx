@@ -131,7 +131,10 @@ function App() {
       saveRoomID(data.room.id)
       savePlayer(data.player)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Не удалось создать комнату.')
+      const message =
+        err instanceof Error ? err.message : 'Не удалось создать комнату.'
+
+      setError(getCreateRoomErrorMessage(message))
     } finally {
       setIsCreatingRoom(false)
     }
@@ -622,6 +625,24 @@ function App() {
     }
 
     return message
+  }
+
+  function getCreateRoomErrorMessage(message: string): string {
+    const normalizedMessage = message.trim().toLowerCase()
+
+    if (normalizedMessage === 'player name is required') {
+      return 'Введите имя игрока.'
+    }
+
+    if (
+      normalizedMessage === 'failed to fetch' ||
+      normalizedMessage === 'load failed' ||
+      normalizedMessage === 'networkerror when attempting to fetch resource.'
+    ) {
+      return 'Не удалось подключиться к серверу.'
+    }
+
+    return message || 'Не удалось создать комнату.'
   }
 
   useEffect(() => {
