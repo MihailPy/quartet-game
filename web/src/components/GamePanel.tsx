@@ -28,6 +28,7 @@ type GamePanelProps = {
   getPlayerName: (playerID: string) => string
   canRequestCard: () => boolean
   getRequestButtonText: () => string
+  isStartingGame: boolean
   completedQuartets: {
     playerID: string
     playerName: string
@@ -77,7 +78,8 @@ export function GamePanel({
   getPlayerName,
   canRequestCard,
   getRequestButtonText,
-  completedQuartets
+  completedQuartets,
+  isStartingGame,
 }: GamePanelProps) {
 
   const requestTargetPlayers =
@@ -123,9 +125,13 @@ export function GamePanel({
           <button
             className="button"
             onClick={onStartGame}
-            disabled={!canStartGame}
+            disabled={!canStartGame || isStartingGame}
           >
-            {canStartGame ? 'Старт игры' : 'Старт игры недоступен'}
+            {isStartingGame
+              ? 'Начинаем игру...'
+              : canStartGame
+                ? 'Старт игры'
+                : 'Старт игры недоступен'}
           </button>
 
           {!isRoomOwner && (

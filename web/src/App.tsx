@@ -66,6 +66,10 @@ function App() {
   const [reconnectAttempt, setReconnectAttempt] = useState<number>(0)
   const isDevMode = import.meta.env.DEV
   const [isSessionRestored, setIsSessionRestored] = useState<boolean>(false)
+  const [isCreatingRoom, setIsCreatingRoom] = useState<boolean>(false)
+  const [isJoiningRoom, setIsJoiningRoom] = useState<boolean>(false)
+  const [isMarkingReady, setIsMarkingReady] = useState<boolean>(false)
+  const [isStartingGame, setIsStartingGame] = useState<boolean>(false)
 
   function resetGameState() {
     updateDeck(null)
@@ -109,6 +113,11 @@ function App() {
   }
 
   async function createRoom() {
+    if (isCreatingRoom) {
+      return
+    }
+
+    setIsCreatingRoom(true)
     setError('')
 
     try {
@@ -121,13 +130,21 @@ function App() {
 
       saveRoomID(data.room.id)
       savePlayer(data.player)
-
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Не удалось создать комнату.')
+      const message =
+        err instanceof Error ? err.message : 'Не удалось создать комнату.'
+
+      setError(getCreateRoomErrorMessage(message))
+    } finally {
+      setIsCreatingRoom(false)
     }
   }
 
   async function joinRoomByID() {
+    if (isJoiningRoom) {
+      return
+    }
+
     if (!roomIdInput.trim()) {
       setError('Введите ID комнаты.')
       return
@@ -138,6 +155,7 @@ function App() {
       return
     }
 
+    setIsJoiningRoom(true)
     setError('')
 
     try {
@@ -155,10 +173,16 @@ function App() {
         err instanceof Error ? err.message : 'Не удалось войти в комнату.'
 
       setError(getJoinRoomErrorMessage(message))
+    } finally {
+      setIsJoiningRoom(false)
     }
   }
 
   async function markReady() {
+    if (isMarkingReady) {
+      return
+    }
+
     if (!room || !player) {
       setError('Join room first')
       return
@@ -169,6 +193,7 @@ function App() {
       return
     }
 
+    setIsMarkingReady(true)
     setError('')
 
     try {
@@ -184,11 +209,20 @@ function App() {
         setPlayer(updatedPlayer)
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error')
+      const message =
+        err instanceof Error ? err.message : 'Не удалось изменить готовность.'
+
+      setError(getReadyErrorMessage(message))
+    } finally {
+      setIsMarkingReady(false)
     }
   }
 
   async function startGame() {
+    if (isStartingGame) {
+      return
+    }
+
     if (!room) {
       setError('Create room first')
       return
@@ -214,6 +248,7 @@ function App() {
       return
     }
 
+    setIsStartingGame(true)
     setError('')
 
     try {
@@ -225,7 +260,12 @@ function App() {
 
       await loadDeck(data.room.id)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Не удалось начать игру.')
+      const message =
+        err instanceof Error ? err.message : 'Не удалось начать игру.'
+
+      setError(getStartGameErrorMessage(message))
+    } finally {
+      setIsStartingGame(false)
     }
   }
 
@@ -590,7 +630,65 @@ function App() {
       return 'Введите имя игрока.'
     }
 
+    if (isNetworkErrorMessage(message)) {
+      return 'Не удалось подключиться к серверу.'
+    }
+
     return message
+  }
+
+  function getCreateRoomErrorMessage(message: string): string {
+    const normalizedMessage = message.trim().toLowerCase()
+
+    if (normalizedMessage === 'player name is required') {
+      return 'Введите имя игрока.'
+    }
+
+    if (isNetworkErrorMessage(message)) {
+      return 'Не удалось подключиться к серверу.'
+    }
+
+    return message || 'Не удалось создать комнату.'
+  }
+
+  function isNetworkErrorMessage(message: string): boolean {
+    const normalizedMessage = message.trim().toLowerCase()
+
+    return (
+      normalizedMessage === 'failed to fetch' ||
+      normalizedMessage === 'load failed' ||
+      normalizedMessage === 'networkerror when attempting to fetch resource.'
+    )
+  }
+
+  function getReadyErrorMessage(message: string): string {
+    if (isNetworkErrorMessage(message)) {
+      return 'Не удалось подключиться к серверу.'
+    }
+
+    return message || 'Не удалось изменить готовность.'
+  }
+
+  function getStartGameErrorMessage(message: string): string {
+    const normalizedMessage = message.trim().toLowerCase()
+
+    if (isNetworkErrorMessage(message)) {
+      return 'Не удалось подключиться к серверу.'
+    }
+
+    if (normalizedMessage === 'not enough players') {
+      return 'Для старта нужно минимум два игрока.'
+    }
+
+    if (normalizedMessage === 'not all players ready') {
+      return 'Все игроки должны быть готовы.'
+    }
+
+    if (normalizedMessage === 'room already started') {
+      return 'Игра уже началась.'
+    }
+
+    return message || 'Не удалось начать игру.'
   }
 
   useEffect(() => {
@@ -900,6 +998,8 @@ function App() {
               onRoomIdInputChange={setRoomIdInput}
               onCreateRoom={createRoom}
               onJoinRoomByID={joinRoomByID}
+              isCreatingRoom={isCreatingRoom}
+              isJoiningRoom={isJoiningRoom}
             />
           )}
 
@@ -943,6 +1043,7 @@ function App() {
                   canRequestCard={canRequestCard}
                   getRequestButtonText={getRequestButtonText}
                   completedQuartets={getCompletedQuartets()}
+                  isStartingGame={isStartingGame}
                 />
               </div>
 
@@ -950,6 +1051,7 @@ function App() {
                 <PlayerPanel
                   player={player}
                   onMarkReady={markReady}
+                  isMarkingReady={isMarkingReady}
                 />
 
                 <GameLogPanel

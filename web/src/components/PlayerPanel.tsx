@@ -3,11 +3,13 @@ import type { Player } from '../types'
 type PlayerPanelProps = {
   player: Player | null
   onMarkReady: () => void
+  isMarkingReady: boolean
 }
 
 export function PlayerPanel({
   player,
   onMarkReady,
+  isMarkingReady,
 }: PlayerPanelProps) {
   return (
     <div className="panel">
@@ -32,9 +34,9 @@ export function PlayerPanel({
           <button
             className="button"
             onClick={onMarkReady}
-            disabled={player.is_ready}
+            disabled={player.is_ready || isMarkingReady}
           >
-            {player.is_ready ? 'Готов' : 'Готовиться'}
+            {isMarkingReady ? 'Отмечаем готовность...' : player.is_ready ? 'Готов' : 'Готовиться'}
           </button>
         </div>
       )}
