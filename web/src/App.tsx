@@ -67,6 +67,7 @@ function App() {
   const isDevMode = import.meta.env.DEV
   const [isSessionRestored, setIsSessionRestored] = useState<boolean>(false)
   const [isCreatingRoom, setIsCreatingRoom] = useState<boolean>(false)
+  const [isJoiningRoom, setIsJoiningRoom] = useState<boolean>(false)
 
   function resetGameState() {
     updateDeck(null)
@@ -135,6 +136,10 @@ function App() {
   }
 
   async function joinRoomByID() {
+    if (isJoiningRoom) {
+      return
+    }
+
     if (!roomIdInput.trim()) {
       setError('Введите ID комнаты.')
       return
@@ -145,6 +150,7 @@ function App() {
       return
     }
 
+    setIsJoiningRoom(true)
     setError('')
 
     try {
@@ -162,6 +168,8 @@ function App() {
         err instanceof Error ? err.message : 'Не удалось войти в комнату.'
 
       setError(getJoinRoomErrorMessage(message))
+    } finally {
+      setIsJoiningRoom(false)
     }
   }
 
@@ -908,6 +916,7 @@ function App() {
               onCreateRoom={createRoom}
               onJoinRoomByID={joinRoomByID}
               isCreatingRoom={isCreatingRoom}
+              isJoiningRoom={isJoiningRoom}
             />
           )}
 

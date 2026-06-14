@@ -6,6 +6,7 @@ type EntryPanelProps = {
   onCreateRoom: () => void
   onJoinRoomByID: () => void
   isCreatingRoom: boolean
+  isJoiningRoom: boolean
 }
 
 export function EntryPanel({
@@ -16,6 +17,7 @@ export function EntryPanel({
   onCreateRoom,
   onJoinRoomByID,
   isCreatingRoom,
+  isJoiningRoom,
 }: EntryPanelProps) {
   const playerNameIsEmpty = playerName.trim() === ''
   const roomIdIsEmpty = roomIdInput.trim() === ''
@@ -58,9 +60,9 @@ export function EntryPanel({
         <button
           className="button"
           onClick={onJoinRoomByID}
-          disabled={playerNameIsEmpty || roomIdIsEmpty}
+          disabled={playerNameIsEmpty || roomIdIsEmpty || isJoiningRoom}
         >
-          Войти в комнату
+          {isJoiningRoom ? 'Входим в комнату...' : 'Войти в комнату'}
         </button>
       </div>
     </div>
