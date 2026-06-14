@@ -209,7 +209,10 @@ function App() {
         setPlayer(updatedPlayer)
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error')
+      const message =
+        err instanceof Error ? err.message : 'Не удалось изменить готовность.'
+
+      setError(getReadyErrorMessage(message))
     } finally {
       setIsMarkingReady(false)
     }
@@ -257,7 +260,10 @@ function App() {
 
       await loadDeck(data.room.id)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Не удалось начать игру.')
+      const message =
+        err instanceof Error ? err.message : 'Не удалось начать игру.'
+
+      setError(getStartGameErrorMessage(message))
     } finally {
       setIsStartingGame(false)
     }
@@ -634,15 +640,51 @@ function App() {
       return 'Введите имя игрока.'
     }
 
-    if (
-      normalizedMessage === 'failed to fetch' ||
-      normalizedMessage === 'load failed' ||
-      normalizedMessage === 'networkerror when attempting to fetch resource.'
-    ) {
+    if (isNetworkErrorMessage(message)) {
       return 'Не удалось подключиться к серверу.'
     }
 
     return message || 'Не удалось создать комнату.'
+  }
+
+  function isNetworkErrorMessage(message: string): boolean {
+    const normalizedMessage = message.trim().toLowerCase()
+
+    return (
+      normalizedMessage === 'failed to fetch' ||
+      normalizedMessage === 'load failed' ||
+      normalizedMessage === 'networkerror when attempting to fetch resource.'
+    )
+  }
+
+  function getReadyErrorMessage(message: string): string {
+    if (isNetworkErrorMessage(message)) {
+      return 'Не удалось подключиться к серверу.'
+    }
+
+    return message || 'Не удалось изменить готовность.'
+  }
+
+  function getStartGameErrorMessage(message: string): string {
+    const normalizedMessage = message.trim().toLowerCase()
+
+    if (isNetworkErrorMessage(message)) {
+      return 'Не удалось подключиться к серверу.'
+    }
+
+    if (normalizedMessage === 'not enough players') {
+      return 'Для старта нужно минимум два игрока.'
+    }
+
+    if (normalizedMessage === 'not all players ready') {
+      return 'Все игроки должны быть готовы.'
+    }
+
+    if (normalizedMessage === 'room already started') {
+      return 'Игра уже началась.'
+    }
+
+    return message || 'Не удалось начать игру.'
   }
 
   useEffect(() => {
