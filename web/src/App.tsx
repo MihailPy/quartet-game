@@ -68,6 +68,7 @@ function App() {
   const [isSessionRestored, setIsSessionRestored] = useState<boolean>(false)
   const [isCreatingRoom, setIsCreatingRoom] = useState<boolean>(false)
   const [isJoiningRoom, setIsJoiningRoom] = useState<boolean>(false)
+  const [isMarkingReady, setIsMarkingReady] = useState<boolean>(false)
 
   function resetGameState() {
     updateDeck(null)
@@ -174,6 +175,10 @@ function App() {
   }
 
   async function markReady() {
+    if (isMarkingReady) {
+      return
+    }
+
     if (!room || !player) {
       setError('Join room first')
       return
@@ -184,6 +189,7 @@ function App() {
       return
     }
 
+    setIsMarkingReady(true)
     setError('')
 
     try {
@@ -200,6 +206,8 @@ function App() {
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error')
+    } finally {
+      setIsMarkingReady(false)
     }
   }
 
@@ -967,6 +975,7 @@ function App() {
                 <PlayerPanel
                   player={player}
                   onMarkReady={markReady}
+                  isMarkingReady={isMarkingReady}
                 />
 
                 <GameLogPanel
