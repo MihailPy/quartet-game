@@ -630,6 +630,10 @@ function App() {
       return 'Введите имя игрока.'
     }
 
+    if (isNetworkErrorMessage(message)) {
+      return 'Не удалось подключиться к серверу.'
+    }
+
     return message
   }
 
