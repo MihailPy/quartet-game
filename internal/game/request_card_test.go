@@ -1,6 +1,9 @@
 package game
 
-import "testing"
+import (
+	"errors"
+	"testing"
+)
 
 func TestRequestCardSuccess(t *testing.T) {
 	deck := testDeck()
@@ -443,5 +446,36 @@ func TestRequestCardCompletedQuartetMovesTurnWhenActorHasNoCards(t *testing.T) {
 
 	if state.CurrentPlayerID != "player_2" {
 		t.Fatalf("expected current player to be player_2, got %s", state.CurrentPlayerID)
+	}
+}
+
+func TestRequestCardReturnsErrorWhenGameAlreadyFinished(t *testing.T) {
+	deck := testDeck()
+	players := testPlayers()
+
+	state, err := NewGame("game_1", deck, players)
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	state.Status = GameStatusFinished
+	state.CurrentPlayerID = "player_1"
+
+	state.Hands["player_1"] = []Card{
+		{ID: "card_2", QuartetID: "quartet_1", Title: "Airbus A380"},
+	}
+
+	state.Hands["player_2"] = []Card{
+		{ID: "card_1", QuartetID: "quartet_1", Title: "Boeing 747"},
+	}
+
+	command, err := NewRequestCardCommand("player_1", "player_2", "card_1")
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	_, err = RequestCard(&state, command)
+	if !errors.Is(err, ErrGameAlreadyFinished) {
+		t.Fatalf("expected ErrGameAlreadyFinished, got %v", err)
 	}
 }
