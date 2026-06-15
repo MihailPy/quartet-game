@@ -409,6 +409,10 @@ function App() {
       return 'Запрос карты заполнен некорректно.'
     }
 
+    if (payload.code === 'game_already_finished') {
+      return 'Игра уже завершена.'
+    }
+
     if (payload.code === 'cannot_request_card') {
       return 'Сейчас нельзя запросить карту.'
     }
