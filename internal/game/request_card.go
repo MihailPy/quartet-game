@@ -4,6 +4,7 @@ import "errors"
 
 var ErrCannotRequestCard = errors.New("cannot request card")
 var ErrTargetPlayerHasNoCards = errors.New("target player has no cards")
+var ErrGameAlreadyFinished = errors.New("game already finished")
 
 type RequestCardResult struct {
 	Success           bool
@@ -15,6 +16,10 @@ type RequestCardResult struct {
 func RequestCard(state *GameState, command RequestCardCommand) (RequestCardResult, error) {
 	if state == nil {
 		return RequestCardResult{}, ErrCannotRequestCard
+	}
+
+	if state.Status == GameStatusFinished {
+		return RequestCardResult{}, ErrGameAlreadyFinished
 	}
 
 	if state.Status != GameStatusPlaying {
