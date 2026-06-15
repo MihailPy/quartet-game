@@ -387,6 +387,8 @@ func requestCardErrorCode(err error) string {
 		return "cannot_transfer_card"
 	case game.ErrTargetPlayerHasNoCards:
 		return "target_player_has_no_cards"
+	case game.ErrGameAlreadyFinished:
+		return "game_already_finished"
 	default:
 		return "unknown_error"
 	}

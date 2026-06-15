@@ -275,6 +275,11 @@ function App() {
       return
     }
 
+    if (!isCurrentPlayerConnected()) {
+      setError('Ты не подключён к комнате.')
+      return
+    }
+
     if (!targetPlayerID) {
       setError('Выбери игрока, у которого хочешь спросить карту.')
       return
@@ -404,6 +409,10 @@ function App() {
       return 'Запрос карты заполнен некорректно.'
     }
 
+    if (payload.code === 'game_already_finished') {
+      return 'Игра уже завершена.'
+    }
+
     if (payload.code === 'cannot_request_card') {
       return 'Сейчас нельзя запросить карту.'
     }
@@ -421,6 +430,7 @@ function App() {
       publicGameState &&
       !gameFinished &&
       socketStatus === 'connected' &&
+      isCurrentPlayerConnected() &&
       currentTurnPlayerID === player.id &&
       targetPlayerID &&
       selectedCardID &&
@@ -431,6 +441,10 @@ function App() {
   function getRequestButtonText(): string {
     if (!player) {
       return 'Сначала подключись'
+    }
+
+    if (!isCurrentPlayerConnected()) {
+      return 'Нет подключения'
     }
 
     if (socketStatus !== 'connected') {
