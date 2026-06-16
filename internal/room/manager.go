@@ -116,7 +116,7 @@ func (m *Manager) GetRoom(ctx context.Context, id RoomID) (Room, error) {
 		loadedRoom.Players[i].IsConnected = false
 	}
 
-	if loadedRoom.Status == RoomStatusWaiting && len(loadedRoom.SelectedPlayerIDs) == 0 {
+	if len(loadedRoom.SelectedPlayerIDs) == 0 {
 		loadedRoom.SelectedPlayerIDs = make(map[PlayerID]bool)
 
 		for _, player := range loadedRoom.Players {
@@ -176,7 +176,7 @@ func (m *Manager) JoinRoom(ctx context.Context, roomID RoomID, playerName string
 			loadedRoom.Players[i].IsConnected = false
 		}
 
-		if loadedRoom.Status == RoomStatusWaiting && len(loadedRoom.SelectedPlayerIDs) == 0 {
+		if len(loadedRoom.SelectedPlayerIDs) == 0 {
 			loadedRoom.SelectedPlayerIDs = make(map[PlayerID]bool)
 
 			for _, player := range loadedRoom.Players {
