@@ -277,16 +277,17 @@ func (h *RoomHandler) StartRoom(w http.ResponseWriter, r *http.Request, roomID r
 		return
 	}
 
-	if len(currentRoom.Players) < 2 {
-		writeError(w, http.StatusBadRequest, "at least two players are required to start the game")
-		return
-	}
+	selectedPlayersCount := 0
 
 	for _, player := range currentRoom.Players {
-		if !player.IsReady {
-			writeError(w, http.StatusBadRequest, "all players must be ready to start the game")
-			return
+		if currentRoom.SelectedPlayerIDs[player.ID] {
+			selectedPlayersCount++
 		}
+	}
+
+	if selectedPlayersCount < 2 {
+		writeError(w, http.StatusBadRequest, room.ErrNotEnoughPlayers.Error())
+		return
 	}
 
 	startedRoom, err := h.manager.StartRoom(r.Context(), roomID)
