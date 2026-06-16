@@ -2,6 +2,7 @@ package room
 
 import (
 	"context"
+	"errors"
 	"testing"
 )
 
@@ -135,5 +136,89 @@ func TestJoinRoomFailsWhenRoomAlreadyStarted(t *testing.T) {
 	_, _, err = manager.JoinRoom(context.Background(), currentRoom.ID, "John")
 	if err != ErrRoomAlreadyStarted {
 		t.Fatalf("expected ErrRoomAlreadyStarted, got %v", err)
+	}
+}
+
+func TestCreateRoomSelectsOwnerByDefault(t *testing.T) {
+	manager := NewMemoryManager()
+
+	player, currentRoom, err := manager.CreateRoom(context.Background(), "Alice")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !currentRoom.SelectedPlayerIDs[player.ID] {
+		t.Fatalf("expected owner to be selected by default")
+	}
+}
+
+func TestJoinRoomSelectsPlayerByDefault(t *testing.T) {
+	manager := NewMemoryManager()
+
+	_, currentRoom, err := manager.CreateRoom(context.Background(), "Alice")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	player, updatedRoom, err := manager.JoinRoom(context.Background(), currentRoom.ID, "Bob")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !updatedRoom.SelectedPlayerIDs[player.ID] {
+		t.Fatalf("expected joined player to be selected by default")
+	}
+}
+
+func TestToggleSelectedPlayerRequiresOwner(t *testing.T) {
+	manager := NewMemoryManager()
+
+	owner, currentRoom, err := manager.CreateRoom(context.Background(), "Alice")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	joinedPlayer, _, err := manager.JoinRoom(context.Background(), currentRoom.ID, "Bob")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = manager.ToggleSelectedPlayer(
+		context.Background(),
+		currentRoom.ID,
+		joinedPlayer.ID,
+		owner.ID,
+	)
+
+	if !errors.Is(err, ErrOnlyOwnerCanSelectPlayers) {
+		t.Fatalf("expected ErrOnlyOwnerCanSelectPlayers, got %v", err)
+	}
+}
+
+func TestToggleSelectedPlayerUpdatesSelection(t *testing.T) {
+	manager := NewMemoryManager()
+
+	owner, currentRoom, err := manager.CreateRoom(context.Background(), "Alice")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	joinedPlayer, _, err := manager.JoinRoom(context.Background(), currentRoom.ID, "Bob")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	updatedRoom, err := manager.ToggleSelectedPlayer(
+		context.Background(),
+		currentRoom.ID,
+		owner.ID,
+		joinedPlayer.ID,
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if updatedRoom.SelectedPlayerIDs[joinedPlayer.ID] {
+		t.Fatalf("expected joined player to be unselected")
 	}
 }
