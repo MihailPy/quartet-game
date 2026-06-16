@@ -202,7 +202,7 @@ function App() {
     }
 
     if (!canStartGame()) {
-      setError('Для старта нужно минимум два игрока, и все должны быть готовы.')
+      setError('Для старта нужно выбрать минимум двух игроков.')
       return
     }
 
@@ -543,11 +543,11 @@ function App() {
       return false
     }
 
-    if (room.players.length < 2) {
-      return false
-    }
+    const selectedPlayersCount = room.players.filter(
+      (roomPlayer) => room.selected_player_ids?.[roomPlayer.id],
+    ).length
 
-    return room.players.every((roomPlayer) => roomPlayer.is_ready)
+    return selectedPlayersCount >= 2
   }
 
   function getAvailableRequestCardsByQuartet() {
@@ -641,11 +641,7 @@ function App() {
     }
 
     if (normalizedMessage === 'not enough players') {
-      return 'Для старта нужно минимум два игрока.'
-    }
-
-    if (normalizedMessage === 'not all players ready') {
-      return 'Все игроки должны быть готовы.'
+      return 'Для старта нужно выбрать минимум двух игроков.'
     }
 
     if (normalizedMessage === 'room already started') {
