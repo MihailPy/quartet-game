@@ -15,6 +15,7 @@ var ErrNotEnoughPlayers = errors.New("not enough players")
 var ErrNotAllPlayersReady = errors.New("not all players ready")
 var ErrRoomAlreadyStarted = errors.New("room already started")
 var ErrRoomFull = errors.New("room is full")
+var ErrOnlyOwnerCanSelectPlayers = errors.New("only owner can select players")
 
 type Repository interface {
 	SaveRoom(ctx context.Context, currentRoom Room) error
@@ -69,6 +70,9 @@ func (m *Manager) CreateRoom(ctx context.Context, playerName string) (Player, Ro
 		Status:        RoomStatusWaiting,
 		Players:       []Player{player},
 		OwnerPlayerID: player.ID,
+		SelectedPlayerIDs: map[PlayerID]bool{
+			player.ID: true,
+		},
 	}
 
 	if m.repository != nil {
@@ -110,6 +114,14 @@ func (m *Manager) GetRoom(ctx context.Context, id RoomID) (Room, error) {
 
 	for i := range loadedRoom.Players {
 		loadedRoom.Players[i].IsConnected = false
+	}
+
+	if len(loadedRoom.SelectedPlayerIDs) == 0 {
+		loadedRoom.SelectedPlayerIDs = make(map[PlayerID]bool)
+
+		for _, player := range loadedRoom.Players {
+			loadedRoom.SelectedPlayerIDs[player.ID] = true
+		}
 	}
 
 	m.mu.Lock()
@@ -164,6 +176,14 @@ func (m *Manager) JoinRoom(ctx context.Context, roomID RoomID, playerName string
 			loadedRoom.Players[i].IsConnected = false
 		}
 
+		if len(loadedRoom.SelectedPlayerIDs) == 0 {
+			loadedRoom.SelectedPlayerIDs = make(map[PlayerID]bool)
+
+			for _, player := range loadedRoom.Players {
+				loadedRoom.SelectedPlayerIDs[player.ID] = true
+			}
+		}
+
 		currentRoom = loadedRoom
 	}
 
@@ -190,9 +210,60 @@ func (m *Manager) JoinRoom(ctx context.Context, roomID RoomID, playerName string
 
 	currentRoom.Players = append(currentRoom.Players, player)
 
+	if currentRoom.SelectedPlayerIDs == nil {
+		currentRoom.SelectedPlayerIDs = make(map[PlayerID]bool)
+	}
+
+	currentRoom.SelectedPlayerIDs[player.ID] = true
+
 	m.rooms[roomID] = currentRoom
 
 	return player, currentRoom, nil
+}
+
+func (m *Manager) ToggleSelectedPlayer(
+	ctx context.Context,
+	roomID RoomID,
+	ownerPlayerID PlayerID,
+	targetPlayerID PlayerID,
+) (Room, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	currentRoom, ok := m.rooms[roomID]
+	if !ok {
+		return Room{}, ErrRoomNotFound
+	}
+
+	if currentRoom.OwnerPlayerID != ownerPlayerID {
+		return Room{}, ErrOnlyOwnerCanSelectPlayers
+	}
+
+	if currentRoom.Status != RoomStatusWaiting {
+		return Room{}, ErrRoomAlreadyStarted
+	}
+
+	targetPlayerExists := false
+	for _, player := range currentRoom.Players {
+		if player.ID == targetPlayerID {
+			targetPlayerExists = true
+			break
+		}
+	}
+
+	if !targetPlayerExists {
+		return Room{}, ErrPlayerNotFound
+	}
+
+	if currentRoom.SelectedPlayerIDs == nil {
+		currentRoom.SelectedPlayerIDs = make(map[PlayerID]bool)
+	}
+
+	currentRoom.SelectedPlayerIDs[targetPlayerID] = !currentRoom.SelectedPlayerIDs[targetPlayerID]
+
+	m.rooms[roomID] = currentRoom
+
+	return currentRoom, nil
 }
 
 func (m *Manager) MarkPlayerReady(ctx context.Context, roomID RoomID, playerID PlayerID) (Room, error) {
@@ -239,14 +310,16 @@ func (m *Manager) StartRoom(ctx context.Context, roomID RoomID) (Room, error) {
 		return Room{}, ErrRoomAlreadyStarted
 	}
 
-	if len(currentRoom.Players) < 2 {
-		return Room{}, ErrNotEnoughPlayers
-	}
+	selectedPlayersCount := 0
 
 	for _, player := range currentRoom.Players {
-		if !player.IsReady {
-			return Room{}, ErrNotAllPlayersReady
+		if currentRoom.SelectedPlayerIDs[player.ID] {
+			selectedPlayersCount++
 		}
+	}
+
+	if selectedPlayersCount < 2 {
+		return Room{}, ErrNotEnoughPlayers
 	}
 
 	currentRoom.Status = RoomStatusPlaying

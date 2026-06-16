@@ -51,7 +51,12 @@ func (s *Service) StartGame(ctx context.Context, currentRoom room.Room) (game.Ga
 	}
 
 	players := make([]game.Player, 0, len(currentRoom.Players))
+
 	for _, roomPlayer := range currentRoom.Players {
+		if !currentRoom.SelectedPlayerIDs[roomPlayer.ID] {
+			continue
+		}
+
 		players = append(players, game.Player{
 			ID:   game.PlayerID(roomPlayer.ID),
 			Name: roomPlayer.Name,

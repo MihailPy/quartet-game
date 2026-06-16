@@ -2,20 +2,14 @@ import type { Player } from '../types'
 
 type PlayerPanelProps = {
   player: Player | null
-  onMarkReady: () => void
-  isMarkingReady: boolean
 }
 
-export function PlayerPanel({
-  player,
-  onMarkReady,
-  isMarkingReady,
-}: PlayerPanelProps) {
+export function PlayerPanel({ player }: PlayerPanelProps) {
   return (
     <div className="panel">
-      <h2>Мой игрок</h2>
+      <h2>Игрок</h2>
 
-      {!player && <p>Игрок не загружен.</p>}
+      {!player && <p>Игрок не выбран.</p>}
 
       {player && (
         <div className="player-info">
@@ -24,20 +18,8 @@ export function PlayerPanel({
           </p>
 
           <p>
-            <strong>ID:</strong> <code>{player.id}</code>
+            <strong>ID:</strong> {player.id}
           </p>
-
-          <p>
-            <strong>Готов:</strong> {player.is_ready ? 'да' : 'нет'}
-          </p>
-
-          <button
-            className="button"
-            onClick={onMarkReady}
-            disabled={player.is_ready || isMarkingReady}
-          >
-            {isMarkingReady ? 'Отмечаем готовность...' : player.is_ready ? 'Готов' : 'Готовиться'}
-          </button>
         </div>
       )}
     </div>
