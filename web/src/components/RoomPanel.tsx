@@ -13,20 +13,12 @@ export function RoomPanel({
   onLeaveRoom,
   onCopyRoomID,
 }: RoomPanelProps) {
-  const readyPlayersCount =
-    room?.players.filter((roomPlayer) => roomPlayer.is_ready).length ?? 0
-
   const totalPlayersCount = room?.players.length ?? 0
+  const selectedPlayersCount =
+    room?.players.filter((roomPlayer) => room.selected_player_ids?.[roomPlayer.id]).length ?? 0
 
-  const allPlayersReady =
-    totalPlayersCount > 0 && readyPlayersCount === totalPlayersCount
-
-  const currentPlayer = room?.players.find(
-    (roomPlayer) => roomPlayer.id === currentPlayerID,
-  )
-
-  const notReadyPlayers =
-    room?.players.filter((roomPlayer) => !roomPlayer.is_ready) ?? []
+  const isCurrentPlayerOwner =
+    Boolean(room && currentPlayerID && room.owner_player_id === currentPlayerID)
 
   return (
     <div className="panel">
@@ -64,72 +56,68 @@ export function RoomPanel({
 
           {room.players.length === 0 && <p>Пока игроков нет.</p>}
 
-          {room.players.map((roomPlayer) => (
-            <div className="player-row" key={roomPlayer.id}>
-              <span>
-                {roomPlayer.name}
-                {roomPlayer.id === currentPlayerID ? ' (ты)' : ''}
-                {roomPlayer.id === room.owner_player_id ? ' 👑' : ''}
-              </span>
-              <div className="player-badges">
-                <span className={roomPlayer.is_connected ? 'connected-badge' : 'disconnected-badge'}>
-                  {roomPlayer.is_connected ? 'онлайн' : 'офлайн'}
+          {room.players.map((roomPlayer) => {
+            const isSelected = room.selected_player_ids?.[roomPlayer.id] === true
+
+            return (
+              <div className="player-row" key={roomPlayer.id}>
+                <span>
+                  {isCurrentPlayerOwner && room.status !== 'playing' && (
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      disabled
+                      aria-label={`Выбрать игрока ${roomPlayer.name}`}
+                    />
+                  )}
+
+                  {roomPlayer.name}
+                  {roomPlayer.id === currentPlayerID ? ' (ты)' : ''}
+                  {roomPlayer.id === room.owner_player_id ? ' 👑' : ''}
                 </span>
 
-                <span className={roomPlayer.is_ready ? 'ready-badge' : 'not-ready-badge'}>
-                  {roomPlayer.is_ready ? 'готов' : 'не готов'}
-                </span>
+                <div className="player-badges">
+                  <span className={roomPlayer.is_connected ? 'connected-badge' : 'disconnected-badge'}>
+                    {roomPlayer.is_connected ? 'онлайн' : 'офлайн'}
+                  </span>
+
+                  <span className={isSelected ? 'ready-badge' : 'not-ready-badge'}>
+                    {isSelected ? 'выбран' : 'не выбран'}
+                  </span>
+                </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
 
           {room.status !== 'playing' && (
             <div className="waiting-box">
               <strong>Ожидание старта</strong>
 
               <p>
-                Готовы {readyPlayersCount} из {totalPlayersCount} игроков.
+                Выбраны {selectedPlayersCount} из {totalPlayersCount} игроков.
               </p>
 
-              {currentPlayer && !currentPlayer.is_ready && (
-                <p className="current-player-warning">
-                  Ты ещё не готов. Нажми “Готовиться”.
+              {isCurrentPlayerOwner && (
+                <p className="form-hint">
+                  Владелец комнаты выбирает участников партии.
                 </p>
               )}
 
-              {currentPlayer?.is_ready && !allPlayersReady && (
+              {!isCurrentPlayerOwner && (
                 <p className="form-hint">
-                  Ты готов. Осталось дождаться остальных игроков.
+                  Владелец комнаты выбирает, кто будет участвовать в партии.
                 </p>
               )}
 
-              {notReadyPlayers.length > 0 && (
-                <div className="not-ready-list">
-                  <strong>Ещё не готовы:</strong>
-
-                  <ul>
-                    {notReadyPlayers.map((roomPlayer) => (
-                      <li key={roomPlayer.id}>{roomPlayer.name}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {totalPlayersCount < 2 && (
+              {selectedPlayersCount < 2 && (
                 <p className="form-hint">
-                  Для игры нужно минимум два игрока.
+                  Для игры нужно выбрать минимум двух игроков.
                 </p>
               )}
 
-              {totalPlayersCount >= 2 && !allPlayersReady && (
+              {selectedPlayersCount >= 2 && (
                 <p className="form-hint">
-                  Все игроки должны нажать “Готовиться”.
-                </p>
-              )}
-
-              {totalPlayersCount >= 2 && allPlayersReady && (
-                <p className="form-hint">
-                  Все готовы. Владелец комнаты может начать игру.
+                  Владелец комнаты может начать игру.
                 </p>
               )}
             </div>

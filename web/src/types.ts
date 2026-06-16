@@ -2,6 +2,7 @@ export type Room = {
   id: string
   status: string
   owner_player_id: string
+  selected_player_ids: Record<string, boolean>
   players: Player[]
 }
 
