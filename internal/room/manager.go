@@ -15,6 +15,7 @@ var ErrNotEnoughPlayers = errors.New("not enough players")
 var ErrNotAllPlayersReady = errors.New("not all players ready")
 var ErrRoomAlreadyStarted = errors.New("room already started")
 var ErrRoomFull = errors.New("room is full")
+var ErrOnlyOwnerCanSelectPlayers = errors.New("only owner can select players")
 
 type Repository interface {
 	SaveRoom(ctx context.Context, currentRoom Room) error
@@ -202,6 +203,51 @@ func (m *Manager) JoinRoom(ctx context.Context, roomID RoomID, playerName string
 	m.rooms[roomID] = currentRoom
 
 	return player, currentRoom, nil
+}
+
+func (m *Manager) ToggleSelectedPlayer(
+	ctx context.Context,
+	roomID RoomID,
+	ownerPlayerID PlayerID,
+	targetPlayerID PlayerID,
+) (Room, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	currentRoom, ok := m.rooms[roomID]
+	if !ok {
+		return Room{}, ErrRoomNotFound
+	}
+
+	if currentRoom.OwnerPlayerID != ownerPlayerID {
+		return Room{}, ErrOnlyOwnerCanSelectPlayers
+	}
+
+	if currentRoom.Status != RoomStatusWaiting {
+		return Room{}, ErrRoomAlreadyStarted
+	}
+
+	targetPlayerExists := false
+	for _, player := range currentRoom.Players {
+		if player.ID == targetPlayerID {
+			targetPlayerExists = true
+			break
+		}
+	}
+
+	if !targetPlayerExists {
+		return Room{}, ErrPlayerNotFound
+	}
+
+	if currentRoom.SelectedPlayerIDs == nil {
+		currentRoom.SelectedPlayerIDs = make(map[PlayerID]bool)
+	}
+
+	currentRoom.SelectedPlayerIDs[targetPlayerID] = !currentRoom.SelectedPlayerIDs[targetPlayerID]
+
+	m.rooms[roomID] = currentRoom
+
+	return currentRoom, nil
 }
 
 func (m *Manager) MarkPlayerReady(ctx context.Context, roomID RoomID, playerID PlayerID) (Room, error) {
