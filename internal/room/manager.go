@@ -306,12 +306,6 @@ func (m *Manager) StartRoom(ctx context.Context, roomID RoomID) (Room, error) {
 		return Room{}, ErrNotEnoughPlayers
 	}
 
-	for _, player := range currentRoom.Players {
-		if !player.IsReady {
-			return Room{}, ErrNotAllPlayersReady
-		}
-	}
-
 	currentRoom.Status = RoomStatusPlaying
 
 	if m.repository != nil {
