@@ -69,6 +69,9 @@ func (m *Manager) CreateRoom(ctx context.Context, playerName string) (Player, Ro
 		Status:        RoomStatusWaiting,
 		Players:       []Player{player},
 		OwnerPlayerID: player.ID,
+		SelectedPlayerIDs: map[PlayerID]bool{
+			player.ID: true,
+		},
 	}
 
 	if m.repository != nil {
@@ -189,6 +192,12 @@ func (m *Manager) JoinRoom(ctx context.Context, roomID RoomID, playerName string
 	}
 
 	currentRoom.Players = append(currentRoom.Players, player)
+
+	if currentRoom.SelectedPlayerIDs == nil {
+		currentRoom.SelectedPlayerIDs = make(map[PlayerID]bool)
+	}
+
+	currentRoom.SelectedPlayerIDs[player.ID] = true
 
 	m.rooms[roomID] = currentRoom
 
