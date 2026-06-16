@@ -294,7 +294,15 @@ func (m *Manager) StartRoom(ctx context.Context, roomID RoomID) (Room, error) {
 		return Room{}, ErrRoomAlreadyStarted
 	}
 
-	if len(currentRoom.Players) < 2 {
+	selectedPlayersCount := 0
+
+	for _, player := range currentRoom.Players {
+		if currentRoom.SelectedPlayerIDs[player.ID] {
+			selectedPlayersCount++
+		}
+	}
+
+	if selectedPlayersCount < 2 {
 		return Room{}, ErrNotEnoughPlayers
 	}
 
