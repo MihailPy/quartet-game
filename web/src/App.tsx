@@ -6,7 +6,6 @@ import {
   loadGameStateRequest,
   loadPlayerHandRequest,
   loadRoomRequest,
-  markReadyRequest,
   startGameRequest,
 } from './api'
 import './App.css'
@@ -68,7 +67,6 @@ function App() {
   const [isSessionRestored, setIsSessionRestored] = useState<boolean>(false)
   const [isCreatingRoom, setIsCreatingRoom] = useState<boolean>(false)
   const [isJoiningRoom, setIsJoiningRoom] = useState<boolean>(false)
-  const [isMarkingReady, setIsMarkingReady] = useState<boolean>(false)
   const [isStartingGame, setIsStartingGame] = useState<boolean>(false)
 
   function resetGameState() {
@@ -175,46 +173,6 @@ function App() {
       setError(getJoinRoomErrorMessage(message))
     } finally {
       setIsJoiningRoom(false)
-    }
-  }
-
-  async function markReady() {
-    if (isMarkingReady) {
-      return
-    }
-
-    if (!room || !player) {
-      setError('Join room first')
-      return
-    }
-
-    if (!isCurrentPlayerConnected()) {
-      setError('Ты не подключён к комнате.')
-      return
-    }
-
-    setIsMarkingReady(true)
-    setError('')
-
-    try {
-      const updatedRoom = await markReadyRequest(room.id, player.id)
-
-      updateRoom(updatedRoom)
-
-      const updatedPlayer = updatedRoom.players.find(
-        (roomPlayer) => roomPlayer.id === player.id,
-      )
-
-      if (updatedPlayer) {
-        setPlayer(updatedPlayer)
-      }
-    } catch (err) {
-      const message =
-        err instanceof Error ? err.message : 'Не удалось изменить готовность.'
-
-      setError(getReadyErrorMessage(message))
-    } finally {
-      setIsMarkingReady(false)
     }
   }
 
@@ -675,14 +633,6 @@ function App() {
     )
   }
 
-  function getReadyErrorMessage(message: string): string {
-    if (isNetworkErrorMessage(message)) {
-      return 'Не удалось подключиться к серверу.'
-    }
-
-    return message || 'Не удалось изменить готовность.'
-  }
-
   function getStartGameErrorMessage(message: string): string {
     const normalizedMessage = message.trim().toLowerCase()
 
@@ -1062,11 +1012,7 @@ function App() {
               </div>
 
               <div className="layout-side-column">
-                <PlayerPanel
-                  player={player}
-                  onMarkReady={markReady}
-                  isMarkingReady={isMarkingReady}
-                />
+                <PlayerPanel player={player} />
 
                 <GameLogPanel
                   gameLog={gameLog}
