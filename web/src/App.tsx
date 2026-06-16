@@ -452,8 +452,19 @@ function App() {
   }
 
   function updateRoom(nextRoom: Room | null) {
-    roomRef.current = nextRoom
-    setRoom(nextRoom)
+    if (!nextRoom) {
+      roomRef.current = null
+      setRoom(null)
+      return
+    }
+
+    const normalizedRoom: Room = {
+      ...nextRoom,
+      selected_player_ids: nextRoom.selected_player_ids ?? {},
+    }
+
+    roomRef.current = normalizedRoom
+    setRoom(normalizedRoom)
   }
 
   function buildGameFinishedFromState(state: PublicGameState): GameFinishedPayload {
