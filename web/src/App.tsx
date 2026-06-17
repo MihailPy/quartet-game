@@ -380,6 +380,12 @@ function App() {
         type,
       },
     ])
+
+    window.setTimeout(() => {
+      setToasts((currentToasts) =>
+        currentToasts.filter((toast) => toast.id !== id),
+      )
+    }, 4000)
   }
 
   function showTemporaryMessage(text: string) {
