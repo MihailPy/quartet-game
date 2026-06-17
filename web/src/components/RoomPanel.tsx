@@ -5,6 +5,7 @@ type RoomPanelProps = {
   currentPlayerID: string | null
   onLeaveRoom: () => void
   onCopyRoomID: () => void
+  onToggleSelectedPlayer: (playerID: string) => void
 }
 
 export function RoomPanel({
@@ -12,6 +13,7 @@ export function RoomPanel({
   currentPlayerID,
   onLeaveRoom,
   onCopyRoomID,
+  onToggleSelectedPlayer,
 }: RoomPanelProps) {
   const totalPlayersCount = room?.players.length ?? 0
   const selectedPlayersCount =
@@ -66,7 +68,7 @@ export function RoomPanel({
                     <input
                       type="checkbox"
                       checked={isSelected}
-                      disabled
+                      onChange={() => onToggleSelectedPlayer(roomPlayer.id)}
                       aria-label={`Выбрать игрока ${roomPlayer.name}`}
                     />
                   )}

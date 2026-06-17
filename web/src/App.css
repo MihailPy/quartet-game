@@ -780,7 +780,6 @@ code {
 
   .player-row {
     align-items: flex-start;
-    flex-direction: column;
     gap: 6px;
   }
 
@@ -801,5 +800,64 @@ code {
   select.input,
   textarea.input {
     font-size: 16px;
+  }
+}
+
+.toast-container {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: min(360px, calc(100vw - 32px));
+}
+
+.toast {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid #d0d7de;
+  background: #ffffff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.toast-success {
+  border-color: #2da44e;
+}
+
+.toast-error {
+  border-color: #cf222e;
+}
+
+.toast-info {
+  border-color: #0969da;
+}
+
+.toast-close-button {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  padding: 0;
+}
+
+@media (max-width: 720px) {
+  .toast-container {
+    top: 12px;
+    right: 12px;
+    left: 12px;
+    width: auto;
+  }
+
+  .toast {
+    font-size: 14px;
   }
 }

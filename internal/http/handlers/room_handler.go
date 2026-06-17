@@ -82,6 +82,11 @@ type StartRoomRequest struct {
 	PlayerID room.PlayerID `json:"player_id"`
 }
 
+type ToggleSelectedPlayerRequest struct {
+	OwnerPlayerID  room.PlayerID `json:"owner_player_id"`
+	TargetPlayerID room.PlayerID `json:"target_player_id"`
+}
+
 func NewRoomHandler(
 	manager *room.Manager,
 	gameStarter GameStarter,
@@ -233,6 +238,42 @@ func (h *RoomHandler) MarkPlayerReady(w http.ResponseWriter, r *http.Request, ro
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 
+		return
+	}
+
+	if h.eventBroadcaster != nil {
+		h.eventBroadcaster.BroadcastToRoom(roomID, ws.Event{
+			Type:    "room_updated",
+			Payload: updatedRoom,
+		})
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	_ = json.NewEncoder(w).Encode(updatedRoom)
+}
+
+func (h *RoomHandler) ToggleSelectedPlayer(w http.ResponseWriter, r *http.Request, roomID room.RoomID) {
+	if r.Method != http.MethodPost {
+		writeError(w, http.StatusMethodNotAllowed, "method not allowed")
+		return
+	}
+
+	var request ToggleSelectedPlayerRequest
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		writeError(w, http.StatusBadRequest, "invalid toggle selected player request")
+		return
+	}
+
+	updatedRoom, err := h.manager.ToggleSelectedPlayer(
+		r.Context(),
+		roomID,
+		request.OwnerPlayerID,
+		request.TargetPlayerID,
+	)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 

@@ -7,14 +7,16 @@ import {
   loadPlayerHandRequest,
   loadRoomRequest,
   startGameRequest,
+  toggleSelectedPlayerRequest,
 } from './api'
 import './App.css'
+import { EntryPanel } from './components/EntryPanel'
 import { GameLogPanel } from './components/GameLogPanel'
 import { GamePanel } from './components/GamePanel'
 import { PlayerHandPanel } from './components/PlayerHandPanel'
 import { PlayerPanel } from './components/PlayerPanel'
 import { RoomPanel } from './components/RoomPanel'
-import { EntryPanel } from './components/EntryPanel'
+import { ToastContainer } from './components/ToastContainer'
 import {
   clearSession,
   loadPlayer,
@@ -30,9 +32,11 @@ import type {
   PlayerHandPayload,
   PublicGameState,
   RequestableCard,
+  RequestCardErrorPayload,
   Room,
   TemporaryMessage,
-  RequestCardErrorPayload,
+  ToastMessage,
+  ToastType
 } from './types'
 import {
   buildRequestCardMessage,
@@ -59,6 +63,7 @@ function App() {
   const [gameFinished, setGameFinished] = useState<GameFinishedPayload | null>(null)
   const [gameLog, setGameLog] = useState<string[]>([])
   const [temporaryMessages, setTemporaryMessages] = useState<TemporaryMessage[]>([])
+  const [toasts, setToasts] = useState<ToastMessage[]>([])
   const [showDebugEvents, setShowDebugEvents] = useState<boolean>(false)
   const [deck, setDeck] = useState<Deck | null>(null)
   const deckRef = useRef<Deck | null>(null)
@@ -82,6 +87,7 @@ function App() {
     setEvents([])
     setError('')
     setReconnectAttempt(0)
+    setToasts([])
   }
 
   function leaveRoom() {
@@ -103,10 +109,24 @@ function App() {
     }
 
     try {
-      await navigator.clipboard.writeText(room.id)
-      showTemporaryMessage('ID комнаты скопирован.')
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(room.id)
+      } else {
+        const textarea = document.createElement('textarea')
+        textarea.value = room.id
+        textarea.setAttribute('readonly', '')
+        textarea.style.position = 'fixed'
+        textarea.style.left = '-9999px'
+
+        document.body.appendChild(textarea)
+        textarea.select()
+        document.execCommand('copy')
+        document.body.removeChild(textarea)
+      }
+
+      showToast('ID комнаты скопирован.', 'success')
     } catch {
-      setError('Не удалось скопировать ID комнаты.')
+      setError('Не удалось скопировать ID комнаты. Скопируй ID вручную.')
     }
   }
 
@@ -227,6 +247,40 @@ function App() {
     }
   }
 
+  async function toggleSelectedPlayer(targetPlayerID: string) {
+    if (!room || !player) {
+      setError('Сначала подключись к комнате.')
+      return
+    }
+
+    if (!isRoomOwner()) {
+      setError('Выбирать участников может только владелец комнаты.')
+      return
+    }
+
+    if (room.status === 'playing') {
+      setError('После старта игры нельзя менять участников.')
+      return
+    }
+
+    try {
+      setError('')
+
+      const updatedRoom = await toggleSelectedPlayerRequest(
+        room.id,
+        player.id,
+        targetPlayerID,
+      )
+
+      updateRoom(updatedRoom)
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : 'Не удалось изменить выбор игрока.'
+
+      setError(message)
+    }
+  }
+
   function requestCard() {
     if (!socketRef.current || socketRef.current.readyState !== WebSocket.OPEN) {
       setError('Нет подключения к серверу.')
@@ -326,6 +380,31 @@ function App() {
     }
 
     return `${Date.now()}-${Math.random().toString(16).slice(2)}`
+  }
+
+  function showToast(text: string, type: ToastType = 'info') {
+    const id = createTemporaryMessageID()
+
+    setToasts((currentToasts) => [
+      ...currentToasts,
+      {
+        id,
+        text,
+        type,
+      },
+    ])
+
+    window.setTimeout(() => {
+      setToasts((currentToasts) =>
+        currentToasts.filter((toast) => toast.id !== id),
+      )
+    }, 4000)
+  }
+
+  function closeToast(toastID: string) {
+    setToasts((currentToasts) =>
+      currentToasts.filter((toast) => toast.id !== toastID),
+    )
   }
 
   function showTemporaryMessage(text: string) {
@@ -697,7 +776,7 @@ function App() {
 
           updateRoom(payload.room)
           updateDeck(payload.deck)
-          showTemporaryMessage('Игра началась.')
+          showToast('Игра началась.', 'success')
           addGameLog('Игра началась.')
 
           void loadGameState(payload.room.id)
@@ -765,13 +844,20 @@ function App() {
           if (payload.success) {
             const resultMessage = `Карта “${cardTitle}” найдена. Игрок продолжает ход.`
 
-            showTemporaryMessage(resultMessage)
+            showToast(resultMessage, 'success')
             addGameLog(resultMessage)
           } else {
             const resultMessage = `Карты “${cardTitle}” нет.`
+            const nextPlayerName = getPlayerName(payload.next_player_id)
+            const turnMessage =
+              player?.id === payload.next_player_id
+                ? 'Сейчас твой ход.'
+                : `Сейчас ходит ${nextPlayerName}.`
 
-            showTemporaryMessage(resultMessage)
+            showToast(resultMessage, 'info')
+            showToast(turnMessage, 'info')
             addGameLog(resultMessage)
+            addGameLog(turnMessage)
           }
         }
 
@@ -954,6 +1040,8 @@ function App() {
 
         {error && <div className="error">{error}</div>}
 
+        <ToastContainer toasts={toasts} onCloseToast={closeToast} />
+
         {!isSessionRestored && (
           <div className="panel">
             <p>Восстанавливаем session...</p>
@@ -982,6 +1070,7 @@ function App() {
                   currentPlayerID={player?.id ?? null}
                   onLeaveRoom={leaveRoom}
                   onCopyRoomID={copyRoomID}
+                  onToggleSelectedPlayer={toggleSelectedPlayer}
                 />
 
                 <PlayerHandPanel
