@@ -819,12 +819,12 @@ function App() {
           if (payload.success) {
             const resultMessage = `Карта “${cardTitle}” найдена. Игрок продолжает ход.`
 
-            showTemporaryMessage(resultMessage)
+            showToast(resultMessage, 'success')
             addGameLog(resultMessage)
           } else {
             const resultMessage = `Карты “${cardTitle}” нет.`
 
-            showTemporaryMessage(resultMessage)
+            showToast(resultMessage, 'info')
             addGameLog(resultMessage)
           }
         }
