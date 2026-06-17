@@ -7,6 +7,7 @@ import {
   loadPlayerHandRequest,
   loadRoomRequest,
   startGameRequest,
+  toggleSelectedPlayerRequest,
 } from './api'
 import './App.css'
 import { GameLogPanel } from './components/GameLogPanel'
@@ -224,6 +225,40 @@ function App() {
       setError(getStartGameErrorMessage(message))
     } finally {
       setIsStartingGame(false)
+    }
+  }
+
+  async function toggleSelectedPlayer(targetPlayerID: string) {
+    if (!room || !player) {
+      setError('Сначала подключись к комнате.')
+      return
+    }
+
+    if (!isRoomOwner()) {
+      setError('Выбирать участников может только владелец комнаты.')
+      return
+    }
+
+    if (room.status === 'playing') {
+      setError('После старта игры нельзя менять участников.')
+      return
+    }
+
+    try {
+      setError('')
+
+      const updatedRoom = await toggleSelectedPlayerRequest(
+        room.id,
+        player.id,
+        targetPlayerID,
+      )
+
+      updateRoom(updatedRoom)
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : 'Не удалось изменить выбор игрока.'
+
+      setError(message)
     }
   }
 
@@ -982,6 +1017,7 @@ function App() {
                   currentPlayerID={player?.id ?? null}
                   onLeaveRoom={leaveRoom}
                   onCopyRoomID={copyRoomID}
+                  onToggleSelectedPlayer={toggleSelectedPlayer}
                 />
 
                 <PlayerHandPanel

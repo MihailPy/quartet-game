@@ -55,6 +55,8 @@ func NewRouter(
 			roomHandler.JoinRoom(w, r, roomID)
 		case "ready":
 			roomHandler.MarkPlayerReady(w, r, roomID)
+		case "selected-player":
+			roomHandler.ToggleSelectedPlayer(w, r, roomID)
 		case "start":
 			roomHandler.StartRoom(w, r, roomID)
 		case "state":

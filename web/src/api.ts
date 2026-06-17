@@ -159,3 +159,25 @@ export async function loadPlayerHandRequest(
 
   return (await response.json()) as PlayerHandPayload
 }
+
+export async function toggleSelectedPlayerRequest(
+  roomID: string,
+  ownerPlayerID: string,
+  targetPlayerID: string,
+): Promise<Room> {
+  const response = await fetch(`${API_URL}/rooms/${roomID}/selected-player`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      owner_player_id: ownerPlayerID,
+      target_player_id: targetPlayerID,
+    }),
+  })
+
+  if (!response.ok) {
+    const errorPayload = await response.json().catch(() => null)
+    throw new Error(errorPayload?.error ?? 'Не удалось изменить выбор игрока.')
+  }
+
+  return (await response.json()) as Room
+}
