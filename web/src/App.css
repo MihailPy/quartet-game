@@ -780,7 +780,6 @@ code {
 
   .player-row {
     align-items: flex-start;
-    flex-direction: column;
     gap: 6px;
   }
 

@@ -221,7 +221,6 @@ function App() {
       updateRoom(data.room)
       setPublicGameState(data.state)
       setCurrentTurnPlayerID(data.state.current_player_id)
-      showToast('Игра началась.', 'success')
 
       await loadDeck(data.room.id)
     } catch (err) {
@@ -763,7 +762,7 @@ function App() {
 
           updateRoom(payload.room)
           updateDeck(payload.deck)
-          showTemporaryMessage('Игра началась.')
+          showToast('Игра началась.', 'success')
           addGameLog('Игра началась.')
 
           void loadGameState(payload.room.id)
@@ -835,9 +834,16 @@ function App() {
             addGameLog(resultMessage)
           } else {
             const resultMessage = `Карты “${cardTitle}” нет.`
+            const nextPlayerName = getPlayerName(payload.next_player_id)
+            const turnMessage =
+              player?.id === payload.next_player_id
+                ? 'Сейчас твой ход.'
+                : `Сейчас ходит ${nextPlayerName}.`
 
             showToast(resultMessage, 'info')
+            showToast(turnMessage, 'info')
             addGameLog(resultMessage)
+            addGameLog(turnMessage)
           }
         }
 
