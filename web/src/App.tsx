@@ -388,6 +388,12 @@ function App() {
     }, 4000)
   }
 
+  function closeToast(toastID: string) {
+    setToasts((currentToasts) =>
+      currentToasts.filter((toast) => toast.id !== toastID),
+    )
+  }
+
   function showTemporaryMessage(text: string) {
     const id = createTemporaryMessageID()
 
@@ -1014,7 +1020,7 @@ function App() {
 
         {error && <div className="error">{error}</div>}
 
-        <ToastContainer toasts={toasts} />
+        <ToastContainer toasts={toasts} onCloseToast={closeToast} />
 
         {!isSessionRestored && (
           <div className="panel">
