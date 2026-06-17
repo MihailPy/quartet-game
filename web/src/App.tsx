@@ -109,10 +109,24 @@ function App() {
     }
 
     try {
-      await navigator.clipboard.writeText(room.id)
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(room.id)
+      } else {
+        const textarea = document.createElement('textarea')
+        textarea.value = room.id
+        textarea.setAttribute('readonly', '')
+        textarea.style.position = 'fixed'
+        textarea.style.left = '-9999px'
+
+        document.body.appendChild(textarea)
+        textarea.select()
+        document.execCommand('copy')
+        document.body.removeChild(textarea)
+      }
+
       showToast('ID комнаты скопирован.', 'success')
     } catch {
-      setError('Не удалось скопировать ID комнаты.')
+      setError('Не удалось скопировать ID комнаты. Скопируй ID вручную.')
     }
   }
 
