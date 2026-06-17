@@ -16,6 +16,7 @@ import { GamePanel } from './components/GamePanel'
 import { PlayerHandPanel } from './components/PlayerHandPanel'
 import { PlayerPanel } from './components/PlayerPanel'
 import { RoomPanel } from './components/RoomPanel'
+import { ToastContainer } from './components/ToastContainer'
 import {
   clearSession,
   loadPlayer,
@@ -379,6 +380,7 @@ function App() {
       },
     ])
   }
+  void showToast
 
   function showTemporaryMessage(text: string) {
     const id = createTemporaryMessageID()
@@ -1005,6 +1007,8 @@ function App() {
         </header>
 
         {error && <div className="error">{error}</div>}
+
+        <ToastContainer toasts={toasts} />
 
         {!isSessionRestored && (
           <div className="panel">
