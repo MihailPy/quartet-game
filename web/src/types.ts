@@ -111,3 +111,11 @@ export type RequestCardErrorPayload = {
   code: string
   message: string
 }
+
+export type ToastType = 'success' | 'error' | 'info'
+
+export type ToastMessage = {
+  id: string
+  text: string
+  type: ToastType
+}

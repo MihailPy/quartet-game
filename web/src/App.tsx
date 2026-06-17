@@ -10,12 +10,12 @@ import {
   toggleSelectedPlayerRequest,
 } from './api'
 import './App.css'
+import { EntryPanel } from './components/EntryPanel'
 import { GameLogPanel } from './components/GameLogPanel'
 import { GamePanel } from './components/GamePanel'
 import { PlayerHandPanel } from './components/PlayerHandPanel'
 import { PlayerPanel } from './components/PlayerPanel'
 import { RoomPanel } from './components/RoomPanel'
-import { EntryPanel } from './components/EntryPanel'
 import {
   clearSession,
   loadPlayer,
@@ -31,9 +31,11 @@ import type {
   PlayerHandPayload,
   PublicGameState,
   RequestableCard,
+  RequestCardErrorPayload,
   Room,
   TemporaryMessage,
-  RequestCardErrorPayload,
+  ToastMessage,
+  ToastType
 } from './types'
 import {
   buildRequestCardMessage,
@@ -60,6 +62,7 @@ function App() {
   const [gameFinished, setGameFinished] = useState<GameFinishedPayload | null>(null)
   const [gameLog, setGameLog] = useState<string[]>([])
   const [temporaryMessages, setTemporaryMessages] = useState<TemporaryMessage[]>([])
+  const [toasts, setToasts] = useState<ToastMessage[]>([])
   const [showDebugEvents, setShowDebugEvents] = useState<boolean>(false)
   const [deck, setDeck] = useState<Deck | null>(null)
   const deckRef = useRef<Deck | null>(null)
@@ -83,6 +86,7 @@ function App() {
     setEvents([])
     setError('')
     setReconnectAttempt(0)
+    setToasts([])
   }
 
   function leaveRoom() {
@@ -361,6 +365,19 @@ function App() {
     }
 
     return `${Date.now()}-${Math.random().toString(16).slice(2)}`
+  }
+
+  function showToast(text: string, type: ToastType = 'info') {
+    const id = createTemporaryMessageID()
+
+    setToasts((currentToasts) => [
+      ...currentToasts,
+      {
+        id,
+        text,
+        type,
+      },
+    ])
   }
 
   function showTemporaryMessage(text: string) {
