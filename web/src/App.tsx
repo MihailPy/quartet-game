@@ -110,7 +110,7 @@ function App() {
 
     try {
       await navigator.clipboard.writeText(room.id)
-      showTemporaryMessage('ID комнаты скопирован.')
+      showToast('ID комнаты скопирован.', 'success')
     } catch {
       setError('Не удалось скопировать ID комнаты.')
     }
