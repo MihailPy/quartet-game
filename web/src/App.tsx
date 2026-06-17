@@ -221,6 +221,7 @@ function App() {
       updateRoom(data.room)
       setPublicGameState(data.state)
       setCurrentTurnPlayerID(data.state.current_player_id)
+      showToast('Игра началась.', 'success')
 
       await loadDeck(data.room.id)
     } catch (err) {
@@ -380,7 +381,6 @@ function App() {
       },
     ])
   }
-  void showToast
 
   function showTemporaryMessage(text: string) {
     const id = createTemporaryMessageID()
