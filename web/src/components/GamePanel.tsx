@@ -280,64 +280,73 @@ export function GamePanel({
             <div className="request-form">
               <h3>Запрос карты</h3>
 
-              {!hasRequestTargetPlayers && (
-                <p className="muted-text">
-                  Нет игроков с картами, у которых можно спросить карту.
-                </p>
-              )}
+              <div className="request-section request-player-section">
+                <h4>1. Выбери игрока</h4>
 
-              <label>
-                У кого спросить
-                <select
-                  className="input"
-                  value={targetPlayerID}
-                  onChange={(event) =>
-                    onTargetPlayerIDChange(event.target.value)
-                  }
-                  disabled={
-                    !player ||
-                    gameFinished !== null ||
-                    socketStatus !== 'connected' ||
-                    currentTurnPlayerID !== player.id ||
-                    !hasRequestTargetPlayers
-                  }
-                >
-                  <option value="">Выбери игрока</option>
-                  {requestTargetPlayers.map((gamePlayer) => (
-                    <option key={gamePlayer.id} value={gamePlayer.id}>
-                      {getPlayerName(gamePlayer.id)} — карт: {gamePlayer.card_count}
-                    </option>
-                  ))}
-                </select>
-              </label>
+                {!hasRequestTargetPlayers && (
+                  <p className="muted-text">
+                    Нет игроков с картами, у которых можно спросить карту.
+                  </p>
+                )}
 
-              <label>
-                Какую карту спросить
-                <select
-                  className="input"
-                  value={selectedCardID}
-                  onChange={(event) => onSelectedCardIDChange(event.target.value)}
-                  disabled={
-                    gameFinished !== null ||
-                    socketStatus !== 'connected' ||
-                    currentTurnPlayerID !== player.id ||
-                    !hasAvailableRequestCards
-                  }
-                >
-                  <option value="">Выбери карту</option>
+                <label>
+                  У кого спросить
+                  <select
+                    className="input"
+                    value={targetPlayerID}
+                    onChange={(event) =>
+                      onTargetPlayerIDChange(event.target.value)
+                    }
+                    disabled={
+                      !player ||
+                      gameFinished !== null ||
+                      socketStatus !== 'connected' ||
+                      currentTurnPlayerID !== player.id ||
+                      !hasRequestTargetPlayers
+                    }
+                  >
+                    <option value="">Выбери игрока</option>
+                    {requestTargetPlayers.map((gamePlayer) => (
+                      <option key={gamePlayer.id} value={gamePlayer.id}>
+                        {getPlayerName(gamePlayer.id)} — карт: {gamePlayer.card_count}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
 
-                  {Object.entries(availableRequestCardsByQuartet).map(
-                    ([quartetID, cards]) => (
-                      <optgroup key={quartetID} label={cards[0]?.quartet_title ?? quartetID}>
-                        {cards.map((card) => (
-                          <option key={card.id} value={card.id}>
-                            {card.title}
-                          </option>
-                        ))}
-                      </optgroup>
-                    ),
-                  )}
-                </select>
+              <div className="request-section request-card-section">
+                <h4>2. Выбери карту</h4>
+
+                <label>
+                  Какую карту спросить
+                  <select
+                    className="input"
+                    value={selectedCardID}
+                    onChange={(event) => onSelectedCardIDChange(event.target.value)}
+                    disabled={
+                      gameFinished !== null ||
+                      socketStatus !== 'connected' ||
+                      currentTurnPlayerID !== player.id ||
+                      !hasAvailableRequestCards
+                    }
+                  >
+                    <option value="">Выбери карту</option>
+
+                    {Object.entries(availableRequestCardsByQuartet).map(
+                      ([quartetID, cards]) => (
+                        <optgroup key={quartetID} label={cards[0]?.quartet_title ?? quartetID}>
+                          {cards.map((card) => (
+                            <option key={card.id} value={card.id}>
+                              {card.title}
+                            </option>
+                          ))}
+                        </optgroup>
+                      ),
+                    )}
+                  </select>
+                </label>
+
                 {!hasAvailableRequestCards && (
                   <p className="form-hint">
                     Нет доступных карт для запроса. Нужно иметь хотя бы одну карту из квартета.
@@ -349,7 +358,7 @@ export function GamePanel({
                     Можно просить только карты из квартетов, которые уже есть у тебя в руке.
                   </p>
                 )}
-              </label>
+              </div>
 
               {currentPlayerCannotRequest && (
                 <div className="form-hint">
