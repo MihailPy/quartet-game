@@ -280,64 +280,85 @@ export function GamePanel({
             <div className="request-form">
               <h3>Запрос карты</h3>
 
-              {!hasRequestTargetPlayers && (
-                <p className="muted-text">
-                  Нет игроков с картами, у которых можно спросить карту.
-                </p>
-              )}
+              <div className="request-section request-player-section">
+                <h4>1. Выбери игрока</h4>
 
-              <label>
-                У кого спросить
-                <select
-                  className="input"
-                  value={targetPlayerID}
-                  onChange={(event) =>
-                    onTargetPlayerIDChange(event.target.value)
-                  }
-                  disabled={
-                    !player ||
-                    gameFinished !== null ||
-                    socketStatus !== 'connected' ||
-                    currentTurnPlayerID !== player.id ||
-                    !hasRequestTargetPlayers
-                  }
-                >
-                  <option value="">Выбери игрока</option>
+                {!hasRequestTargetPlayers && (
+                  <p className="muted-text">
+                    Нет игроков с картами, у которых можно спросить карту.
+                  </p>
+                )}
+
+                <div className="request-choice-grid">
                   {requestTargetPlayers.map((gamePlayer) => (
-                    <option key={gamePlayer.id} value={gamePlayer.id}>
-                      {getPlayerName(gamePlayer.id)} — карт: {gamePlayer.card_count}
-                    </option>
+                    <button
+                      className={
+                        gamePlayer.id === targetPlayerID
+                          ? 'request-choice-card request-choice-card-selected'
+                          : 'request-choice-card'
+                      }
+                      type="button"
+                      key={gamePlayer.id}
+                      onClick={() => onTargetPlayerIDChange(gamePlayer.id)}
+                      disabled={
+                        !player ||
+                        gameFinished !== null ||
+                        socketStatus !== 'connected' ||
+                        currentTurnPlayerID !== player.id
+                      }
+                    >
+                      <div className="request-choice-card-media request-choice-card-avatar">
+                        {getPlayerName(gamePlayer.id).slice(0, 1).toUpperCase()}
+                      </div>
+
+                      <div className="request-choice-card-content">
+                        <strong>{getPlayerName(gamePlayer.id)}</strong>
+                        <span>{gamePlayer.card_count} карт</span>
+                      </div>
+                    </button>
                   ))}
-                </select>
-              </label>
+                </div>
+              </div>
 
-              <label>
-                Какую карту спросить
-                <select
-                  className="input"
-                  value={selectedCardID}
-                  onChange={(event) => onSelectedCardIDChange(event.target.value)}
-                  disabled={
-                    gameFinished !== null ||
-                    socketStatus !== 'connected' ||
-                    currentTurnPlayerID !== player.id ||
-                    !hasAvailableRequestCards
-                  }
-                >
-                  <option value="">Выбери карту</option>
+              <div className="request-section request-card-section">
+                <h4>2. Выбери карту</h4>
 
-                  {Object.entries(availableRequestCardsByQuartet).map(
-                    ([quartetID, cards]) => (
-                      <optgroup key={quartetID} label={cards[0]?.quartet_title ?? quartetID}>
+                <div className="request-card-groups">
+                  {Object.entries(availableRequestCardsByQuartet).map(([quartetID, cards]) => (
+                    <div className="request-card-group" key={quartetID}>
+                      <strong>{cards[0]?.quartet_title ?? quartetID}</strong>
+
+                      <div className="request-choice-grid">
                         {cards.map((card) => (
-                          <option key={card.id} value={card.id}>
-                            {card.title}
-                          </option>
+                          <button
+                            className={
+                              card.id === selectedCardID
+                                ? 'request-choice-card request-choice-card-selected'
+                                : 'request-choice-card'
+                            }
+                            type="button"
+                            key={card.id}
+                            onClick={() => onSelectedCardIDChange(card.id)}
+                            disabled={
+                              gameFinished !== null ||
+                              socketStatus !== 'connected' ||
+                              currentTurnPlayerID !== player.id
+                            }
+                          >
+                            <div className="request-choice-card-media request-choice-card-image-placeholder">
+                              🂠
+                            </div>
+
+                            <div className="request-choice-card-content">
+                              <strong>{card.title}</strong>
+                            </div>
+                          </button>
                         ))}
-                      </optgroup>
-                    ),
-                  )}
-                </select>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
                 {!hasAvailableRequestCards && (
                   <p className="form-hint">
                     Нет доступных карт для запроса. Нужно иметь хотя бы одну карту из квартета.
@@ -349,7 +370,7 @@ export function GamePanel({
                     Можно просить только карты из квартетов, которые уже есть у тебя в руке.
                   </p>
                 )}
-              </label>
+              </div>
 
               {currentPlayerCannotRequest && (
                 <div className="form-hint">
