@@ -317,34 +317,35 @@ export function GamePanel({
               <div className="request-section request-card-section">
                 <h4>2. Выбери карту</h4>
 
-                <label>
-                  Какую карту спросить
-                  <select
-                    className="input"
-                    value={selectedCardID}
-                    onChange={(event) => onSelectedCardIDChange(event.target.value)}
-                    disabled={
-                      gameFinished !== null ||
-                      socketStatus !== 'connected' ||
-                      currentTurnPlayerID !== player.id ||
-                      !hasAvailableRequestCards
-                    }
-                  >
-                    <option value="">Выбери карту</option>
+                <div className="request-card-groups">
+                  {Object.entries(availableRequestCardsByQuartet).map(([quartetID, cards]) => (
+                    <div className="request-card-group" key={quartetID}>
+                      <strong>{cards[0]?.quartet_title ?? quartetID}</strong>
 
-                    {Object.entries(availableRequestCardsByQuartet).map(
-                      ([quartetID, cards]) => (
-                        <optgroup key={quartetID} label={cards[0]?.quartet_title ?? quartetID}>
-                          {cards.map((card) => (
-                            <option key={card.id} value={card.id}>
-                              {card.title}
-                            </option>
-                          ))}
-                        </optgroup>
-                      ),
-                    )}
-                  </select>
-                </label>
+                      <div className="request-choice-grid">
+                        {cards.map((card) => (
+                          <button
+                            className={
+                              card.id === selectedCardID
+                                ? 'request-choice-card request-choice-card-selected'
+                                : 'request-choice-card'
+                            }
+                            type="button"
+                            key={card.id}
+                            onClick={() => onSelectedCardIDChange(card.id)}
+                            disabled={
+                              gameFinished !== null ||
+                              socketStatus !== 'connected' ||
+                              currentTurnPlayerID !== player.id
+                            }
+                          >
+                            <strong>{card.title}</strong>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
 
                 {!hasAvailableRequestCards && (
                   <p className="form-hint">
