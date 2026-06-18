@@ -289,30 +289,29 @@ export function GamePanel({
                   </p>
                 )}
 
-                <label>
-                  У кого спросить
-                  <select
-                    className="input"
-                    value={targetPlayerID}
-                    onChange={(event) =>
-                      onTargetPlayerIDChange(event.target.value)
-                    }
-                    disabled={
-                      !player ||
-                      gameFinished !== null ||
-                      socketStatus !== 'connected' ||
-                      currentTurnPlayerID !== player.id ||
-                      !hasRequestTargetPlayers
-                    }
-                  >
-                    <option value="">Выбери игрока</option>
-                    {requestTargetPlayers.map((gamePlayer) => (
-                      <option key={gamePlayer.id} value={gamePlayer.id}>
-                        {getPlayerName(gamePlayer.id)} — карт: {gamePlayer.card_count}
-                      </option>
-                    ))}
-                  </select>
-                </label>
+                <div className="request-choice-grid">
+                  {requestTargetPlayers.map((gamePlayer) => (
+                    <button
+                      className={
+                        gamePlayer.id === targetPlayerID
+                          ? 'request-choice-card request-choice-card-selected'
+                          : 'request-choice-card'
+                      }
+                      type="button"
+                      key={gamePlayer.id}
+                      onClick={() => onTargetPlayerIDChange(gamePlayer.id)}
+                      disabled={
+                        !player ||
+                        gameFinished !== null ||
+                        socketStatus !== 'connected' ||
+                        currentTurnPlayerID !== player.id
+                      }
+                    >
+                      <strong>{getPlayerName(gamePlayer.id)}</strong>
+                      <span>{gamePlayer.card_count} карт</span>
+                    </button>
+                  ))}
+                </div>
               </div>
 
               <div className="request-section request-card-section">
