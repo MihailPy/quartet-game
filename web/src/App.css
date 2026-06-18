@@ -900,3 +900,30 @@ code {
   display: grid;
   gap: 8px;
 }
+
+.request-choice-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.request-choice-card-media {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 40px;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: #f6f8fa;
+  font-weight: 700;
+}
+
+.request-choice-card-avatar {
+  border-radius: 999px;
+}
+
+.request-choice-card-content {
+  display: grid;
+  gap: 2px;
+}

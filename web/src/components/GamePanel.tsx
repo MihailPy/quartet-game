@@ -307,8 +307,14 @@ export function GamePanel({
                         currentTurnPlayerID !== player.id
                       }
                     >
-                      <strong>{getPlayerName(gamePlayer.id)}</strong>
-                      <span>{gamePlayer.card_count} карт</span>
+                      <div className="request-choice-card-media request-choice-card-avatar">
+                        {getPlayerName(gamePlayer.id).slice(0, 1).toUpperCase()}
+                      </div>
+
+                      <div className="request-choice-card-content">
+                        <strong>{getPlayerName(gamePlayer.id)}</strong>
+                        <span>{gamePlayer.card_count} карт</span>
+                      </div>
                     </button>
                   ))}
                 </div>
@@ -339,7 +345,13 @@ export function GamePanel({
                               currentTurnPlayerID !== player.id
                             }
                           >
-                            <strong>{card.title}</strong>
+                            <div className="request-choice-card-media request-choice-card-image-placeholder">
+                              🂠
+                            </div>
+
+                            <div className="request-choice-card-content">
+                              <strong>{card.title}</strong>
+                            </div>
                           </button>
                         ))}
                       </div>
