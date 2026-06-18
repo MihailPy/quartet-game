@@ -867,14 +867,7 @@ code {
   gap: 10px;
 }
 
-.request-choice-card {
-  text-align: left;
-  border: 1px solid #d0d7de;
-  border-radius: 12px;
-  background: #ffffff;
-  padding: 12px;
-  cursor: pointer;
-}
+
 
 .request-choice-card:disabled {
   cursor: not-allowed;
@@ -884,11 +877,12 @@ code {
 .request-choice-card strong,
 .request-choice-card span {
   display: block;
+  color: inherit;
 }
 
 .request-choice-card-selected {
   border-color: #0969da;
-  box-shadow: 0 0 0 2px rgba(9, 105, 218, 0.18);
+  box-shadow: 0 0 0 2px rgba(9, 105, 218, 0.8);
 }
 
 .request-card-groups {
@@ -900,11 +894,20 @@ code {
   display: grid;
   gap: 8px;
 }
-
 .request-choice-card {
   display: flex;
   align-items: center;
   gap: 12px;
+  text-align: left;
+  border: 1px solid #d0d7de;
+  border-radius: 12px;
+  background: #ffffff;
+  color: inherit;
+  padding: 12px;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .request-choice-card-media {
