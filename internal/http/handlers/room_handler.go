@@ -19,6 +19,7 @@ type RoomHandler struct {
 	manager          *room.Manager
 	gameStarter      GameStarter
 	eventBroadcaster EventBroadcaster
+	deckService      DeckService
 }
 
 type CreateRoomRequest struct {
@@ -92,15 +93,21 @@ type ToggleSelectedQuartetRequest struct {
 	QuartetID     string        `json:"quartet_id"`
 }
 
+type DeckService interface {
+	LoadAvailableQuartets(ctx context.Context, ownerPlayerID room.PlayerID) ([]game.Quartet, error)
+}
+
 func NewRoomHandler(
 	manager *room.Manager,
 	gameStarter GameStarter,
 	eventBroadcaster EventBroadcaster,
+	deckService DeckService,
 ) *RoomHandler {
 	return &RoomHandler{
 		manager:          manager,
 		gameStarter:      gameStarter,
 		eventBroadcaster: eventBroadcaster,
+		deckService:      deckService,
 	}
 }
 
@@ -125,6 +132,31 @@ func (h *RoomHandler) CreateRoom(w http.ResponseWriter, r *http.Request) {
 		}
 
 		writeError(w, http.StatusInternalServerError, "failed to create room")
+		return
+	}
+
+	availableQuartets, err := h.deckService.LoadAvailableQuartets(
+		r.Context(),
+		player.ID,
+	)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	selectedQuartetIDs := make([]string, 0, len(availableQuartets))
+
+	for _, quartet := range availableQuartets {
+		selectedQuartetIDs = append(selectedQuartetIDs, string(quartet.ID))
+	}
+
+	createdRoom, err = h.manager.SetSelectedQuartets(
+		r.Context(),
+		createdRoom.ID,
+		selectedQuartetIDs,
+	)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 

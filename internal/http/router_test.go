@@ -17,6 +17,12 @@ type fakeGameStarter struct {
 	hasState bool
 }
 
+type fakeDeckService struct{}
+
+func (f fakeDeckService) LoadAvailableQuartets(ctx context.Context, ownerPlayerID room.PlayerID) ([]game.Quartet, error) {
+	return nil, nil
+}
+
 func (f fakeGameStarter) StartGame(ctx context.Context, currentRoom room.Room) (game.GameState, error) {
 	if f.err != nil {
 		return game.GameState{}, f.err
@@ -49,7 +55,9 @@ func TestHealthHandler(t *testing.T) {
 	roomManager := room.NewMemoryManager()
 	gameStarter := fakeGameStarter{}
 
-	router := NewRouter(roomManager, gameStarter, gameStarter)
+	deckService := fakeDeckService{}
+
+	router := NewRouter(roomManager, gameStarter, gameStarter, deckService)
 
 	req := httptest.NewRequest(http.MethodGet, "/health", nil)
 	rec := httptest.NewRecorder()

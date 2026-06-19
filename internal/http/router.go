@@ -14,6 +14,7 @@ func NewRouter(
 	roomManager *room.Manager,
 	gameStarter handlers.GameStarter,
 	gameService ws.GameService,
+	deckService handlers.DeckService,
 ) http.Handler {
 	mux := http.NewServeMux()
 
@@ -23,6 +24,7 @@ func NewRouter(
 		roomManager,
 		gameStarter,
 		wsHub,
+		deckService,
 	)
 
 	wsHandler := ws.NewHandler(

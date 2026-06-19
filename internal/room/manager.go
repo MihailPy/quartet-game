@@ -308,6 +308,34 @@ func (m *Manager) ToggleSelectedQuartet(
 	return currentRoom, nil
 }
 
+func (m *Manager) SetSelectedQuartets(
+	ctx context.Context,
+	roomID RoomID,
+	quartetIDs []string,
+) (Room, error) {
+	_ = ctx
+
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	currentRoom, ok := m.rooms[roomID]
+	if !ok {
+		return Room{}, ErrRoomNotFound
+	}
+
+	currentRoom.SelectedQuartetIDs = make(map[string]bool)
+
+	for _, quartetID := range quartetIDs {
+		if quartetID != "" {
+			currentRoom.SelectedQuartetIDs[quartetID] = true
+		}
+	}
+
+	m.rooms[roomID] = currentRoom
+
+	return currentRoom, nil
+}
+
 func (m *Manager) MarkPlayerReady(ctx context.Context, roomID RoomID, playerID PlayerID) (Room, error) {
 	if playerID == "" {
 		return Room{}, ErrPlayerNotFound
