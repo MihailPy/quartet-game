@@ -87,6 +87,11 @@ type ToggleSelectedPlayerRequest struct {
 	TargetPlayerID room.PlayerID `json:"target_player_id"`
 }
 
+type ToggleSelectedQuartetRequest struct {
+	OwnerPlayerID room.PlayerID `json:"owner_player_id"`
+	QuartetID     string        `json:"quartet_id"`
+}
+
 func NewRoomHandler(
 	manager *room.Manager,
 	gameStarter GameStarter,
@@ -271,6 +276,42 @@ func (h *RoomHandler) ToggleSelectedPlayer(w http.ResponseWriter, r *http.Reques
 		roomID,
 		request.OwnerPlayerID,
 		request.TargetPlayerID,
+	)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if h.eventBroadcaster != nil {
+		h.eventBroadcaster.BroadcastToRoom(roomID, ws.Event{
+			Type:    "room_updated",
+			Payload: updatedRoom,
+		})
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	_ = json.NewEncoder(w).Encode(updatedRoom)
+}
+
+func (h *RoomHandler) ToggleSelectedQuartet(w http.ResponseWriter, r *http.Request, roomID room.RoomID) {
+	if r.Method != http.MethodPost {
+		writeError(w, http.StatusMethodNotAllowed, "method not allowed")
+		return
+	}
+
+	var request ToggleSelectedQuartetRequest
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		writeError(w, http.StatusBadRequest, "invalid toggle selected quartet request")
+		return
+	}
+
+	updatedRoom, err := h.manager.ToggleSelectedQuartet(
+		r.Context(),
+		roomID,
+		request.OwnerPlayerID,
+		request.QuartetID,
 	)
 	if err != nil {
 		writeError(w, http.StatusBadRequest, err.Error())

@@ -16,6 +16,8 @@ var ErrNotAllPlayersReady = errors.New("not all players ready")
 var ErrRoomAlreadyStarted = errors.New("room already started")
 var ErrRoomFull = errors.New("room is full")
 var ErrOnlyOwnerCanSelectPlayers = errors.New("only owner can select players")
+var ErrOnlyOwnerCanSelectQuartets = errors.New("only owner can select quartets")
+var ErrInvalidQuartetSelection = errors.New("invalid quartet selection")
 
 type Repository interface {
 	SaveRoom(ctx context.Context, currentRoom Room) error
@@ -261,6 +263,45 @@ func (m *Manager) ToggleSelectedPlayer(
 	}
 
 	currentRoom.SelectedPlayerIDs[targetPlayerID] = !currentRoom.SelectedPlayerIDs[targetPlayerID]
+
+	m.rooms[roomID] = currentRoom
+
+	return currentRoom, nil
+}
+
+func (m *Manager) ToggleSelectedQuartet(
+	ctx context.Context,
+	roomID RoomID,
+	ownerPlayerID PlayerID,
+	quartetID string,
+) (Room, error) {
+	_ = ctx
+
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	currentRoom, ok := m.rooms[roomID]
+	if !ok {
+		return Room{}, ErrRoomNotFound
+	}
+
+	if currentRoom.OwnerPlayerID != ownerPlayerID {
+		return Room{}, ErrOnlyOwnerCanSelectQuartets
+	}
+
+	if currentRoom.Status != RoomStatusWaiting {
+		return Room{}, ErrRoomAlreadyStarted
+	}
+
+	if quartetID == "" {
+		return Room{}, ErrInvalidQuartetSelection
+	}
+
+	if currentRoom.SelectedQuartetIDs == nil {
+		currentRoom.SelectedQuartetIDs = make(map[string]bool)
+	}
+
+	currentRoom.SelectedQuartetIDs[quartetID] = !currentRoom.SelectedQuartetIDs[quartetID]
 
 	m.rooms[roomID] = currentRoom
 
