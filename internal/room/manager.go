@@ -73,6 +73,7 @@ func (m *Manager) CreateRoom(ctx context.Context, playerName string) (Player, Ro
 		SelectedPlayerIDs: map[PlayerID]bool{
 			player.ID: true,
 		},
+		SelectedQuartetIDs: make(map[string]bool),
 	}
 
 	if m.repository != nil {
