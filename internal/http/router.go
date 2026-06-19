@@ -14,6 +14,7 @@ func NewRouter(
 	roomManager *room.Manager,
 	gameStarter handlers.GameStarter,
 	gameService ws.GameService,
+	deckService handlers.DeckService,
 ) http.Handler {
 	mux := http.NewServeMux()
 
@@ -23,6 +24,7 @@ func NewRouter(
 		roomManager,
 		gameStarter,
 		wsHub,
+		deckService,
 	)
 
 	wsHandler := ws.NewHandler(
@@ -57,6 +59,10 @@ func NewRouter(
 			roomHandler.MarkPlayerReady(w, r, roomID)
 		case "selected-player":
 			roomHandler.ToggleSelectedPlayer(w, r, roomID)
+		case "selected-quartet":
+			roomHandler.ToggleSelectedQuartet(w, r, roomID)
+		case "available-quartets":
+			roomHandler.GetAvailableQuartets(w, r, roomID)
 		case "start":
 			roomHandler.StartRoom(w, r, roomID)
 		case "state":

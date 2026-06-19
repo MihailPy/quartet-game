@@ -1,4 +1,4 @@
-import type { Room } from '../types'
+import type { Quartet, Room } from '../types'
 
 type RoomPanelProps = {
   room: Room | null
@@ -6,6 +6,8 @@ type RoomPanelProps = {
   onLeaveRoom: () => void
   onCopyRoomID: () => void
   onToggleSelectedPlayer: (playerID: string) => void
+  availableQuartets: Quartet[]
+  onToggleSelectedQuartet: (quartetID: string) => void
 }
 
 export function RoomPanel({
@@ -14,6 +16,8 @@ export function RoomPanel({
   onLeaveRoom,
   onCopyRoomID,
   onToggleSelectedPlayer,
+  availableQuartets,
+  onToggleSelectedQuartet,
 }: RoomPanelProps) {
   const totalPlayersCount = room?.players.length ?? 0
   const selectedPlayersCount =
@@ -122,6 +126,43 @@ export function RoomPanel({
                   Владелец комнаты может начать игру.
                 </p>
               )}
+            </div>
+          )}
+
+          {room.status !== 'playing' && (
+            <div className="quartet-selection-box">
+              <h3>Квартеты для игры</h3>
+
+              {availableQuartets.length === 0 && (
+                <p className="form-hint">Доступные квартеты не загружены.</p>
+              )}
+
+              {availableQuartets.map((quartet) => {
+                const isSelected = room.selected_quartet_ids?.[quartet.ID] === true
+
+                return (
+                  <label className="player-row" key={quartet.ID}>
+                    <span>
+                      {isCurrentPlayerOwner && (
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => onToggleSelectedQuartet(quartet.ID)}
+                          aria-label={`Выбрать квартет ${quartet.Title}`}
+                        />
+                      )}
+
+                      {quartet.Title}
+                    </span>
+
+                    <div className="player-badges">
+                      <span className={isSelected ? 'ready-badge' : 'not-ready-badge'}>
+                        {isSelected ? 'выбран' : 'не выбран'}
+                      </span>
+                    </div>
+                  </label>
+                )
+              })}
             </div>
           )}
         </div>

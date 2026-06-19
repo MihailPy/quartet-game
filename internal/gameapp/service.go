@@ -21,6 +21,7 @@ type GameRepository interface {
 
 type DeckService interface {
 	LoadDeck(ctx context.Context, deckID game.DeckID) (game.Deck, error)
+	LoadAvailableQuartets(ctx context.Context, ownerPlayerID room.PlayerID) ([]game.Quartet, error)
 }
 
 type Service struct {
@@ -48,6 +49,22 @@ func (s *Service) StartGame(ctx context.Context, currentRoom room.Room) (game.Ga
 	loadedDeck, err := s.deckService.LoadDeck(ctx, s.deckID)
 	if err != nil {
 		return game.GameState{}, err
+	}
+
+	if len(currentRoom.SelectedQuartetIDs) > 0 {
+		selectedQuartets := make([]game.Quartet, 0, len(currentRoom.SelectedQuartetIDs))
+
+		for _, quartet := range loadedDeck.Quartets {
+			if currentRoom.SelectedQuartetIDs[string(quartet.ID)] {
+				selectedQuartets = append(selectedQuartets, quartet)
+			}
+		}
+
+		loadedDeck = game.Deck{
+			ID:       loadedDeck.ID,
+			Title:    loadedDeck.Title,
+			Quartets: selectedQuartets,
+		}
 	}
 
 	players := make([]game.Player, 0, len(currentRoom.Players))

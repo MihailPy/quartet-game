@@ -2,6 +2,7 @@ import type {
   Player,
   PlayerHandPayload,
   PublicGameState,
+  Quartet,
   Room,
   RoomDeckResponse,
   StartGameResponse,
@@ -12,6 +13,10 @@ const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8080'
 export type CreateRoomResponse = {
   room: Room
   player: Player
+}
+
+export type AvailableQuartetsResponse = {
+  quartets: Quartet[]
 }
 
 export async function createRoomRequest(
@@ -177,6 +182,43 @@ export async function toggleSelectedPlayerRequest(
   if (!response.ok) {
     const errorPayload = await response.json().catch(() => null)
     throw new Error(errorPayload?.error ?? 'Не удалось изменить выбор игрока.')
+  }
+
+  return (await response.json()) as Room
+}
+
+export async function loadAvailableQuartetsRequest(
+  roomID: string,
+  ownerPlayerID: string,
+): Promise<AvailableQuartetsResponse | null> {
+  const response = await fetch(
+    `${API_URL}/rooms/${roomID}/available-quartets?owner_player_id=${ownerPlayerID}`,
+  )
+
+  if (!response.ok) {
+    return null
+  }
+
+  return (await response.json()) as AvailableQuartetsResponse
+}
+
+export async function toggleSelectedQuartetRequest(
+  roomID: string,
+  ownerPlayerID: string,
+  quartetID: string,
+): Promise<Room> {
+  const response = await fetch(`${API_URL}/rooms/${roomID}/selected-quartet`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      owner_player_id: ownerPlayerID,
+      quartet_id: quartetID,
+    }),
+  })
+
+  if (!response.ok) {
+    const errorPayload = await response.json().catch(() => null)
+    throw new Error(errorPayload?.error ?? 'Не удалось изменить выбор квартета.')
   }
 
   return (await response.json()) as Room

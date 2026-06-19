@@ -16,6 +16,9 @@ var ErrNotAllPlayersReady = errors.New("not all players ready")
 var ErrRoomAlreadyStarted = errors.New("room already started")
 var ErrRoomFull = errors.New("room is full")
 var ErrOnlyOwnerCanSelectPlayers = errors.New("only owner can select players")
+var ErrOnlyOwnerCanSelectQuartets = errors.New("only owner can select quartets")
+var ErrInvalidQuartetSelection = errors.New("invalid quartet selection")
+var ErrNotEnoughCards = errors.New("not enough cards")
 
 type Repository interface {
 	SaveRoom(ctx context.Context, currentRoom Room) error
@@ -73,6 +76,7 @@ func (m *Manager) CreateRoom(ctx context.Context, playerName string) (Player, Ro
 		SelectedPlayerIDs: map[PlayerID]bool{
 			player.ID: true,
 		},
+		SelectedQuartetIDs: make(map[string]bool),
 	}
 
 	if m.repository != nil {
@@ -266,6 +270,73 @@ func (m *Manager) ToggleSelectedPlayer(
 	return currentRoom, nil
 }
 
+func (m *Manager) ToggleSelectedQuartet(
+	ctx context.Context,
+	roomID RoomID,
+	ownerPlayerID PlayerID,
+	quartetID string,
+) (Room, error) {
+	_ = ctx
+
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	currentRoom, ok := m.rooms[roomID]
+	if !ok {
+		return Room{}, ErrRoomNotFound
+	}
+
+	if currentRoom.OwnerPlayerID != ownerPlayerID {
+		return Room{}, ErrOnlyOwnerCanSelectQuartets
+	}
+
+	if currentRoom.Status != RoomStatusWaiting {
+		return Room{}, ErrRoomAlreadyStarted
+	}
+
+	if quartetID == "" {
+		return Room{}, ErrInvalidQuartetSelection
+	}
+
+	if currentRoom.SelectedQuartetIDs == nil {
+		currentRoom.SelectedQuartetIDs = make(map[string]bool)
+	}
+
+	currentRoom.SelectedQuartetIDs[quartetID] = !currentRoom.SelectedQuartetIDs[quartetID]
+
+	m.rooms[roomID] = currentRoom
+
+	return currentRoom, nil
+}
+
+func (m *Manager) SetSelectedQuartets(
+	ctx context.Context,
+	roomID RoomID,
+	quartetIDs []string,
+) (Room, error) {
+	_ = ctx
+
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	currentRoom, ok := m.rooms[roomID]
+	if !ok {
+		return Room{}, ErrRoomNotFound
+	}
+
+	currentRoom.SelectedQuartetIDs = make(map[string]bool)
+
+	for _, quartetID := range quartetIDs {
+		if quartetID != "" {
+			currentRoom.SelectedQuartetIDs[quartetID] = true
+		}
+	}
+
+	m.rooms[roomID] = currentRoom
+
+	return currentRoom, nil
+}
+
 func (m *Manager) MarkPlayerReady(ctx context.Context, roomID RoomID, playerID PlayerID) (Room, error) {
 	if playerID == "" {
 		return Room{}, ErrPlayerNotFound
@@ -320,6 +391,20 @@ func (m *Manager) StartRoom(ctx context.Context, roomID RoomID) (Room, error) {
 
 	if selectedPlayersCount < 2 {
 		return Room{}, ErrNotEnoughPlayers
+	}
+
+	selectedQuartetsCount := 0
+
+	for _, isSelected := range currentRoom.SelectedQuartetIDs {
+		if isSelected {
+			selectedQuartetsCount++
+		}
+	}
+
+	availableCardsCount := selectedQuartetsCount * 4
+
+	if availableCardsCount < selectedPlayersCount*2 {
+		return Room{}, ErrNotEnoughCards
 	}
 
 	currentRoom.Status = RoomStatusPlaying

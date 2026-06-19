@@ -19,6 +19,7 @@ type RoomHandler struct {
 	manager          *room.Manager
 	gameStarter      GameStarter
 	eventBroadcaster EventBroadcaster
+	deckService      DeckService
 }
 
 type CreateRoomRequest struct {
@@ -87,15 +88,26 @@ type ToggleSelectedPlayerRequest struct {
 	TargetPlayerID room.PlayerID `json:"target_player_id"`
 }
 
+type ToggleSelectedQuartetRequest struct {
+	OwnerPlayerID room.PlayerID `json:"owner_player_id"`
+	QuartetID     string        `json:"quartet_id"`
+}
+
+type DeckService interface {
+	LoadAvailableQuartets(ctx context.Context, ownerPlayerID room.PlayerID) ([]game.Quartet, error)
+}
+
 func NewRoomHandler(
 	manager *room.Manager,
 	gameStarter GameStarter,
 	eventBroadcaster EventBroadcaster,
+	deckService DeckService,
 ) *RoomHandler {
 	return &RoomHandler{
 		manager:          manager,
 		gameStarter:      gameStarter,
 		eventBroadcaster: eventBroadcaster,
+		deckService:      deckService,
 	}
 }
 
@@ -120,6 +132,31 @@ func (h *RoomHandler) CreateRoom(w http.ResponseWriter, r *http.Request) {
 		}
 
 		writeError(w, http.StatusInternalServerError, "failed to create room")
+		return
+	}
+
+	availableQuartets, err := h.deckService.LoadAvailableQuartets(
+		r.Context(),
+		player.ID,
+	)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	selectedQuartetIDs := make([]string, 0, len(availableQuartets))
+
+	for _, quartet := range availableQuartets {
+		selectedQuartetIDs = append(selectedQuartetIDs, string(quartet.ID))
+	}
+
+	createdRoom, err = h.manager.SetSelectedQuartets(
+		r.Context(),
+		createdRoom.ID,
+		selectedQuartetIDs,
+	)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -271,6 +308,42 @@ func (h *RoomHandler) ToggleSelectedPlayer(w http.ResponseWriter, r *http.Reques
 		roomID,
 		request.OwnerPlayerID,
 		request.TargetPlayerID,
+	)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if h.eventBroadcaster != nil {
+		h.eventBroadcaster.BroadcastToRoom(roomID, ws.Event{
+			Type:    "room_updated",
+			Payload: updatedRoom,
+		})
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	_ = json.NewEncoder(w).Encode(updatedRoom)
+}
+
+func (h *RoomHandler) ToggleSelectedQuartet(w http.ResponseWriter, r *http.Request, roomID room.RoomID) {
+	if r.Method != http.MethodPost {
+		writeError(w, http.StatusMethodNotAllowed, "method not allowed")
+		return
+	}
+
+	var request ToggleSelectedQuartetRequest
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		writeError(w, http.StatusBadRequest, "invalid toggle selected quartet request")
+		return
+	}
+
+	updatedRoom, err := h.manager.ToggleSelectedQuartet(
+		r.Context(),
+		roomID,
+		request.OwnerPlayerID,
+		request.QuartetID,
 	)
 	if err != nil {
 		writeError(w, http.StatusBadRequest, err.Error())
@@ -530,4 +603,41 @@ func buildPlayerHandPayload(state game.GameState, playerID game.PlayerID) Player
 		PlayerID: string(playerID),
 		Cards:    cards,
 	}
+}
+
+type AvailableQuartetsResponse struct {
+	Quartets []game.Quartet `json:"quartets"`
+}
+
+func (h *RoomHandler) GetAvailableQuartets(w http.ResponseWriter, r *http.Request, roomID room.RoomID) {
+	if r.Method != http.MethodGet {
+		writeError(w, http.StatusMethodNotAllowed, "method not allowed")
+		return
+	}
+
+	currentRoom, err := h.manager.GetRoom(r.Context(), roomID)
+	if err != nil {
+		writeError(w, http.StatusNotFound, err.Error())
+		return
+	}
+
+	ownerPlayerID := currentRoom.OwnerPlayerID
+
+	availableQuartets, err := h.deckService.LoadAvailableQuartets(
+		r.Context(),
+		ownerPlayerID,
+	)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	response := AvailableQuartetsResponse{
+		Quartets: availableQuartets,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	_ = json.NewEncoder(w).Encode(response)
 }
