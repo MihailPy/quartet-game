@@ -21,6 +21,7 @@ type GameRepository interface {
 
 type DeckService interface {
 	LoadDeck(ctx context.Context, deckID game.DeckID) (game.Deck, error)
+	LoadAvailableQuartets(ctx context.Context, ownerPlayerID room.PlayerID) ([]game.Quartet, error)
 }
 
 type Service struct {
