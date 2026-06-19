@@ -231,3 +231,100 @@ func TestToggleSelectedPlayerUpdatesSelection(t *testing.T) {
 		t.Fatalf("expected joined player to be unselected")
 	}
 }
+
+func TestToggleSelectedQuartetRequiresOwner(t *testing.T) {
+	manager := NewMemoryManager()
+
+	owner, currentRoom, err := manager.CreateRoom(context.Background(), "Alice")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	joinedPlayer, _, err := manager.JoinRoom(context.Background(), currentRoom.ID, "Bob")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = manager.ToggleSelectedQuartet(
+		context.Background(),
+		currentRoom.ID,
+		joinedPlayer.ID,
+		"quartet-1",
+	)
+
+	if !errors.Is(err, ErrOnlyOwnerCanSelectQuartets) {
+		t.Fatalf("expected ErrOnlyOwnerCanSelectQuartets, got %v", err)
+	}
+
+	_ = owner
+}
+
+func TestToggleSelectedQuartetUpdatesSelection(t *testing.T) {
+	manager := NewMemoryManager()
+
+	owner, currentRoom, err := manager.CreateRoom(context.Background(), "Alice")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	updatedRoom, err := manager.ToggleSelectedQuartet(
+		context.Background(),
+		currentRoom.ID,
+		owner.ID,
+		"quartet-1",
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !updatedRoom.SelectedQuartetIDs["quartet-1"] {
+		t.Fatalf("expected quartet to be selected")
+	}
+
+	updatedRoom, err = manager.ToggleSelectedQuartet(
+		context.Background(),
+		currentRoom.ID,
+		owner.ID,
+		"quartet-1",
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if updatedRoom.SelectedQuartetIDs["quartet-1"] {
+		t.Fatalf("expected quartet to be unselected")
+	}
+}
+
+func TestStartRoomFailsWhenNotEnoughCards(t *testing.T) {
+	manager := NewMemoryManager()
+
+	_, currentRoom, err := manager.CreateRoom(context.Background(), "Alice")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, currentRoom, err = manager.JoinRoom(context.Background(), currentRoom.ID, "Bob")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, currentRoom, err = manager.JoinRoom(context.Background(), currentRoom.ID, "Charlie")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	currentRoom, err = manager.SetSelectedQuartets(
+		context.Background(),
+		currentRoom.ID,
+		[]string{"quartet-1"},
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = manager.StartRoom(context.Background(), currentRoom.ID)
+	if !errors.Is(err, ErrNotEnoughCards) {
+		t.Fatalf("expected ErrNotEnoughCards, got %v", err)
+	}
+}
