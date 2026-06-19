@@ -8,6 +8,8 @@ import {
   loadRoomRequest,
   startGameRequest,
   toggleSelectedPlayerRequest,
+  loadAvailableQuartetsRequest,
+  toggleSelectedQuartetRequest,
 } from './api'
 import './App.css'
 import { EntryPanel } from './components/EntryPanel'
@@ -36,7 +38,8 @@ import type {
   Room,
   TemporaryMessage,
   ToastMessage,
-  ToastType
+  ToastType,
+  Quartet,
 } from './types'
 import {
   buildRequestCardMessage,
@@ -73,6 +76,7 @@ function App() {
   const [isCreatingRoom, setIsCreatingRoom] = useState<boolean>(false)
   const [isJoiningRoom, setIsJoiningRoom] = useState<boolean>(false)
   const [isStartingGame, setIsStartingGame] = useState<boolean>(false)
+  const [availableQuartets, setAvailableQuartets] = useState<Quartet[]>([])
 
   function resetGameState() {
     updateDeck(null)
@@ -88,6 +92,7 @@ function App() {
     setError('')
     setReconnectAttempt(0)
     setToasts([])
+    setAvailableQuartets([])
   }
 
   function leaveRoom() {
@@ -279,6 +284,51 @@ function App() {
 
       setError(message)
     }
+  }
+
+  async function toggleSelectedQuartet(quartetID: string) {
+    if (!room || !player) {
+      setError('Сначала подключись к комнате.')
+      return
+    }
+
+    if (!isRoomOwner()) {
+      setError('Выбирать квартеты может только владелец комнаты.')
+      return
+    }
+
+    if (room.status === 'playing') {
+      setError('После старта игры нельзя менять квартеты.')
+      return
+    }
+
+    try {
+      setError('')
+
+      const updatedRoom = await toggleSelectedQuartetRequest(
+        room.id,
+        player.id,
+        quartetID,
+      )
+
+      updateRoom(updatedRoom)
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : 'Не удалось изменить выбор квартета.'
+
+      setError(message)
+    }
+  }
+
+  async function loadAvailableQuartets(roomID: string, ownerPlayerID: string) {
+    const data = await loadAvailableQuartetsRequest(roomID, ownerPlayerID)
+
+    if (!data) {
+      setAvailableQuartets([])
+      return
+    }
+
+    setAvailableQuartets(data.quartets)
   }
 
   function requestCard() {
@@ -540,6 +590,7 @@ function App() {
     const normalizedRoom: Room = {
       ...nextRoom,
       selected_player_ids: nextRoom.selected_player_ids ?? {},
+      selected_quartet_ids: nextRoom.selected_quartet_ids ?? {},
     }
 
     roomRef.current = normalizedRoom
@@ -1028,6 +1079,14 @@ function App() {
     }
   }, [availableRequestCards, selectedCardID])
 
+  useEffect(() => {
+    if (!room || room.status === 'playing') {
+      return
+    }
+
+    void loadAvailableQuartets(room.id, room.owner_player_id)
+  }, [room?.id, room?.owner_player_id, room?.status])
+
   const isEntered = room !== null && player !== null && isCurrentPlayerInRoom()
 
   return (
@@ -1071,6 +1130,8 @@ function App() {
                   onLeaveRoom={leaveRoom}
                   onCopyRoomID={copyRoomID}
                   onToggleSelectedPlayer={toggleSelectedPlayer}
+                  availableQuartets={availableQuartets}
+                  onToggleSelectedQuartet={toggleSelectedQuartet}
                 />
 
                 <PlayerHandPanel

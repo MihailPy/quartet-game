@@ -604,3 +604,40 @@ func buildPlayerHandPayload(state game.GameState, playerID game.PlayerID) Player
 		Cards:    cards,
 	}
 }
+
+type AvailableQuartetsResponse struct {
+	Quartets []game.Quartet `json:"quartets"`
+}
+
+func (h *RoomHandler) GetAvailableQuartets(w http.ResponseWriter, r *http.Request, roomID room.RoomID) {
+	if r.Method != http.MethodGet {
+		writeError(w, http.StatusMethodNotAllowed, "method not allowed")
+		return
+	}
+
+	currentRoom, err := h.manager.GetRoom(r.Context(), roomID)
+	if err != nil {
+		writeError(w, http.StatusNotFound, err.Error())
+		return
+	}
+
+	ownerPlayerID := currentRoom.OwnerPlayerID
+
+	availableQuartets, err := h.deckService.LoadAvailableQuartets(
+		r.Context(),
+		ownerPlayerID,
+	)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	response := AvailableQuartetsResponse{
+		Quartets: availableQuartets,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	_ = json.NewEncoder(w).Encode(response)
+}
