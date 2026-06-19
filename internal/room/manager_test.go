@@ -128,6 +128,15 @@ func TestJoinRoomFailsWhenRoomAlreadyStarted(t *testing.T) {
 		t.Fatalf("expected no error, got %v", err)
 	}
 
+	currentRoom, err = manager.SetSelectedQuartets(
+		context.Background(),
+		currentRoom.ID,
+		[]string{"quartet-1"},
+	)
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
 	_, err = manager.StartRoom(context.Background(), currentRoom.ID)
 	if err != nil {
 		t.Fatalf("expected no error, got %v", err)

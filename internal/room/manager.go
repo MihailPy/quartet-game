@@ -18,6 +18,7 @@ var ErrRoomFull = errors.New("room is full")
 var ErrOnlyOwnerCanSelectPlayers = errors.New("only owner can select players")
 var ErrOnlyOwnerCanSelectQuartets = errors.New("only owner can select quartets")
 var ErrInvalidQuartetSelection = errors.New("invalid quartet selection")
+var ErrNotEnoughCards = errors.New("not enough cards")
 
 type Repository interface {
 	SaveRoom(ctx context.Context, currentRoom Room) error
@@ -390,6 +391,20 @@ func (m *Manager) StartRoom(ctx context.Context, roomID RoomID) (Room, error) {
 
 	if selectedPlayersCount < 2 {
 		return Room{}, ErrNotEnoughPlayers
+	}
+
+	selectedQuartetsCount := 0
+
+	for _, isSelected := range currentRoom.SelectedQuartetIDs {
+		if isSelected {
+			selectedQuartetsCount++
+		}
+	}
+
+	availableCardsCount := selectedQuartetsCount * 4
+
+	if availableCardsCount < selectedPlayersCount*2 {
+		return Room{}, ErrNotEnoughCards
 	}
 
 	currentRoom.Status = RoomStatusPlaying
