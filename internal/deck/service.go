@@ -28,7 +28,7 @@ func (s *Service) LoadDeck(ctx context.Context, deckID game.DeckID) (game.Deck, 
 func (s *Service) LoadAvailableQuartets(ctx context.Context, ownerPlayerID room.PlayerID) ([]game.Quartet, error) {
 	_ = ownerPlayerID
 
-	loadedDeck, err := s.LoadDeck(ctx, game.DeckID("default"))
+	loadedDeck, err := s.LoadDeck(ctx, game.DeckID("00000000-0000-0000-0000-000000000001"))
 	if err != nil {
 		return nil, err
 	}
