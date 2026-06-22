@@ -120,3 +120,10 @@ export type ToastMessage = {
   text: string
   type: ToastType
 }
+
+export type User = {
+  id: string
+  player_name: string
+  created_at: string
+  updated_at: string
+}

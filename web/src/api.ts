@@ -6,6 +6,7 @@ import type {
   Room,
   RoomDeckResponse,
   StartGameResponse,
+  User,
 } from './types'
 
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8080'
@@ -222,4 +223,35 @@ export async function toggleSelectedQuartetRequest(
   }
 
   return (await response.json()) as Room
+}
+
+export type CreateUserResponse = {
+  user: User
+}
+
+export async function createUserRequest(playerName: string): Promise<CreateUserResponse> {
+  const response = await fetch(`${API_URL}/users`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      player_name: playerName,
+    }),
+  })
+
+  if (!response.ok) {
+    const errorPayload = await response.json().catch(() => null)
+    throw new Error(errorPayload?.error ?? 'Не удалось создать аккаунт.')
+  }
+
+  return (await response.json()) as CreateUserResponse
+}
+
+export async function loadUserRequest(userID: string): Promise<User | null> {
+  const response = await fetch(`${API_URL}/users/${userID}`)
+
+  if (!response.ok) {
+    return null
+  }
+
+  return (await response.json()) as User
 }

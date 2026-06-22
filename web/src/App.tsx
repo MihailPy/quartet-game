@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import {
+  createUserRequest,
+  loadUserRequest,
   createRoomRequest,
   joinRoomRequest,
   loadDeckRequest,
@@ -40,6 +42,7 @@ import type {
   ToastMessage,
   ToastType,
   Quartet,
+  User,
 } from './types'
 import {
   buildRequestCardMessage,
@@ -77,6 +80,7 @@ function App() {
   const [isJoiningRoom, setIsJoiningRoom] = useState<boolean>(false)
   const [isStartingGame, setIsStartingGame] = useState<boolean>(false)
   const [availableQuartets, setAvailableQuartets] = useState<Quartet[]>([])
+  const [user, setUser] = useState<User | null>(null)
 
   function resetGameState() {
     updateDeck(null)
@@ -792,6 +796,16 @@ function App() {
     return message || 'Не удалось начать игру.'
   }
 
+  function saveUser(nextUser: User | null) {
+    setUser(nextUser)
+
+    if (nextUser) {
+      window.localStorage.setItem('quartetUserID', nextUser.id)
+    } else {
+      window.localStorage.removeItem('quartetUserID')
+    }
+  }
+
   useEffect(() => {
     if (!room || !player) return
 
@@ -998,6 +1012,14 @@ function App() {
     async function restoreSession() {
       const savedRoomID = loadRoomID()
       const savedPlayer = loadPlayer()
+      const savedUserID = window.localStorage.getItem('quartetUserID')
+
+      if (savedUserID) {
+        const loadedUser = await loadUserRequest(savedUserID)
+        saveUser(loadedUser)
+        void createUserRequest
+        void user
+      }
 
       if (!savedRoomID) {
         setIsSessionRestored(true)
