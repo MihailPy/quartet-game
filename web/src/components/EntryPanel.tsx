@@ -1,4 +1,4 @@
-import type { User } from '../types'
+import type { GameHistoryRecord, User } from '../types'
 type EntryPanelProps = {
   playerName: string
   roomIdInput: string
@@ -10,6 +10,8 @@ type EntryPanelProps = {
   isJoiningRoom: boolean
   user: User | null
   onCreateUser: () => void
+  userHistory: GameHistoryRecord[]
+
 }
 
 export function EntryPanel({
@@ -23,6 +25,7 @@ export function EntryPanel({
   isJoiningRoom,
   user,
   onCreateUser,
+  userHistory,
 }: EntryPanelProps) {
   const playerNameIsEmpty = playerName.trim() === ''
   const roomIdIsEmpty = roomIdInput.trim() === ''
@@ -48,6 +51,27 @@ export function EntryPanel({
           </>
         )}
       </div>
+
+      {user && (
+        <div className="form-block">
+          <h3>История игр</h3>
+
+          {userHistory.length === 0 && (
+            <p className="form-hint">История пока пустая.</p>
+          )}
+
+          {userHistory.map((record) => (
+            <div className="player-row" key={record.id}>
+              <span>
+                Комната {record.room_id}
+                {record.is_winner ? ' 👑' : ''}
+              </span>
+
+              <span>{record.score} очков</span>
+            </div>
+          ))}
+        </div>
+      )}
 
       <h2>Войти в игру</h2>
 

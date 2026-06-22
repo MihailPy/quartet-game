@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import {
   createUserRequest,
+  loadUserHistoryRequest,
   loadUserRequest,
   createRoomRequest,
   joinRoomRequest,
@@ -43,6 +44,7 @@ import type {
   ToastType,
   Quartet,
   User,
+  GameHistoryRecord,
 } from './types'
 import {
   buildRequestCardMessage,
@@ -81,6 +83,7 @@ function App() {
   const [isStartingGame, setIsStartingGame] = useState<boolean>(false)
   const [availableQuartets, setAvailableQuartets] = useState<Quartet[]>([])
   const [user, setUser] = useState<User | null>(null)
+  const [userHistory, setUserHistory] = useState<GameHistoryRecord[]>([])
 
   function resetGameState() {
     updateDeck(null)
@@ -834,6 +837,12 @@ function App() {
     }
   }
 
+  async function loadUserHistory(userID: string) {
+    const data = await loadUserHistoryRequest(userID)
+
+    setUserHistory(data?.records ?? [])
+  }
+
   useEffect(() => {
     if (!room || !player) return
 
@@ -1135,6 +1144,15 @@ function App() {
     void loadAvailableQuartets(room.id, room.owner_player_id)
   }, [room?.id, room?.owner_player_id, room?.status])
 
+  useEffect(() => {
+    if (!user) {
+      setUserHistory([])
+      return
+    }
+
+    void loadUserHistory(user.id)
+  }, [user?.id])
+
   const isEntered = room !== null && player !== null && isCurrentPlayerInRoom()
 
   return (
@@ -1168,6 +1186,7 @@ function App() {
               isJoiningRoom={isJoiningRoom}
               user={user}
               onCreateUser={createUser}
+              userHistory={userHistory}
             />
           )}
 

@@ -1,4 +1,5 @@
 import type {
+  GameHistoryRecord,
   Player,
   PlayerHandPayload,
   PublicGameState,
@@ -256,4 +257,20 @@ export async function loadUserRequest(userID: string): Promise<User | null> {
   }
 
   return (await response.json()) as User
+}
+
+export type UserHistoryResponse = {
+  records: GameHistoryRecord[]
+}
+
+export async function loadUserHistoryRequest(
+  userID: string,
+): Promise<UserHistoryResponse | null> {
+  const response = await fetch(`${API_URL}/users/${userID}/history`)
+
+  if (!response.ok) {
+    return null
+  }
+
+  return (await response.json()) as UserHistoryResponse
 }

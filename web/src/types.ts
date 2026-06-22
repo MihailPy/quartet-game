@@ -127,3 +127,14 @@ export type User = {
   created_at: string
   updated_at: string
 }
+
+export type GameHistoryRecord = {
+  id: string
+  game_id: string
+  room_id: string
+  user_id: string
+  role: string
+  score: number
+  is_winner: boolean
+  created_at: string
+}
