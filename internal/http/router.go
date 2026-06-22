@@ -27,6 +27,7 @@ func NewRouter(
 		gameStarter,
 		wsHub,
 		deckService,
+		userRepository,
 	)
 
 	wsHandler := ws.NewHandler(

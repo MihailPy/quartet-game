@@ -7,6 +7,7 @@ import (
 
 	"github.com/MihailPy/quartet-game/internal/game"
 	"github.com/MihailPy/quartet-game/internal/room"
+	"github.com/MihailPy/quartet-game/internal/user"
 	"github.com/MihailPy/quartet-game/internal/ws"
 )
 
@@ -20,12 +21,12 @@ type RoomHandler struct {
 	gameStarter      GameStarter
 	eventBroadcaster EventBroadcaster
 	deckService      DeckService
+	userRepository   UserRepository
 }
 
 type CreateRoomRequest struct {
-	Name string `json:"name"`
+	UserID user.UserID `json:"user_id"`
 }
-
 type CreateRoomResponse struct {
 	Player room.Player `json:"player"`
 	Room   room.Room   `json:"room"`
@@ -102,12 +103,14 @@ func NewRoomHandler(
 	gameStarter GameStarter,
 	eventBroadcaster EventBroadcaster,
 	deckService DeckService,
+	userRepository UserRepository,
 ) *RoomHandler {
 	return &RoomHandler{
 		manager:          manager,
 		gameStarter:      gameStarter,
 		eventBroadcaster: eventBroadcaster,
 		deckService:      deckService,
+		userRepository:   userRepository,
 	}
 }
 
@@ -124,7 +127,18 @@ func (h *RoomHandler) CreateRoom(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	player, createdRoom, err := h.manager.CreateRoom(r.Context(), req.Name)
+	if req.UserID == "" {
+		writeError(w, http.StatusBadRequest, "user_id is required")
+		return
+	}
+
+	currentUser, err := h.userRepository.FindUserByID(r.Context(), req.UserID)
+	if err != nil {
+		writeError(w, http.StatusUnauthorized, "user account is required to create room")
+		return
+	}
+
+	player, createdRoom, err := h.manager.CreateRoom(r.Context(), currentUser.PlayerName)
 	if err != nil {
 		if err == room.ErrInvalidPlayerName {
 			writeError(w, http.StatusBadRequest, "player name is required")
