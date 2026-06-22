@@ -140,7 +140,8 @@ function App() {
   }
 
   async function createRoom() {
-    if (isCreatingRoom) {
+    if (!user) {
+      setError('Чтобы создать комнату, сначала создай аккаунт.')
       return
     }
 
@@ -148,7 +149,7 @@ function App() {
     setError('')
 
     try {
-      const data = await createRoomRequest(playerName)
+      const data = await createRoomRequest(user.id)
 
       updateRoom(data.room)
       setPlayer(data.player)
@@ -164,6 +165,29 @@ function App() {
       setError(getCreateRoomErrorMessage(message))
     } finally {
       setIsCreatingRoom(false)
+    }
+  }
+
+  async function createUser() {
+    const trimmedName = playerName.trim()
+
+    if (!trimmedName) {
+      setError('Введите имя игрока.')
+      return
+    }
+
+    try {
+      setError('')
+
+      const data = await createUserRequest(trimmedName)
+
+      saveUser(data.user)
+      showToast('Аккаунт создан.', 'success')
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : 'Не удалось создать аккаунт.'
+
+      setError(message)
     }
   }
 
@@ -187,7 +211,11 @@ function App() {
 
     try {
       const loadedRoom = await loadRoomRequest(roomIdInput.trim())
-      const data = await joinRoomRequest(loadedRoom.id, playerName)
+      const data = await joinRoomRequest(
+        loadedRoom.id,
+        playerName,
+        user?.id,
+      )
 
       updateRoom(data.room)
       setPlayer(data.player)
@@ -1017,8 +1045,6 @@ function App() {
       if (savedUserID) {
         const loadedUser = await loadUserRequest(savedUserID)
         saveUser(loadedUser)
-        void createUserRequest
-        void user
       }
 
       if (!savedRoomID) {
@@ -1140,6 +1166,8 @@ function App() {
               onJoinRoomByID={joinRoomByID}
               isCreatingRoom={isCreatingRoom}
               isJoiningRoom={isJoiningRoom}
+              user={user}
+              onCreateUser={createUser}
             />
           )}
 

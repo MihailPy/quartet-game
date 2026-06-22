@@ -1,3 +1,4 @@
+import type { User } from '../types'
 type EntryPanelProps = {
   playerName: string
   roomIdInput: string
@@ -7,6 +8,8 @@ type EntryPanelProps = {
   onJoinRoomByID: () => void
   isCreatingRoom: boolean
   isJoiningRoom: boolean
+  user: User | null
+  onCreateUser: () => void
 }
 
 export function EntryPanel({
@@ -18,12 +21,34 @@ export function EntryPanel({
   onJoinRoomByID,
   isCreatingRoom,
   isJoiningRoom,
+  user,
+  onCreateUser,
 }: EntryPanelProps) {
   const playerNameIsEmpty = playerName.trim() === ''
   const roomIdIsEmpty = roomIdInput.trim() === ''
 
   return (
     <div className="panel entry-panel">
+      <div className="form-block">
+        <h3>Аккаунт</h3>
+
+        {user ? (
+          <p className="form-hint">
+            Аккаунт: {user.player_name}
+          </p>
+        ) : (
+          <>
+            <p className="form-hint">
+              Для создания комнаты нужен аккаунт. Для входа в чужую комнату можно играть как гость.
+            </p>
+
+            <button className="button secondary-button" type="button" onClick={onCreateUser}>
+              Создать аккаунт
+            </button>
+          </>
+        )}
+      </div>
+
       <h2>Войти в игру</h2>
 
       <label className="form-field">

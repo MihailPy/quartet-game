@@ -21,7 +21,7 @@ export type AvailableQuartetsResponse = {
 }
 
 export async function createRoomRequest(
-  playerName: string,
+  userID: string,
 ): Promise<CreateRoomResponse> {
   const response = await fetch(`${API_URL}/rooms`, {
     method: 'POST',
@@ -29,7 +29,7 @@ export async function createRoomRequest(
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      name: playerName,
+      user_id: userID,
     }),
   })
 
@@ -55,6 +55,7 @@ export async function loadRoomRequest(roomID: string): Promise<Room> {
 export async function joinRoomRequest(
   roomID: string,
   playerName: string,
+  userID?: string,
 ): Promise<{
   room: Room
   player: Player
@@ -66,6 +67,7 @@ export async function joinRoomRequest(
     },
     body: JSON.stringify({
       name: playerName,
+      user_id: userID ?? '',
     }),
   })
 
