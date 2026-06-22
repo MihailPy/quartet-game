@@ -33,7 +33,8 @@ type CreateRoomResponse struct {
 }
 
 type JoinRoomRequest struct {
-	Name string `json:"name"`
+	Name   string      `json:"name"`
+	UserID user.UserID `json:"user_id"`
 }
 
 type JoinRoomResponse struct {
@@ -198,7 +199,19 @@ func (h *RoomHandler) JoinRoom(w http.ResponseWriter, r *http.Request, roomID ro
 		return
 	}
 
-	player, joinedRoom, err := h.manager.JoinRoom(r.Context(), roomID, req.Name)
+	playerName := req.Name
+
+	if req.UserID != "" {
+		currentUser, err := h.userRepository.FindUserByID(r.Context(), req.UserID)
+		if err != nil {
+			writeError(w, http.StatusUnauthorized, "invalid user account")
+			return
+		}
+
+		playerName = currentUser.PlayerName
+	}
+
+	player, joinedRoom, err := h.manager.JoinRoom(r.Context(), roomID, playerName)
 	if err != nil {
 		if err == room.ErrInvalidPlayerName {
 			writeError(w, http.StatusBadRequest, "player name is required")
