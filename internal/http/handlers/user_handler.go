@@ -13,6 +13,7 @@ type UserRepository interface {
 	SaveUser(ctx context.Context, currentUser user.User) error
 	FindUserByID(ctx context.Context, userID user.UserID) (user.User, error)
 	UpdatePlayerName(ctx context.Context, userID user.UserID, playerName string, now time.Time) (user.User, error)
+	FindGameHistoryByUserID(ctx context.Context, userID user.UserID) ([]user.GameHistoryRecord, error)
 }
 
 type UserHandler struct {
@@ -29,6 +30,10 @@ type CreateUserResponse struct {
 
 type UpdatePlayerNameRequest struct {
 	PlayerName string `json:"player_name"`
+}
+
+type UserHistoryResponse struct {
+	Records []user.GameHistoryRecord `json:"records"`
 }
 
 func NewUserHandler(repository UserRepository) *UserHandler {
@@ -126,4 +131,26 @@ func (h *UserHandler) UpdatePlayerName(w http.ResponseWriter, r *http.Request, u
 	w.WriteHeader(http.StatusOK)
 
 	_ = json.NewEncoder(w).Encode(updatedUser)
+}
+
+func (h *UserHandler) GetUserHistory(w http.ResponseWriter, r *http.Request, userID user.UserID) {
+	if r.Method != http.MethodGet {
+		writeError(w, http.StatusMethodNotAllowed, "method not allowed")
+		return
+	}
+
+	records, err := h.repository.FindGameHistoryByUserID(r.Context(), userID)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	response := UserHistoryResponse{
+		Records: records,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	_ = json.NewEncoder(w).Encode(response)
 }

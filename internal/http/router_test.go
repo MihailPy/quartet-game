@@ -90,3 +90,10 @@ func (f fakeUserRepository) FindUserByID(ctx context.Context, userID user.UserID
 func (f fakeUserRepository) UpdatePlayerName(ctx context.Context, userID user.UserID, playerName string, now time.Time) (user.User, error) {
 	return user.User{}, user.ErrUserNotFound
 }
+
+func (f fakeUserRepository) FindGameHistoryByUserID(
+	ctx context.Context,
+	userID user.UserID,
+) ([]user.GameHistoryRecord, error) {
+	return []user.GameHistoryRecord{}, nil
+}
