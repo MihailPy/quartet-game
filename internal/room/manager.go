@@ -94,6 +94,24 @@ func (m *Manager) CreateRoom(ctx context.Context, playerName string) (Player, Ro
 	return player, currentRoom, nil
 }
 
+func (m *Manager) CreateRoomForUser(
+	ctx context.Context,
+	playerName string,
+	userID string,
+) (Player, Room, error) {
+	player, currentRoom, err := m.CreateRoom(ctx, playerName)
+	if err != nil {
+		return Player{}, Room{}, err
+	}
+
+	player.UserID = userID
+	currentRoom.Players[0].UserID = userID
+
+	m.rooms[currentRoom.ID] = currentRoom
+
+	return player, currentRoom, nil
+}
+
 func (m *Manager) GetRoom(ctx context.Context, id RoomID) (Room, error) {
 	m.mu.RLock()
 	currentRoom, ok := m.rooms[id]
@@ -219,6 +237,31 @@ func (m *Manager) JoinRoom(ctx context.Context, roomID RoomID, playerName string
 	}
 
 	currentRoom.SelectedPlayerIDs[player.ID] = true
+
+	m.rooms[roomID] = currentRoom
+
+	return player, currentRoom, nil
+}
+
+func (m *Manager) JoinRoomForUser(
+	ctx context.Context,
+	roomID RoomID,
+	playerName string,
+	userID string,
+) (Player, Room, error) {
+	player, currentRoom, err := m.JoinRoom(ctx, roomID, playerName)
+	if err != nil {
+		return Player{}, Room{}, err
+	}
+
+	player.UserID = userID
+
+	for i := range currentRoom.Players {
+		if currentRoom.Players[i].ID == player.ID {
+			currentRoom.Players[i].UserID = userID
+			break
+		}
+	}
 
 	m.rooms[roomID] = currentRoom
 

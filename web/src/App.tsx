@@ -1,5 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import {
+  createUserRequest,
+  loadUserHistoryRequest,
+  loadUserRequest,
   createRoomRequest,
   joinRoomRequest,
   loadDeckRequest,
@@ -40,6 +43,8 @@ import type {
   ToastMessage,
   ToastType,
   Quartet,
+  User,
+  GameHistoryRecord,
 } from './types'
 import {
   buildRequestCardMessage,
@@ -77,6 +82,8 @@ function App() {
   const [isJoiningRoom, setIsJoiningRoom] = useState<boolean>(false)
   const [isStartingGame, setIsStartingGame] = useState<boolean>(false)
   const [availableQuartets, setAvailableQuartets] = useState<Quartet[]>([])
+  const [user, setUser] = useState<User | null>(null)
+  const [userHistory, setUserHistory] = useState<GameHistoryRecord[]>([])
 
   function resetGameState() {
     updateDeck(null)
@@ -136,7 +143,8 @@ function App() {
   }
 
   async function createRoom() {
-    if (isCreatingRoom) {
+    if (!user) {
+      setError('Чтобы создать комнату, сначала создай аккаунт.')
       return
     }
 
@@ -144,7 +152,7 @@ function App() {
     setError('')
 
     try {
-      const data = await createRoomRequest(playerName)
+      const data = await createRoomRequest(user.id)
 
       updateRoom(data.room)
       setPlayer(data.player)
@@ -160,6 +168,29 @@ function App() {
       setError(getCreateRoomErrorMessage(message))
     } finally {
       setIsCreatingRoom(false)
+    }
+  }
+
+  async function createUser() {
+    const trimmedName = playerName.trim()
+
+    if (!trimmedName) {
+      setError('Введите имя игрока.')
+      return
+    }
+
+    try {
+      setError('')
+
+      const data = await createUserRequest(trimmedName)
+
+      saveUser(data.user)
+      showToast('Аккаунт создан.', 'success')
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : 'Не удалось создать аккаунт.'
+
+      setError(message)
     }
   }
 
@@ -183,7 +214,11 @@ function App() {
 
     try {
       const loadedRoom = await loadRoomRequest(roomIdInput.trim())
-      const data = await joinRoomRequest(loadedRoom.id, playerName)
+      const data = await joinRoomRequest(
+        loadedRoom.id,
+        playerName,
+        user?.id,
+      )
 
       updateRoom(data.room)
       setPlayer(data.player)
@@ -792,6 +827,28 @@ function App() {
     return message || 'Не удалось начать игру.'
   }
 
+  function saveUser(nextUser: User | null) {
+    setUser(nextUser)
+
+    if (nextUser) {
+      window.localStorage.setItem('quartetUserID', nextUser.id)
+    } else {
+      window.localStorage.removeItem('quartetUserID')
+    }
+  }
+
+  function logoutUser() {
+    saveUser(null)
+    setUserHistory([])
+    showToast('Вы вышли из аккаунта.', 'info')
+  }
+
+  async function loadUserHistory(userID: string) {
+    const data = await loadUserHistoryRequest(userID)
+
+    setUserHistory(data?.records ?? [])
+  }
+
   useEffect(() => {
     if (!room || !player) return
 
@@ -998,6 +1055,12 @@ function App() {
     async function restoreSession() {
       const savedRoomID = loadRoomID()
       const savedPlayer = loadPlayer()
+      const savedUserID = window.localStorage.getItem('quartetUserID')
+
+      if (savedUserID) {
+        const loadedUser = await loadUserRequest(savedUserID)
+        saveUser(loadedUser)
+      }
 
       if (!savedRoomID) {
         setIsSessionRestored(true)
@@ -1087,6 +1150,15 @@ function App() {
     void loadAvailableQuartets(room.id, room.owner_player_id)
   }, [room?.id, room?.owner_player_id, room?.status])
 
+  useEffect(() => {
+    if (!user) {
+      setUserHistory([])
+      return
+    }
+
+    void loadUserHistory(user.id)
+  }, [user?.id])
+
   const isEntered = room !== null && player !== null && isCurrentPlayerInRoom()
 
   return (
@@ -1118,6 +1190,10 @@ function App() {
               onJoinRoomByID={joinRoomByID}
               isCreatingRoom={isCreatingRoom}
               isJoiningRoom={isJoiningRoom}
+              user={user}
+              onCreateUser={createUser}
+              userHistory={userHistory}
+              onLogoutUser={logoutUser}
             />
           )}
 

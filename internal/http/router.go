@@ -7,6 +7,7 @@ import (
 
 	"github.com/MihailPy/quartet-game/internal/http/handlers"
 	"github.com/MihailPy/quartet-game/internal/room"
+	"github.com/MihailPy/quartet-game/internal/user"
 	"github.com/MihailPy/quartet-game/internal/ws"
 )
 
@@ -15,6 +16,7 @@ func NewRouter(
 	gameStarter handlers.GameStarter,
 	gameService ws.GameService,
 	deckService handlers.DeckService,
+	userRepository handlers.UserRepository,
 ) http.Handler {
 	mux := http.NewServeMux()
 
@@ -25,6 +27,7 @@ func NewRouter(
 		gameStarter,
 		wsHub,
 		deckService,
+		userRepository,
 	)
 
 	wsHandler := ws.NewHandler(
@@ -32,6 +35,8 @@ func NewRouter(
 		wsHub,
 		gameService,
 	)
+
+	userHandler := handlers.NewUserHandler(userRepository)
 
 	mux.HandleFunc("/health", healthHandler)
 	mux.HandleFunc("/rooms", roomHandler.CreateRoom)
@@ -76,6 +81,26 @@ func NewRouter(
 		default:
 			w.WriteHeader(http.StatusNotFound)
 		}
+	})
+
+	mux.HandleFunc("/users", userHandler.CreateUser)
+	mux.HandleFunc("/users/", func(w http.ResponseWriter, r *http.Request) {
+		path := strings.TrimPrefix(r.URL.Path, "/users/")
+		parts := strings.Split(path, "/")
+
+		userID := user.UserID(parts[0])
+
+		if len(parts) == 2 && parts[1] == "history" {
+			userHandler.GetUserHistory(w, r, userID)
+			return
+		}
+
+		if r.Method == http.MethodPatch {
+			userHandler.UpdatePlayerName(w, r, userID)
+			return
+		}
+
+		userHandler.GetUser(w, r, userID)
 	})
 
 	return withCORS(mux)

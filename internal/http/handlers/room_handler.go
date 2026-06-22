@@ -7,6 +7,7 @@ import (
 
 	"github.com/MihailPy/quartet-game/internal/game"
 	"github.com/MihailPy/quartet-game/internal/room"
+	"github.com/MihailPy/quartet-game/internal/user"
 	"github.com/MihailPy/quartet-game/internal/ws"
 )
 
@@ -20,19 +21,20 @@ type RoomHandler struct {
 	gameStarter      GameStarter
 	eventBroadcaster EventBroadcaster
 	deckService      DeckService
+	userRepository   UserRepository
 }
 
 type CreateRoomRequest struct {
-	Name string `json:"name"`
+	UserID user.UserID `json:"user_id"`
 }
-
 type CreateRoomResponse struct {
 	Player room.Player `json:"player"`
 	Room   room.Room   `json:"room"`
 }
 
 type JoinRoomRequest struct {
-	Name string `json:"name"`
+	Name   string      `json:"name"`
+	UserID user.UserID `json:"user_id"`
 }
 
 type JoinRoomResponse struct {
@@ -102,12 +104,14 @@ func NewRoomHandler(
 	gameStarter GameStarter,
 	eventBroadcaster EventBroadcaster,
 	deckService DeckService,
+	userRepository UserRepository,
 ) *RoomHandler {
 	return &RoomHandler{
 		manager:          manager,
 		gameStarter:      gameStarter,
 		eventBroadcaster: eventBroadcaster,
 		deckService:      deckService,
+		userRepository:   userRepository,
 	}
 }
 
@@ -124,7 +128,22 @@ func (h *RoomHandler) CreateRoom(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	player, createdRoom, err := h.manager.CreateRoom(r.Context(), req.Name)
+	if req.UserID == "" {
+		writeError(w, http.StatusBadRequest, "user_id is required")
+		return
+	}
+
+	currentUser, err := h.userRepository.FindUserByID(r.Context(), req.UserID)
+	if err != nil {
+		writeError(w, http.StatusUnauthorized, "user account is required to create room")
+		return
+	}
+
+	player, createdRoom, err := h.manager.CreateRoomForUser(
+		r.Context(),
+		currentUser.PlayerName,
+		string(currentUser.ID),
+	)
 	if err != nil {
 		if err == room.ErrInvalidPlayerName {
 			writeError(w, http.StatusBadRequest, "player name is required")
@@ -184,7 +203,38 @@ func (h *RoomHandler) JoinRoom(w http.ResponseWriter, r *http.Request, roomID ro
 		return
 	}
 
-	player, joinedRoom, err := h.manager.JoinRoom(r.Context(), roomID, req.Name)
+	playerName := req.Name
+	userID := ""
+
+	if req.UserID != "" {
+		currentUser, err := h.userRepository.FindUserByID(r.Context(), req.UserID)
+		if err != nil {
+			writeError(w, http.StatusUnauthorized, "invalid user account")
+			return
+		}
+
+		playerName = currentUser.PlayerName
+		userID = string(currentUser.ID)
+	}
+
+	var player room.Player
+	var joinedRoom room.Room
+	var err error
+
+	if userID != "" {
+		player, joinedRoom, err = h.manager.JoinRoomForUser(
+			r.Context(),
+			roomID,
+			playerName,
+			userID,
+		)
+	} else {
+		player, joinedRoom, err = h.manager.JoinRoom(
+			r.Context(),
+			roomID,
+			playerName,
+		)
+	}
 	if err != nil {
 		if err == room.ErrInvalidPlayerName {
 			writeError(w, http.StatusBadRequest, "player name is required")

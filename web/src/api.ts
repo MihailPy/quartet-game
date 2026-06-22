@@ -1,4 +1,5 @@
 import type {
+  GameHistoryRecord,
   Player,
   PlayerHandPayload,
   PublicGameState,
@@ -6,6 +7,7 @@ import type {
   Room,
   RoomDeckResponse,
   StartGameResponse,
+  User,
 } from './types'
 
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8080'
@@ -20,7 +22,7 @@ export type AvailableQuartetsResponse = {
 }
 
 export async function createRoomRequest(
-  playerName: string,
+  userID: string,
 ): Promise<CreateRoomResponse> {
   const response = await fetch(`${API_URL}/rooms`, {
     method: 'POST',
@@ -28,7 +30,7 @@ export async function createRoomRequest(
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      name: playerName,
+      user_id: userID,
     }),
   })
 
@@ -54,6 +56,7 @@ export async function loadRoomRequest(roomID: string): Promise<Room> {
 export async function joinRoomRequest(
   roomID: string,
   playerName: string,
+  userID?: string,
 ): Promise<{
   room: Room
   player: Player
@@ -65,6 +68,7 @@ export async function joinRoomRequest(
     },
     body: JSON.stringify({
       name: playerName,
+      user_id: userID ?? '',
     }),
   })
 
@@ -222,4 +226,51 @@ export async function toggleSelectedQuartetRequest(
   }
 
   return (await response.json()) as Room
+}
+
+export type CreateUserResponse = {
+  user: User
+}
+
+export async function createUserRequest(playerName: string): Promise<CreateUserResponse> {
+  const response = await fetch(`${API_URL}/users`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      player_name: playerName,
+    }),
+  })
+
+  if (!response.ok) {
+    const errorPayload = await response.json().catch(() => null)
+    throw new Error(errorPayload?.error ?? 'Не удалось создать аккаунт.')
+  }
+
+  return (await response.json()) as CreateUserResponse
+}
+
+export async function loadUserRequest(userID: string): Promise<User | null> {
+  const response = await fetch(`${API_URL}/users/${userID}`)
+
+  if (!response.ok) {
+    return null
+  }
+
+  return (await response.json()) as User
+}
+
+export type UserHistoryResponse = {
+  records: GameHistoryRecord[]
+}
+
+export async function loadUserHistoryRequest(
+  userID: string,
+): Promise<UserHistoryResponse | null> {
+  const response = await fetch(`${API_URL}/users/${userID}/history`)
+
+  if (!response.ok) {
+    return null
+  }
+
+  return (await response.json()) as UserHistoryResponse
 }

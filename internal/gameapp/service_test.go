@@ -83,7 +83,7 @@ func TestGetGameStateRestoresFinishedGameFromRepository(t *testing.T) {
 		},
 	}
 
-	service := NewService(nil, repository, "deck_1")
+	service := NewService(nil, repository, nil, "deck_1")
 
 	restoredState, ok := service.GetGameState(ctx, roomID)
 	if !ok {
@@ -128,7 +128,7 @@ func TestGetGameStateReturnsCachedGameBeforeRepository(t *testing.T) {
 		err: errors.New("repository should not be called"),
 	}
 
-	service := NewService(nil, repository, "deck_1")
+	service := NewService(nil, repository, nil, "deck_1")
 
 	cachedState := game.GameState{
 		ID:     game.GameID(roomID),
@@ -166,7 +166,7 @@ func TestGetGameStateReturnsFalseWhenRepositoryCannotFindGame(t *testing.T) {
 		err: errors.New("game not found"),
 	}
 
-	service := NewService(nil, repository, "deck_1")
+	service := NewService(nil, repository, nil, "deck_1")
 
 	_, ok := service.GetGameState(ctx, roomID)
 	if ok {
