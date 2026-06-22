@@ -11,6 +11,7 @@ const (
 
 type Player struct {
 	ID          PlayerID `json:"id"`
+	UserID      string   `json:"user_id,omitempty"`
 	Name        string   `json:"name"`
 	IsReady     bool     `json:"is_ready"`
 	IsConnected bool     `json:"is_connected"`

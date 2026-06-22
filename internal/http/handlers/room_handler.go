@@ -139,7 +139,11 @@ func (h *RoomHandler) CreateRoom(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	player, createdRoom, err := h.manager.CreateRoom(r.Context(), currentUser.PlayerName)
+	player, createdRoom, err := h.manager.CreateRoomForUser(
+		r.Context(),
+		currentUser.PlayerName,
+		string(currentUser.ID),
+	)
 	if err != nil {
 		if err == room.ErrInvalidPlayerName {
 			writeError(w, http.StatusBadRequest, "player name is required")
@@ -200,6 +204,7 @@ func (h *RoomHandler) JoinRoom(w http.ResponseWriter, r *http.Request, roomID ro
 	}
 
 	playerName := req.Name
+	userID := ""
 
 	if req.UserID != "" {
 		currentUser, err := h.userRepository.FindUserByID(r.Context(), req.UserID)
@@ -209,9 +214,27 @@ func (h *RoomHandler) JoinRoom(w http.ResponseWriter, r *http.Request, roomID ro
 		}
 
 		playerName = currentUser.PlayerName
+		userID = string(currentUser.ID)
 	}
 
-	player, joinedRoom, err := h.manager.JoinRoom(r.Context(), roomID, playerName)
+	var player room.Player
+	var joinedRoom room.Room
+	var err error
+
+	if userID != "" {
+		player, joinedRoom, err = h.manager.JoinRoomForUser(
+			r.Context(),
+			roomID,
+			playerName,
+			userID,
+		)
+	} else {
+		player, joinedRoom, err = h.manager.JoinRoom(
+			r.Context(),
+			roomID,
+			playerName,
+		)
+	}
 	if err != nil {
 		if err == room.ErrInvalidPlayerName {
 			writeError(w, http.StatusBadRequest, "player name is required")
