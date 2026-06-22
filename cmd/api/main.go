@@ -12,6 +12,7 @@ import (
 	apphttp "github.com/MihailPy/quartet-game/internal/http"
 	"github.com/MihailPy/quartet-game/internal/room"
 	"github.com/MihailPy/quartet-game/internal/storage/postgres"
+	"github.com/MihailPy/quartet-game/internal/user"
 )
 
 func main() {
@@ -37,6 +38,7 @@ func main() {
 
 	roomRepository := postgres.NewRoomRepository(db)
 	roomManager := room.NewManager(roomRepository, maxPlayers)
+	userRepository := user.NewMemoryRepository()
 
 	gameRepository := postgres.NewGameRepository(db)
 
@@ -46,7 +48,7 @@ func main() {
 		game.DeckID(cfg.DefaultDeckID),
 	)
 
-	router := apphttp.NewRouter(roomManager, gameService, gameService, deckService)
+	router := apphttp.NewRouter(roomManager, gameService, gameService, deckService, userRepository)
 
 	log.Printf("Quartet Game API is running on %s", cfg.HTTPAddr)
 

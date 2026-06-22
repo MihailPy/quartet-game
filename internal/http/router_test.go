@@ -5,9 +5,11 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/MihailPy/quartet-game/internal/game"
 	"github.com/MihailPy/quartet-game/internal/room"
+	"github.com/MihailPy/quartet-game/internal/user"
 	"github.com/MihailPy/quartet-game/internal/ws"
 )
 
@@ -57,7 +59,9 @@ func TestHealthHandler(t *testing.T) {
 
 	deckService := fakeDeckService{}
 
-	router := NewRouter(roomManager, gameStarter, gameStarter, deckService)
+	userRepository := fakeUserRepository{}
+
+	router := NewRouter(roomManager, gameStarter, gameStarter, deckService, userRepository)
 
 	req := httptest.NewRequest(http.MethodGet, "/health", nil)
 	rec := httptest.NewRecorder()
@@ -71,4 +75,18 @@ func TestHealthHandler(t *testing.T) {
 	if rec.Body.String() != "OK" {
 		t.Fatalf("expected body OK, got %s", rec.Body.String())
 	}
+}
+
+type fakeUserRepository struct{}
+
+func (f fakeUserRepository) SaveUser(ctx context.Context, currentUser user.User) error {
+	return nil
+}
+
+func (f fakeUserRepository) FindUserByID(ctx context.Context, userID user.UserID) (user.User, error) {
+	return user.User{}, user.ErrUserNotFound
+}
+
+func (f fakeUserRepository) UpdatePlayerName(ctx context.Context, userID user.UserID, playerName string, now time.Time) (user.User, error) {
+	return user.User{}, user.ErrUserNotFound
 }

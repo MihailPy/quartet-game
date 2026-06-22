@@ -7,6 +7,7 @@ import (
 
 	"github.com/MihailPy/quartet-game/internal/http/handlers"
 	"github.com/MihailPy/quartet-game/internal/room"
+	"github.com/MihailPy/quartet-game/internal/user"
 	"github.com/MihailPy/quartet-game/internal/ws"
 )
 
@@ -15,6 +16,7 @@ func NewRouter(
 	gameStarter handlers.GameStarter,
 	gameService ws.GameService,
 	deckService handlers.DeckService,
+	userRepository handlers.UserRepository,
 ) http.Handler {
 	mux := http.NewServeMux()
 
@@ -32,6 +34,8 @@ func NewRouter(
 		wsHub,
 		gameService,
 	)
+
+	userHandler := handlers.NewUserHandler(userRepository)
 
 	mux.HandleFunc("/health", healthHandler)
 	mux.HandleFunc("/rooms", roomHandler.CreateRoom)
@@ -76,6 +80,12 @@ func NewRouter(
 		default:
 			w.WriteHeader(http.StatusNotFound)
 		}
+	})
+
+	mux.HandleFunc("/users", userHandler.CreateUser)
+	mux.HandleFunc("/users/", func(w http.ResponseWriter, r *http.Request) {
+		userID := user.UserID(strings.TrimPrefix(r.URL.Path, "/users/"))
+		userHandler.GetUser(w, r, userID)
 	})
 
 	return withCORS(mux)
