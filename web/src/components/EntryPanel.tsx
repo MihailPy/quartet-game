@@ -11,7 +11,7 @@ type EntryPanelProps = {
   user: User | null
   onCreateUser: () => void
   userHistory: GameHistoryRecord[]
-
+  onLogoutUser: () => void
 }
 
 export function EntryPanel({
@@ -26,6 +26,7 @@ export function EntryPanel({
   user,
   onCreateUser,
   userHistory,
+  onLogoutUser,
 }: EntryPanelProps) {
   const playerNameIsEmpty = playerName.trim() === ''
   const roomIdIsEmpty = roomIdInput.trim() === ''
@@ -36,9 +37,15 @@ export function EntryPanel({
         <h3>Аккаунт</h3>
 
         {user ? (
-          <p className="form-hint">
-            Аккаунт: {user.player_name}
-          </p>
+          <>
+            <p className="form-hint">
+              Аккаунт: {user.player_name}
+            </p>
+
+            <button className="button secondary-button" type="button" onClick={onLogoutUser}>
+              Выйти из аккаунта
+            </button>
+          </>
         ) : (
           <>
             <p className="form-hint">

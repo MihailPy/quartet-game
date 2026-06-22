@@ -837,6 +837,12 @@ function App() {
     }
   }
 
+  function logoutUser() {
+    saveUser(null)
+    setUserHistory([])
+    showToast('Вы вышли из аккаунта.', 'info')
+  }
+
   async function loadUserHistory(userID: string) {
     const data = await loadUserHistoryRequest(userID)
 
@@ -1187,6 +1193,7 @@ function App() {
               user={user}
               onCreateUser={createUser}
               userHistory={userHistory}
+              onLogoutUser={logoutUser}
             />
           )}
 
