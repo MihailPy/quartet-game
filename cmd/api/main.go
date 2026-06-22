@@ -45,6 +45,7 @@ func main() {
 	gameService := gameapp.NewService(
 		deckService,
 		gameRepository,
+		userRepository,
 		game.DeckID(cfg.DefaultDeckID),
 	)
 

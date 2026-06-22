@@ -4,9 +4,11 @@ import (
 	"context"
 	"errors"
 	"sync"
+	"time"
 
 	"github.com/MihailPy/quartet-game/internal/game"
 	"github.com/MihailPy/quartet-game/internal/room"
+	"github.com/MihailPy/quartet-game/internal/user"
 )
 
 var ErrCannotStartGame = errors.New("cannot start game")
@@ -24,24 +26,33 @@ type DeckService interface {
 	LoadAvailableQuartets(ctx context.Context, ownerPlayerID room.PlayerID) ([]game.Quartet, error)
 }
 
+type UserHistoryRepository interface {
+	SaveGameHistoryRecord(ctx context.Context, record user.GameHistoryRecord) error
+}
+
 type Service struct {
-	mu             sync.Mutex
-	deckService    DeckService
-	gameRepository GameRepository
-	deckID         game.DeckID
-	games          map[room.RoomID]game.GameState
+	mu                    sync.Mutex
+	deckService           DeckService
+	gameRepository        GameRepository
+	userHistoryRepository UserHistoryRepository
+	deckID                game.DeckID
+	games                 map[room.RoomID]game.GameState
+	rooms                 map[room.RoomID]room.Room
 }
 
 func NewService(
 	deckService DeckService,
 	gameRepository GameRepository,
+	userHistoryRepository UserHistoryRepository,
 	deckID game.DeckID,
 ) *Service {
 	return &Service{
-		deckService:    deckService,
-		gameRepository: gameRepository,
-		deckID:         deckID,
-		games:          make(map[room.RoomID]game.GameState),
+		deckService:           deckService,
+		gameRepository:        gameRepository,
+		userHistoryRepository: userHistoryRepository,
+		deckID:                deckID,
+		games:                 make(map[room.RoomID]game.GameState),
+		rooms:                 make(map[room.RoomID]room.Room),
 	}
 }
 
@@ -111,6 +122,7 @@ func (s *Service) StartGame(ctx context.Context, currentRoom room.Room) (game.Ga
 
 	s.mu.Lock()
 	s.games[currentRoom.ID] = state
+	s.rooms[currentRoom.ID] = currentRoom
 	s.mu.Unlock()
 
 	return state, nil
@@ -140,6 +152,10 @@ func (s *Service) FinishGame(ctx context.Context, roomID room.RoomID) (game.Game
 	}
 
 	result := game.CalculateGameResult(&state)
+
+	if err := s.saveGameHistory(ctx, roomID, state, result); err != nil {
+		return game.GameResult{}, err
+	}
 
 	if s.gameRepository != nil {
 		if err := s.gameRepository.SaveGameResult(ctx, state.ID, result); err != nil {
@@ -186,6 +202,10 @@ func (s *Service) RequestCard(
 	if state.Status == game.GameStatusFinished && s.gameRepository != nil {
 		gameResult := game.CalculateGameResult(&state)
 
+		if err := s.saveGameHistory(ctx, roomID, state, gameResult); err != nil {
+			return game.RequestCardResult{}, game.GameState{}, err
+		}
+
 		if err := s.gameRepository.SaveGameResult(ctx, state.ID, gameResult); err != nil {
 			return game.RequestCardResult{}, game.GameState{}, err
 		}
@@ -225,4 +245,69 @@ func (s *Service) GetGameState(ctx context.Context, roomID room.RoomID) (game.Ga
 	s.mu.Unlock()
 
 	return state, true
+}
+
+func (s *Service) saveGameHistory(
+	ctx context.Context,
+	roomID room.RoomID,
+	state game.GameState,
+	result game.GameResult,
+) error {
+	if s.userHistoryRepository == nil {
+		return nil
+	}
+
+	s.mu.Lock()
+	currentRoom, ok := s.rooms[roomID]
+	s.mu.Unlock()
+
+	if !ok {
+		return nil
+	}
+
+	winnerIDs := make(map[string]bool)
+
+	for _, winnerID := range result.Winners {
+		winnerIDs[string(winnerID)] = true
+	}
+
+	scoreByPlayerID := make(map[string]int)
+
+	for playerID, score := range result.Scores {
+		scoreByPlayerID[string(playerID)] = score
+	}
+
+	now := time.Now().UTC()
+
+	for _, player := range currentRoom.Players {
+		if player.UserID == "" {
+			continue
+		}
+
+		role := "participant"
+		if player.ID == currentRoom.OwnerPlayerID {
+			role = "owner"
+		}
+
+		record := user.GameHistoryRecord{
+			ID:        generateHistoryID(),
+			GameID:    string(state.ID),
+			RoomID:    string(roomID),
+			UserID:    user.UserID(player.UserID),
+			Role:      role,
+			Score:     scoreByPlayerID[string(player.ID)],
+			IsWinner:  winnerIDs[string(player.ID)],
+			CreatedAt: now,
+		}
+
+		if err := s.userHistoryRepository.SaveGameHistoryRecord(ctx, record); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func generateHistoryID() string {
+	return time.Now().UTC().Format("20060102150405.000000000")
 }
