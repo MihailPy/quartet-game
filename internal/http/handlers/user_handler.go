@@ -12,6 +12,7 @@ import (
 type UserRepository interface {
 	SaveUser(ctx context.Context, currentUser user.User) error
 	FindUserByID(ctx context.Context, userID user.UserID) (user.User, error)
+	UpdatePlayerName(ctx context.Context, userID user.UserID, playerName string, now time.Time) (user.User, error)
 }
 
 type UserHandler struct {
@@ -24,6 +25,10 @@ type CreateUserRequest struct {
 
 type CreateUserResponse struct {
 	User user.User `json:"user"`
+}
+
+type UpdatePlayerNameRequest struct {
+	PlayerName string `json:"player_name"`
 }
 
 func NewUserHandler(repository UserRepository) *UserHandler {
@@ -92,4 +97,33 @@ func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request, userID use
 	w.WriteHeader(http.StatusOK)
 
 	_ = json.NewEncoder(w).Encode(currentUser)
+}
+
+func (h *UserHandler) UpdatePlayerName(w http.ResponseWriter, r *http.Request, userID user.UserID) {
+	if r.Method != http.MethodPatch {
+		writeError(w, http.StatusMethodNotAllowed, "method not allowed")
+		return
+	}
+
+	var request UpdatePlayerNameRequest
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		writeError(w, http.StatusBadRequest, "invalid update player name request")
+		return
+	}
+
+	updatedUser, err := h.repository.UpdatePlayerName(
+		r.Context(),
+		userID,
+		request.PlayerName,
+		time.Now().UTC(),
+	)
+	if err != nil {
+		writeError(w, http.StatusNotFound, err.Error())
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	_ = json.NewEncoder(w).Encode(updatedUser)
 }

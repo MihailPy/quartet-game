@@ -85,6 +85,12 @@ func NewRouter(
 	mux.HandleFunc("/users", userHandler.CreateUser)
 	mux.HandleFunc("/users/", func(w http.ResponseWriter, r *http.Request) {
 		userID := user.UserID(strings.TrimPrefix(r.URL.Path, "/users/"))
+
+		if r.Method == http.MethodPatch {
+			userHandler.UpdatePlayerName(w, r, userID)
+			return
+		}
+
 		userHandler.GetUser(w, r, userID)
 	})
 
