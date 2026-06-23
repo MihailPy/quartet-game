@@ -15,6 +15,11 @@ type EntryPanelProps = {
   recoveryCode: string
   onRecoveryCodeChange: (value: string) => void
   onLoginUser: () => void
+  quartetTitle: string
+  quartetCards: string[]
+  onQuartetTitleChange: (value: string) => void
+  onQuartetCardsChange: (cards: string[]) => void
+  onCreateUserQuartet: () => void
 }
 
 export function EntryPanel({
@@ -33,6 +38,11 @@ export function EntryPanel({
   recoveryCode,
   onRecoveryCodeChange,
   onLoginUser,
+  quartetTitle,
+  quartetCards,
+  onQuartetTitleChange,
+  onQuartetCardsChange,
+  onCreateUserQuartet,
 }: EntryPanelProps) {
   const playerNameIsEmpty = playerName.trim() === ''
   const roomIdIsEmpty = roomIdInput.trim() === ''
@@ -100,6 +110,43 @@ export function EntryPanel({
               <span>{record.score} очков</span>
             </div>
           ))}
+        </div>
+      )}
+
+      {user && (
+        <div className="form-block">
+          <h3>Создать квартет</h3>
+
+          <input
+            className="input"
+            type="text"
+            value={quartetTitle}
+            onChange={(event) => onQuartetTitleChange(event.target.value)}
+            placeholder="Название квартета"
+          />
+
+          {quartetCards.map((card, index) => (
+            <input
+              key={index}
+              className="input"
+              type="text"
+              value={card}
+              onChange={(event) => {
+                const nextCards = [...quartetCards]
+                nextCards[index] = event.target.value
+                onQuartetCardsChange(nextCards)
+              }}
+              placeholder={`Карта ${index + 1}`}
+            />
+          ))}
+
+          <button
+            className="button secondary-button"
+            type="button"
+            onClick={onCreateUserQuartet}
+          >
+            Создать квартет
+          </button>
         </div>
       )}
 
