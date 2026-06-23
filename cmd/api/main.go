@@ -24,7 +24,8 @@ func main() {
 	defer db.Close()
 
 	deckRepository := postgres.NewDeckRepository(db)
-	deckService := deck.NewService(deckRepository)
+	quartetRepository := postgres.NewQuartetRepository(db)
+	deckService := deck.NewService(deckRepository, quartetRepository)
 	defaultDeck, err := deckService.LoadDeck(
 		context.Background(),
 		game.DeckID(cfg.DefaultDeckID),
@@ -39,7 +40,6 @@ func main() {
 	roomManager := room.NewManager(roomRepository, maxPlayers)
 	userRepository := postgres.NewUserRepository(db)
 	userHistoryRepository := postgres.NewUserHistoryRepository(db)
-	quartetRepository := postgres.NewQuartetRepository(db)
 
 	gameRepository := postgres.NewGameRepository(db)
 

@@ -5,19 +5,26 @@ import (
 
 	"github.com/MihailPy/quartet-game/internal/game"
 	"github.com/MihailPy/quartet-game/internal/room"
+	"github.com/MihailPy/quartet-game/internal/user"
 )
 
 type Repository interface {
 	FindByID(ctx context.Context, deckID game.DeckID) (game.Deck, error)
 }
 
-type Service struct {
-	repository Repository
+type QuartetRepository interface {
+	ListUserQuartets(ctx context.Context, ownerUserID user.UserID) ([]game.Quartet, error)
 }
 
-func NewService(repository Repository) *Service {
+type Service struct {
+	repository        Repository
+	quartetRepository QuartetRepository
+}
+
+func NewService(repository Repository, quartetRepository QuartetRepository) *Service {
 	return &Service{
-		repository: repository,
+		repository:        repository,
+		quartetRepository: quartetRepository,
 	}
 }
 
@@ -25,7 +32,11 @@ func (s *Service) LoadDeck(ctx context.Context, deckID game.DeckID) (game.Deck, 
 	return s.repository.FindByID(ctx, deckID)
 }
 
-func (s *Service) LoadAvailableQuartets(ctx context.Context, ownerPlayerID room.PlayerID) ([]game.Quartet, error) {
+func (s *Service) LoadAvailableQuartets(
+	ctx context.Context,
+	ownerPlayerID room.PlayerID,
+	ownerUserID user.UserID,
+) ([]game.Quartet, error) {
 	_ = ownerPlayerID
 
 	loadedDeck, err := s.LoadDeck(ctx, game.DeckID("00000000-0000-0000-0000-000000000001"))
@@ -33,5 +44,16 @@ func (s *Service) LoadAvailableQuartets(ctx context.Context, ownerPlayerID room.
 		return nil, err
 	}
 
-	return loadedDeck.Quartets, nil
+	quartets := append([]game.Quartet{}, loadedDeck.Quartets...)
+
+	if ownerUserID != "" && s.quartetRepository != nil {
+		userQuartets, err := s.quartetRepository.ListUserQuartets(ctx, ownerUserID)
+		if err != nil {
+			return nil, err
+		}
+
+		quartets = append(quartets, userQuartets...)
+	}
+
+	return quartets, nil
 }

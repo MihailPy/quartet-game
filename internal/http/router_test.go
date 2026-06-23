@@ -21,8 +21,12 @@ type fakeGameStarter struct {
 
 type fakeDeckService struct{}
 
-func (f fakeDeckService) LoadAvailableQuartets(ctx context.Context, ownerPlayerID room.PlayerID) ([]game.Quartet, error) {
-	return nil, nil
+func (f fakeDeckService) LoadAvailableQuartets(
+	ctx context.Context,
+	ownerPlayerID room.PlayerID,
+	ownerUserID user.UserID,
+) ([]game.Quartet, error) {
+	return []game.Quartet{}, nil
 }
 
 func (f fakeGameStarter) StartGame(ctx context.Context, currentRoom room.Room) (game.GameState, error) {
