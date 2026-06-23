@@ -12,6 +12,9 @@ type EntryPanelProps = {
   onCreateUser: () => void
   userHistory: GameHistoryRecord[]
   onLogoutUser: () => void
+  recoveryCode: string
+  onRecoveryCodeChange: (value: string) => void
+  onLoginUser: () => void
 }
 
 export function EntryPanel({
@@ -27,6 +30,9 @@ export function EntryPanel({
   onCreateUser,
   userHistory,
   onLogoutUser,
+  recoveryCode,
+  onRecoveryCodeChange,
+  onLoginUser,
 }: EntryPanelProps) {
   const playerNameIsEmpty = playerName.trim() === ''
   const roomIdIsEmpty = roomIdInput.trim() === ''
@@ -45,6 +51,10 @@ export function EntryPanel({
             <button className="button secondary-button" type="button" onClick={onLogoutUser}>
               Выйти из аккаунта
             </button>
+
+            <p className="form-hint">
+              Код восстановления: {user.recovery_code}
+            </p>
           </>
         ) : (
           <>
@@ -55,6 +65,19 @@ export function EntryPanel({
             <button className="button secondary-button" type="button" onClick={onCreateUser}>
               Создать аккаунт
             </button>
+            <div className="form-row">
+              <input
+                className="input"
+                type="text"
+                value={recoveryCode}
+                onChange={(event) => onRecoveryCodeChange(event.target.value)}
+                placeholder="Код восстановления"
+              />
+
+              <button className="button secondary-button" type="button" onClick={onLoginUser}>
+                Войти
+              </button>
+            </div>
           </>
         )}
       </div>
@@ -96,7 +119,7 @@ export function EntryPanel({
         <button
           className="button"
           onClick={onCreateRoom}
-          disabled={playerNameIsEmpty || isCreatingRoom}
+          disabled={!user || isCreatingRoom}
         >
           {isCreatingRoom ? 'Создаём комнату...' : 'Создать комнату'}
         </button>

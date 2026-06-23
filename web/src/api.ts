@@ -274,3 +274,22 @@ export async function loadUserHistoryRequest(
 
   return (await response.json()) as UserHistoryResponse
 }
+
+export async function loginUserRequest(
+  recoveryCode: string,
+): Promise<CreateUserResponse> {
+  const response = await fetch(`${API_URL}/users/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      recovery_code: recoveryCode,
+    }),
+  })
+
+  if (!response.ok) {
+    const errorPayload = await response.json().catch(() => null)
+    throw new Error(errorPayload?.error ?? 'Не удалось войти в аккаунт.')
+  }
+
+  return (await response.json()) as CreateUserResponse
+}

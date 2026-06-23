@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import {
+  loginUserRequest,
   createUserRequest,
   loadUserHistoryRequest,
   loadUserRequest,
@@ -84,6 +85,7 @@ function App() {
   const [availableQuartets, setAvailableQuartets] = useState<Quartet[]>([])
   const [user, setUser] = useState<User | null>(null)
   const [userHistory, setUserHistory] = useState<GameHistoryRecord[]>([])
+  const [recoveryCode, setRecoveryCode] = useState('')
 
   function resetGameState() {
     updateDeck(null)
@@ -849,6 +851,30 @@ function App() {
     setUserHistory(data?.records ?? [])
   }
 
+  async function loginUser() {
+    const trimmedCode = recoveryCode.trim()
+
+    if (!trimmedCode) {
+      setError('Введите код восстановления.')
+      return
+    }
+
+    try {
+      setError('')
+
+      const data = await loginUserRequest(trimmedCode)
+
+      saveUser(data.user)
+      setRecoveryCode('')
+      showToast('Вы вошли в аккаунт.', 'success')
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : 'Не удалось войти в аккаунт.'
+
+      setError(message)
+    }
+  }
+
   useEffect(() => {
     if (!room || !player) return
 
@@ -1194,6 +1220,9 @@ function App() {
               onCreateUser={createUser}
               userHistory={userHistory}
               onLogoutUser={logoutUser}
+              recoveryCode={recoveryCode}
+              onRecoveryCodeChange={setRecoveryCode}
+              onLoginUser={loginUser}
             />
           )}
 

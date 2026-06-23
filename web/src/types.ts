@@ -124,6 +124,7 @@ export type ToastMessage = {
 export type User = {
   id: string
   player_name: string
+  recovery_code: string
   created_at: string
   updated_at: string
 }
