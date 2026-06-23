@@ -89,3 +89,75 @@ func (r *QuartetRepository) CreateUserQuartet(
 
 	return tx.Commit()
 }
+
+func (r *QuartetRepository) ListUserQuartets(
+	ctx context.Context,
+	ownerUserID user.UserID,
+) ([]game.Quartet, error) {
+	rows, err := r.db.QueryContext(
+		ctx,
+		`
+		SELECT q.id, q.title
+		FROM quartets q
+		INNER JOIN quartet_metadata qm ON q.id = qm.quartet_id
+		WHERE qm.owner_user_id = $1
+		ORDER BY q.title
+		`,
+		ownerUserID,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	quartets := make([]game.Quartet, 0)
+
+	for rows.Next() {
+		var currentQuartet game.Quartet
+
+		if err := rows.Scan(
+			&currentQuartet.ID,
+			&currentQuartet.Title,
+		); err != nil {
+			return nil, err
+		}
+
+		cardRows, err := r.db.QueryContext(
+			ctx,
+			`
+			SELECT id, quartet_id, title
+			FROM cards
+			WHERE quartet_id = $1
+			ORDER BY title
+			`,
+			currentQuartet.ID,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		cards := make([]game.Card, 0, 4)
+
+		for cardRows.Next() {
+			var card game.Card
+
+			if err := cardRows.Scan(
+				&card.ID,
+				&card.QuartetID,
+				&card.Title,
+			); err != nil {
+				cardRows.Close()
+				return nil, err
+			}
+
+			cards = append(cards, card)
+		}
+
+		cardRows.Close()
+
+		currentQuartet.Cards = cards
+		quartets = append(quartets, currentQuartet)
+	}
+
+	return quartets, rows.Err()
+}

@@ -115,3 +115,10 @@ func (f fakeQuartetRepository) CreateUserQuartet(
 ) error {
 	return nil
 }
+
+func (f fakeQuartetRepository) ListUserQuartets(
+	ctx context.Context,
+	ownerUserID user.UserID,
+) ([]game.Quartet, error) {
+	return []game.Quartet{}, nil
+}

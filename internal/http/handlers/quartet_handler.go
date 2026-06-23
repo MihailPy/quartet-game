@@ -17,6 +17,10 @@ type QuartetRepository interface {
 		newQuartet game.Quartet,
 		now time.Time,
 	) error
+	ListUserQuartets(
+		ctx context.Context,
+		ownerUserID user.UserID,
+	) ([]game.Quartet, error)
 }
 
 type QuartetHandler struct {
@@ -89,4 +93,28 @@ func (h *QuartetHandler) CreateUserQuartet(w http.ResponseWriter, r *http.Reques
 	w.WriteHeader(http.StatusCreated)
 
 	_ = json.NewEncoder(w).Encode(newQuartet)
+}
+
+func (h *QuartetHandler) ListUserQuartets(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		writeError(w, http.StatusMethodNotAllowed, "method not allowed")
+		return
+	}
+
+	userID := user.UserID(r.URL.Query().Get("user_id"))
+	if userID == "" {
+		writeError(w, http.StatusBadRequest, "user_id is required")
+		return
+	}
+
+	quartets, err := h.repository.ListUserQuartets(r.Context(), userID)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	_ = json.NewEncoder(w).Encode(quartets)
 }

@@ -107,7 +107,14 @@ func NewRouter(
 		userHandler.GetUser(w, r, userID)
 	})
 
-	mux.HandleFunc("/quartets", quartetHandler.CreateUserQuartet)
+	mux.HandleFunc("/quartets", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodGet {
+			quartetHandler.ListUserQuartets(w, r)
+			return
+		}
+
+		quartetHandler.CreateUserQuartet(w, r)
+	})
 
 	return withCORS(mux)
 }
