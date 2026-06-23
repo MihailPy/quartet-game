@@ -274,3 +274,57 @@ export async function loadUserHistoryRequest(
 
   return (await response.json()) as UserHistoryResponse
 }
+
+export async function loginUserRequest(
+  recoveryCode: string,
+): Promise<CreateUserResponse> {
+  const response = await fetch(`${API_URL}/users/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      recovery_code: recoveryCode,
+    }),
+  })
+
+  if (!response.ok) {
+    const errorPayload = await response.json().catch(() => null)
+    throw new Error(errorPayload?.error ?? 'Не удалось войти в аккаунт.')
+  }
+
+  return (await response.json()) as CreateUserResponse
+}
+
+export async function createUserQuartetRequest(
+  ownerUserID: string,
+  title: string,
+  cards: string[],
+): Promise<Quartet> {
+  const response = await fetch(`${API_URL}/quartets`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      owner_user_id: ownerUserID,
+      title,
+      cards,
+    }),
+  })
+
+  if (!response.ok) {
+    const errorPayload = await response.json().catch(() => null)
+    throw new Error(errorPayload?.error ?? 'Не удалось создать квартет.')
+  }
+
+  return (await response.json()) as Quartet
+}
+
+export async function loadUserQuartetsRequest(
+  userID: string,
+): Promise<Quartet[]> {
+  const response = await fetch(`${API_URL}/quartets?user_id=${userID}`)
+
+  if (!response.ok) {
+    return []
+  }
+
+  return (await response.json()) as Quartet[]
+}

@@ -1,4 +1,4 @@
-import type { GameHistoryRecord, User } from '../types'
+import type { GameHistoryRecord, User, Quartet } from '../types'
 type EntryPanelProps = {
   playerName: string
   roomIdInput: string
@@ -12,6 +12,15 @@ type EntryPanelProps = {
   onCreateUser: () => void
   userHistory: GameHistoryRecord[]
   onLogoutUser: () => void
+  recoveryCode: string
+  onRecoveryCodeChange: (value: string) => void
+  onLoginUser: () => void
+  quartetTitle: string
+  quartetCards: string[]
+  onQuartetTitleChange: (value: string) => void
+  onQuartetCardsChange: (cards: string[]) => void
+  onCreateUserQuartet: () => void
+  userQuartets: Quartet[]
 }
 
 export function EntryPanel({
@@ -27,6 +36,15 @@ export function EntryPanel({
   onCreateUser,
   userHistory,
   onLogoutUser,
+  recoveryCode,
+  onRecoveryCodeChange,
+  onLoginUser,
+  quartetTitle,
+  quartetCards,
+  onQuartetTitleChange,
+  onQuartetCardsChange,
+  onCreateUserQuartet,
+  userQuartets,
 }: EntryPanelProps) {
   const playerNameIsEmpty = playerName.trim() === ''
   const roomIdIsEmpty = roomIdInput.trim() === ''
@@ -45,6 +63,10 @@ export function EntryPanel({
             <button className="button secondary-button" type="button" onClick={onLogoutUser}>
               Выйти из аккаунта
             </button>
+
+            <p className="form-hint">
+              Код восстановления: {user.recovery_code}
+            </p>
           </>
         ) : (
           <>
@@ -55,6 +77,19 @@ export function EntryPanel({
             <button className="button secondary-button" type="button" onClick={onCreateUser}>
               Создать аккаунт
             </button>
+            <div className="form-row">
+              <input
+                className="input"
+                type="text"
+                value={recoveryCode}
+                onChange={(event) => onRecoveryCodeChange(event.target.value)}
+                placeholder="Код восстановления"
+              />
+
+              <button className="button secondary-button" type="button" onClick={onLoginUser}>
+                Войти
+              </button>
+            </div>
           </>
         )}
       </div>
@@ -80,6 +115,60 @@ export function EntryPanel({
         </div>
       )}
 
+      {user && (
+        <div className="form-block">
+          <h3>Создать квартет</h3>
+
+          <input
+            className="input"
+            type="text"
+            value={quartetTitle}
+            onChange={(event) => onQuartetTitleChange(event.target.value)}
+            placeholder="Название квартета"
+          />
+
+          {quartetCards.map((card, index) => (
+            <input
+              key={index}
+              className="input"
+              type="text"
+              value={card}
+              onChange={(event) => {
+                const nextCards = [...quartetCards]
+                nextCards[index] = event.target.value
+                onQuartetCardsChange(nextCards)
+              }}
+              placeholder={`Карта ${index + 1}`}
+            />
+          ))}
+
+          <button
+            className="button secondary-button"
+            type="button"
+            onClick={onCreateUserQuartet}
+          >
+            Создать квартет
+          </button>
+        </div>
+      )}
+
+      {user && (
+        <div className="form-block">
+          <h3>Мои квартеты</h3>
+
+          {userQuartets.length === 0 && (
+            <p className="form-hint">Пока нет пользовательских квартетов.</p>
+          )}
+
+          {userQuartets.map((quartet) => (
+            <div key={quartet.ID} className="player-row">
+              <span>{quartet.Title}</span>
+              <span>{quartet.Cards.length} карт</span>
+            </div>
+          ))}
+        </div>
+      )}
+
       <h2>Войти в игру</h2>
 
       <label className="form-field">
@@ -96,7 +185,7 @@ export function EntryPanel({
         <button
           className="button"
           onClick={onCreateRoom}
-          disabled={playerNameIsEmpty || isCreatingRoom}
+          disabled={!user || isCreatingRoom}
         >
           {isCreatingRoom ? 'Создаём комнату...' : 'Создать комнату'}
         </button>

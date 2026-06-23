@@ -12,7 +12,6 @@ import (
 	apphttp "github.com/MihailPy/quartet-game/internal/http"
 	"github.com/MihailPy/quartet-game/internal/room"
 	"github.com/MihailPy/quartet-game/internal/storage/postgres"
-	"github.com/MihailPy/quartet-game/internal/user"
 )
 
 func main() {
@@ -25,7 +24,8 @@ func main() {
 	defer db.Close()
 
 	deckRepository := postgres.NewDeckRepository(db)
-	deckService := deck.NewService(deckRepository)
+	quartetRepository := postgres.NewQuartetRepository(db)
+	deckService := deck.NewService(deckRepository, quartetRepository)
 	defaultDeck, err := deckService.LoadDeck(
 		context.Background(),
 		game.DeckID(cfg.DefaultDeckID),
@@ -38,18 +38,19 @@ func main() {
 
 	roomRepository := postgres.NewRoomRepository(db)
 	roomManager := room.NewManager(roomRepository, maxPlayers)
-	userRepository := user.NewMemoryRepository()
+	userRepository := postgres.NewUserRepository(db)
+	userHistoryRepository := postgres.NewUserHistoryRepository(db)
 
 	gameRepository := postgres.NewGameRepository(db)
 
 	gameService := gameapp.NewService(
 		deckService,
 		gameRepository,
-		userRepository,
+		userHistoryRepository,
 		game.DeckID(cfg.DefaultDeckID),
 	)
 
-	router := apphttp.NewRouter(roomManager, gameService, gameService, deckService, userRepository)
+	router := apphttp.NewRouter(roomManager, gameService, gameService, deckService, userRepository, quartetRepository)
 
 	log.Printf("Quartet Game API is running on %s", cfg.HTTPAddr)
 

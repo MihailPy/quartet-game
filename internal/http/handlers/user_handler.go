@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/MihailPy/quartet-game/internal/user"
+	"github.com/google/uuid"
 )
 
 type UserRepository interface {
@@ -14,6 +15,7 @@ type UserRepository interface {
 	FindUserByID(ctx context.Context, userID user.UserID) (user.User, error)
 	UpdatePlayerName(ctx context.Context, userID user.UserID, playerName string, now time.Time) (user.User, error)
 	FindGameHistoryByUserID(ctx context.Context, userID user.UserID) ([]user.GameHistoryRecord, error)
+	FindUserByRecoveryCode(ctx context.Context, recoveryCode string) (user.User, error)
 }
 
 type UserHandler struct {
@@ -36,6 +38,10 @@ type UserHistoryResponse struct {
 	Records []user.GameHistoryRecord `json:"records"`
 }
 
+type LoginUserRequest struct {
+	RecoveryCode string `json:"recovery_code"`
+}
+
 func NewUserHandler(repository UserRepository) *UserHandler {
 	return &UserHandler{
 		repository: repository,
@@ -44,7 +50,7 @@ func NewUserHandler(repository UserRepository) *UserHandler {
 
 // Временный локальный helper
 func generateID() string {
-	return time.Now().UTC().Format("20060102150405.000000000")
+	return uuid.NewString()
 }
 
 func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
@@ -64,6 +70,7 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	currentUser, err := user.NewUser(
 		user.UserID(generateID()),
 		request.PlayerName,
+		generateRecoveryCode(),
 		now,
 	)
 	if err != nil {
@@ -147,6 +154,41 @@ func (h *UserHandler) GetUserHistory(w http.ResponseWriter, r *http.Request, use
 
 	response := UserHistoryResponse{
 		Records: records,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	_ = json.NewEncoder(w).Encode(response)
+}
+
+func generateRecoveryCode() string {
+	return time.Now().UTC().Format("150405000")
+}
+
+func (h *UserHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		writeError(w, http.StatusMethodNotAllowed, "method not allowed")
+		return
+	}
+
+	var request LoginUserRequest
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		writeError(w, http.StatusBadRequest, "invalid login request")
+		return
+	}
+
+	currentUser, err := h.repository.FindUserByRecoveryCode(
+		r.Context(),
+		request.RecoveryCode,
+	)
+	if err != nil {
+		writeError(w, http.StatusUnauthorized, "invalid recovery code")
+		return
+	}
+
+	response := CreateUserResponse{
+		User: currentUser,
 	}
 
 	w.Header().Set("Content-Type", "application/json")

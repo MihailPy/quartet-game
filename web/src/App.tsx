@@ -1,17 +1,20 @@
 import { useEffect, useRef, useState } from 'react'
 import {
-  createUserRequest,
-  loadUserHistoryRequest,
-  loadUserRequest,
   createRoomRequest,
+  createUserQuartetRequest,
+  createUserRequest,
   joinRoomRequest,
+  loadAvailableQuartetsRequest,
   loadDeckRequest,
   loadGameStateRequest,
   loadPlayerHandRequest,
   loadRoomRequest,
+  loadUserHistoryRequest,
+  loadUserQuartetsRequest,
+  loadUserRequest,
+  loginUserRequest,
   startGameRequest,
   toggleSelectedPlayerRequest,
-  loadAvailableQuartetsRequest,
   toggleSelectedQuartetRequest,
 } from './api'
 import './App.css'
@@ -32,19 +35,19 @@ import {
 import type {
   Deck,
   GameFinishedPayload,
+  GameHistoryRecord,
   GameStartedPayload,
   Player,
   PlayerHandPayload,
   PublicGameState,
+  Quartet,
   RequestableCard,
   RequestCardErrorPayload,
   Room,
   TemporaryMessage,
   ToastMessage,
   ToastType,
-  Quartet,
   User,
-  GameHistoryRecord,
 } from './types'
 import {
   buildRequestCardMessage,
@@ -84,6 +87,10 @@ function App() {
   const [availableQuartets, setAvailableQuartets] = useState<Quartet[]>([])
   const [user, setUser] = useState<User | null>(null)
   const [userHistory, setUserHistory] = useState<GameHistoryRecord[]>([])
+  const [recoveryCode, setRecoveryCode] = useState('')
+  const [userQuartets, setUserQuartets] = useState<Quartet[]>([])
+  const [quartetTitle, setQuartetTitle] = useState('')
+  const [quartetCards, setQuartetCards] = useState(['', '', '', ''])
 
   function resetGameState() {
     updateDeck(null)
@@ -849,6 +856,76 @@ function App() {
     setUserHistory(data?.records ?? [])
   }
 
+  async function loadUserQuartets(userID: string) {
+    const quartets = await loadUserQuartetsRequest(userID)
+    setUserQuartets(quartets)
+  }
+
+  async function loginUser() {
+    const trimmedCode = recoveryCode.trim()
+
+    if (!trimmedCode) {
+      setError('Введите код восстановления.')
+      return
+    }
+
+    try {
+      setError('')
+
+      const data = await loginUserRequest(trimmedCode)
+
+      saveUser(data.user)
+      setRecoveryCode('')
+      showToast('Вы вошли в аккаунт.', 'success')
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : 'Не удалось войти в аккаунт.'
+
+      setError(message)
+    }
+  }
+
+  async function createUserQuartet() {
+    if (!user) {
+      setError('Нужен аккаунт.')
+      return
+    }
+
+    const trimmedTitle = quartetTitle.trim()
+    const trimmedCards = quartetCards.map((card) => card.trim())
+
+    if (!trimmedTitle) {
+      setError('Введите название квартета.')
+      return
+    }
+
+    if (trimmedCards.some((card) => !card)) {
+      setError('Заполни все 4 карты.')
+      return
+    }
+
+    try {
+      setError('')
+
+      const createdQuartet = await createUserQuartetRequest(
+        user.id,
+        trimmedTitle,
+        trimmedCards,
+      )
+
+      setUserQuartets((current) => [...current, createdQuartet])
+      setQuartetTitle('')
+      setQuartetCards(['', '', '', ''])
+
+      showToast('Квартет создан.', 'success')
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : 'Не удалось создать квартет.'
+
+      setError(message)
+    }
+  }
+
   useEffect(() => {
     if (!room || !player) return
 
@@ -1153,10 +1230,12 @@ function App() {
   useEffect(() => {
     if (!user) {
       setUserHistory([])
+      setUserQuartets([])
       return
     }
 
     void loadUserHistory(user.id)
+    void loadUserQuartets(user.id)
   }, [user?.id])
 
   const isEntered = room !== null && player !== null && isCurrentPlayerInRoom()
@@ -1194,6 +1273,15 @@ function App() {
               onCreateUser={createUser}
               userHistory={userHistory}
               onLogoutUser={logoutUser}
+              recoveryCode={recoveryCode}
+              onRecoveryCodeChange={setRecoveryCode}
+              onLoginUser={loginUser}
+              quartetTitle={quartetTitle}
+              quartetCards={quartetCards}
+              onQuartetTitleChange={setQuartetTitle}
+              onQuartetCardsChange={setQuartetCards}
+              onCreateUserQuartet={createUserQuartet}
+              userQuartets={userQuartets}
             />
           )}
 

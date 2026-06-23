@@ -21,8 +21,12 @@ type fakeGameStarter struct {
 
 type fakeDeckService struct{}
 
-func (f fakeDeckService) LoadAvailableQuartets(ctx context.Context, ownerPlayerID room.PlayerID) ([]game.Quartet, error) {
-	return nil, nil
+func (f fakeDeckService) LoadAvailableQuartets(
+	ctx context.Context,
+	ownerPlayerID room.PlayerID,
+	ownerUserID user.UserID,
+) ([]game.Quartet, error) {
+	return []game.Quartet{}, nil
 }
 
 func (f fakeGameStarter) StartGame(ctx context.Context, currentRoom room.Room) (game.GameState, error) {
@@ -61,7 +65,7 @@ func TestHealthHandler(t *testing.T) {
 
 	userRepository := fakeUserRepository{}
 
-	router := NewRouter(roomManager, gameStarter, gameStarter, deckService, userRepository)
+	router := NewRouter(roomManager, gameStarter, gameStarter, deckService, userRepository, fakeQuartetRepository{})
 
 	req := httptest.NewRequest(http.MethodGet, "/health", nil)
 	rec := httptest.NewRecorder()
@@ -96,4 +100,29 @@ func (f fakeUserRepository) FindGameHistoryByUserID(
 	userID user.UserID,
 ) ([]user.GameHistoryRecord, error) {
 	return []user.GameHistoryRecord{}, nil
+}
+
+func (f fakeUserRepository) FindUserByRecoveryCode(
+	ctx context.Context,
+	recoveryCode string,
+) (user.User, error) {
+	return user.User{}, user.ErrUserNotFound
+}
+
+type fakeQuartetRepository struct{}
+
+func (f fakeQuartetRepository) CreateUserQuartet(
+	ctx context.Context,
+	ownerUserID user.UserID,
+	newQuartet game.Quartet,
+	now time.Time,
+) error {
+	return nil
+}
+
+func (f fakeQuartetRepository) ListUserQuartets(
+	ctx context.Context,
+	ownerUserID user.UserID,
+) ([]game.Quartet, error) {
+	return []game.Quartet{}, nil
 }

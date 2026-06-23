@@ -96,7 +96,11 @@ type ToggleSelectedQuartetRequest struct {
 }
 
 type DeckService interface {
-	LoadAvailableQuartets(ctx context.Context, ownerPlayerID room.PlayerID) ([]game.Quartet, error)
+	LoadAvailableQuartets(
+		ctx context.Context,
+		ownerPlayerID room.PlayerID,
+		ownerUserID user.UserID,
+	) ([]game.Quartet, error)
 }
 
 func NewRoomHandler(
@@ -157,6 +161,7 @@ func (h *RoomHandler) CreateRoom(w http.ResponseWriter, r *http.Request) {
 	availableQuartets, err := h.deckService.LoadAvailableQuartets(
 		r.Context(),
 		player.ID,
+		req.UserID,
 	)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, err.Error())
@@ -673,9 +678,19 @@ func (h *RoomHandler) GetAvailableQuartets(w http.ResponseWriter, r *http.Reques
 
 	ownerPlayerID := currentRoom.OwnerPlayerID
 
+	ownerUserID := user.UserID("")
+
+	for _, player := range currentRoom.Players {
+		if player.ID == ownerPlayerID {
+			ownerUserID = user.UserID(player.UserID)
+			break
+		}
+	}
+
 	availableQuartets, err := h.deckService.LoadAvailableQuartets(
 		r.Context(),
 		ownerPlayerID,
+		ownerUserID,
 	)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, err.Error())
