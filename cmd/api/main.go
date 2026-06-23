@@ -39,6 +39,7 @@ func main() {
 	roomManager := room.NewManager(roomRepository, maxPlayers)
 	userRepository := postgres.NewUserRepository(db)
 	userHistoryRepository := postgres.NewUserHistoryRepository(db)
+	quartetRepository := postgres.NewQuartetRepository(db)
 
 	gameRepository := postgres.NewGameRepository(db)
 
@@ -49,7 +50,7 @@ func main() {
 		game.DeckID(cfg.DefaultDeckID),
 	)
 
-	router := apphttp.NewRouter(roomManager, gameService, gameService, deckService, userRepository)
+	router := apphttp.NewRouter(roomManager, gameService, gameService, deckService, userRepository, quartetRepository)
 
 	log.Printf("Quartet Game API is running on %s", cfg.HTTPAddr)
 

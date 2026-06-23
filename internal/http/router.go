@@ -17,6 +17,7 @@ func NewRouter(
 	gameService ws.GameService,
 	deckService handlers.DeckService,
 	userRepository handlers.UserRepository,
+	quartetRepository handlers.QuartetRepository,
 ) http.Handler {
 	mux := http.NewServeMux()
 
@@ -37,6 +38,7 @@ func NewRouter(
 	)
 
 	userHandler := handlers.NewUserHandler(userRepository)
+	quartetHandler := handlers.NewQuartetHandler(quartetRepository)
 
 	mux.HandleFunc("/health", healthHandler)
 	mux.HandleFunc("/rooms", roomHandler.CreateRoom)
@@ -104,6 +106,8 @@ func NewRouter(
 
 		userHandler.GetUser(w, r, userID)
 	})
+
+	mux.HandleFunc("/quartets", quartetHandler.CreateUserQuartet)
 
 	return withCORS(mux)
 }

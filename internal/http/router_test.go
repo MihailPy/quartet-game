@@ -61,7 +61,7 @@ func TestHealthHandler(t *testing.T) {
 
 	userRepository := fakeUserRepository{}
 
-	router := NewRouter(roomManager, gameStarter, gameStarter, deckService, userRepository)
+	router := NewRouter(roomManager, gameStarter, gameStarter, deckService, userRepository, fakeQuartetRepository{})
 
 	req := httptest.NewRequest(http.MethodGet, "/health", nil)
 	rec := httptest.NewRecorder()
@@ -103,4 +103,15 @@ func (f fakeUserRepository) FindUserByRecoveryCode(
 	recoveryCode string,
 ) (user.User, error) {
 	return user.User{}, user.ErrUserNotFound
+}
+
+type fakeQuartetRepository struct{}
+
+func (f fakeQuartetRepository) CreateUserQuartet(
+	ctx context.Context,
+	ownerUserID user.UserID,
+	newQuartet game.Quartet,
+	now time.Time,
+) error {
+	return nil
 }
