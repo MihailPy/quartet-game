@@ -23,11 +23,12 @@ func (r *UserRepository) SaveUser(ctx context.Context, currentUser user.User) er
 	_, err := r.db.ExecContext(
 		ctx,
 		`
-		INSERT INTO users (id, player_name, created_at, updated_at)
-		VALUES ($1, $2, $3, $4)
+		INSERT INTO users (id, player_name, recovery_code, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5)
 		`,
 		currentUser.ID,
 		currentUser.PlayerName,
+		currentUser.RecoveryCode,
 		currentUser.CreatedAt,
 		currentUser.UpdatedAt,
 	)
@@ -41,7 +42,7 @@ func (r *UserRepository) FindUserByID(ctx context.Context, userID user.UserID) (
 	err := r.db.QueryRowContext(
 		ctx,
 		`
-		SELECT id, player_name, created_at, updated_at
+		SELECT id, player_name, recovery_code, created_at, updated_at
 		FROM users
 		WHERE id = $1
 		`,
@@ -49,6 +50,7 @@ func (r *UserRepository) FindUserByID(ctx context.Context, userID user.UserID) (
 	).Scan(
 		&currentUser.ID,
 		&currentUser.PlayerName,
+		&currentUser.RecoveryCode,
 		&currentUser.CreatedAt,
 		&currentUser.UpdatedAt,
 	)
@@ -79,7 +81,7 @@ func (r *UserRepository) UpdatePlayerName(
 		SET player_name = $2,
 		    updated_at = $3
 		WHERE id = $1
-		RETURNING id, player_name, created_at, updated_at
+		RETURNING id, player_name, recovery_code, created_at, updated_at
 		`,
 		userID,
 		playerName,
@@ -87,6 +89,7 @@ func (r *UserRepository) UpdatePlayerName(
 	).Scan(
 		&updatedUser.ID,
 		&updatedUser.PlayerName,
+		&updatedUser.RecoveryCode,
 		&updatedUser.CreatedAt,
 		&updatedUser.UpdatedAt,
 	)
