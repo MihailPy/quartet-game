@@ -101,3 +101,21 @@ func (r *UserRepository) UpdatePlayerName(
 
 	return updatedUser, nil
 }
+
+func (r *UserRepository) SaveGameHistoryRecord(
+	ctx context.Context,
+	record user.GameHistoryRecord,
+) error {
+	historyRepository := NewUserHistoryRepository(r.db)
+
+	return historyRepository.SaveGameHistoryRecord(ctx, record)
+}
+
+func (r *UserRepository) FindGameHistoryByUserID(
+	ctx context.Context,
+	userID user.UserID,
+) ([]user.GameHistoryRecord, error) {
+	historyRepository := NewUserHistoryRepository(r.db)
+
+	return historyRepository.FindGameHistoryByUserID(ctx, userID)
+}
