@@ -1,4 +1,4 @@
-import type { GameHistoryRecord, User } from '../types'
+import type { GameHistoryRecord, User, Quartet } from '../types'
 type EntryPanelProps = {
   playerName: string
   roomIdInput: string
@@ -20,6 +20,7 @@ type EntryPanelProps = {
   onQuartetTitleChange: (value: string) => void
   onQuartetCardsChange: (cards: string[]) => void
   onCreateUserQuartet: () => void
+  userQuartets: Quartet[]
 }
 
 export function EntryPanel({
@@ -43,6 +44,7 @@ export function EntryPanel({
   onQuartetTitleChange,
   onQuartetCardsChange,
   onCreateUserQuartet,
+  userQuartets,
 }: EntryPanelProps) {
   const playerNameIsEmpty = playerName.trim() === ''
   const roomIdIsEmpty = roomIdInput.trim() === ''
@@ -147,6 +149,23 @@ export function EntryPanel({
           >
             Создать квартет
           </button>
+        </div>
+      )}
+
+      {user && (
+        <div className="form-block">
+          <h3>Мои квартеты</h3>
+
+          {userQuartets.length === 0 && (
+            <p className="form-hint">Пока нет пользовательских квартетов.</p>
+          )}
+
+          {userQuartets.map((quartet) => (
+            <div key={quartet.ID} className="player-row">
+              <span>{quartet.Title}</span>
+              <span>{quartet.Cards.length} карт</span>
+            </div>
+          ))}
         </div>
       )}
 

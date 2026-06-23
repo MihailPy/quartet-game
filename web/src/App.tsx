@@ -856,6 +856,11 @@ function App() {
     setUserHistory(data?.records ?? [])
   }
 
+  async function loadUserQuartets(userID: string) {
+    const quartets = await loadUserQuartetsRequest(userID)
+    setUserQuartets(quartets)
+  }
+
   async function loginUser() {
     const trimmedCode = recoveryCode.trim()
 
@@ -1225,10 +1230,12 @@ function App() {
   useEffect(() => {
     if (!user) {
       setUserHistory([])
+      setUserQuartets([])
       return
     }
 
     void loadUserHistory(user.id)
+    void loadUserQuartets(user.id)
   }, [user?.id])
 
   const isEntered = room !== null && player !== null && isCurrentPlayerInRoom()
@@ -1274,6 +1281,7 @@ function App() {
               onQuartetTitleChange={setQuartetTitle}
               onQuartetCardsChange={setQuartetCards}
               onCreateUserQuartet={createUserQuartet}
+              userQuartets={userQuartets}
             />
           )}
 
