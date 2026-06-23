@@ -1,18 +1,20 @@
 import { useEffect, useRef, useState } from 'react'
 import {
-  loginUserRequest,
-  createUserRequest,
-  loadUserHistoryRequest,
-  loadUserRequest,
   createRoomRequest,
+  createUserQuartetRequest,
+  createUserRequest,
   joinRoomRequest,
+  loadAvailableQuartetsRequest,
   loadDeckRequest,
   loadGameStateRequest,
   loadPlayerHandRequest,
   loadRoomRequest,
+  loadUserHistoryRequest,
+  loadUserQuartetsRequest,
+  loadUserRequest,
+  loginUserRequest,
   startGameRequest,
   toggleSelectedPlayerRequest,
-  loadAvailableQuartetsRequest,
   toggleSelectedQuartetRequest,
 } from './api'
 import './App.css'
@@ -33,19 +35,19 @@ import {
 import type {
   Deck,
   GameFinishedPayload,
+  GameHistoryRecord,
   GameStartedPayload,
   Player,
   PlayerHandPayload,
   PublicGameState,
+  Quartet,
   RequestableCard,
   RequestCardErrorPayload,
   Room,
   TemporaryMessage,
   ToastMessage,
   ToastType,
-  Quartet,
   User,
-  GameHistoryRecord,
 } from './types'
 import {
   buildRequestCardMessage,
@@ -86,6 +88,11 @@ function App() {
   const [user, setUser] = useState<User | null>(null)
   const [userHistory, setUserHistory] = useState<GameHistoryRecord[]>([])
   const [recoveryCode, setRecoveryCode] = useState('')
+  const [userQuartets, setUserQuartets] = useState<Quartet[]>([])
+
+  void userQuartets
+  void createUserQuartetRequest
+  void loadUserQuartetsRequest
 
   function resetGameState() {
     updateDeck(null)
