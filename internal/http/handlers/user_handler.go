@@ -64,6 +64,7 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	currentUser, err := user.NewUser(
 		user.UserID(generateID()),
 		request.PlayerName,
+		generateRecoveryCode(),
 		now,
 	)
 	if err != nil {
@@ -153,4 +154,8 @@ func (h *UserHandler) GetUserHistory(w http.ResponseWriter, r *http.Request, use
 	w.WriteHeader(http.StatusOK)
 
 	_ = json.NewEncoder(w).Encode(response)
+}
+
+func generateRecoveryCode() string {
+	return time.Now().UTC().Format("150405000")
 }
