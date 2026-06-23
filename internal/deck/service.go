@@ -14,6 +14,7 @@ type Repository interface {
 
 type QuartetRepository interface {
 	ListUserQuartets(ctx context.Context, ownerUserID user.UserID) ([]game.Quartet, error)
+	IsUserQuartet(ctx context.Context, quartetID game.QuartetID) (bool, error)
 }
 
 type Service struct {
@@ -44,7 +45,22 @@ func (s *Service) LoadAvailableQuartets(
 		return nil, err
 	}
 
-	quartets := append([]game.Quartet{}, loadedDeck.Quartets...)
+	quartets := make([]game.Quartet, 0, len(loadedDeck.Quartets))
+
+	for _, currentQuartet := range loadedDeck.Quartets {
+		if s.quartetRepository != nil && ownerUserID != "" {
+			isUserQuartet, err := s.quartetRepository.IsUserQuartet(ctx, currentQuartet.ID)
+			if err != nil {
+				return nil, err
+			}
+
+			if isUserQuartet {
+				continue
+			}
+		}
+
+		quartets = append(quartets, currentQuartet)
+	}
 
 	if ownerUserID != "" && s.quartetRepository != nil {
 		userQuartets, err := s.quartetRepository.ListUserQuartets(ctx, ownerUserID)

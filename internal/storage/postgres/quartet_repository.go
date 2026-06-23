@@ -162,3 +162,26 @@ func (r *QuartetRepository) ListUserQuartets(
 
 	return quartets, rows.Err()
 }
+
+func (r *QuartetRepository) IsUserQuartet(ctx context.Context, quartetID game.QuartetID) (bool, error) {
+	var exists bool
+
+	err := r.db.QueryRowContext(
+		ctx,
+		`
+		SELECT EXISTS (
+			SELECT 1
+			FROM quartet_metadata
+			WHERE quartet_id = $1
+			  AND source = 'user'
+		)
+		`,
+		quartetID,
+	).Scan(&exists)
+
+	if err != nil {
+		return false, err
+	}
+
+	return exists, nil
+}
