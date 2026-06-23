@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/MihailPy/quartet-game/internal/user"
+	"github.com/google/uuid"
 )
 
 type UserRepository interface {
@@ -49,7 +50,7 @@ func NewUserHandler(repository UserRepository) *UserHandler {
 
 // Временный локальный helper
 func generateID() string {
-	return time.Now().UTC().Format("20060102150405.000000000")
+	return uuid.NewString()
 }
 
 func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {

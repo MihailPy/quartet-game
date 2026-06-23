@@ -35,10 +35,11 @@ func (r *QuartetRepository) CreateUserQuartet(
 	_, err = tx.ExecContext(
 		ctx,
 		`
-		INSERT INTO quartets (id, title)
-		VALUES ($1, $2)
-		`,
+	INSERT INTO quartets (id, deck_id, title)
+	VALUES ($1, $2, $3)
+	`,
 		newQuartet.ID,
+		game.DeckID("00000000-0000-0000-0000-000000000001"),
 		newQuartet.Title,
 	)
 	if err != nil {
