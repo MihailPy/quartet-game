@@ -122,3 +122,36 @@ func (r *UserRepository) FindGameHistoryByUserID(
 
 	return historyRepository.FindGameHistoryByUserID(ctx, userID)
 }
+
+func (r *UserRepository) FindUserByRecoveryCode(
+	ctx context.Context,
+	recoveryCode string,
+) (user.User, error) {
+	var currentUser user.User
+
+	err := r.db.QueryRowContext(
+		ctx,
+		`
+		SELECT id, player_name, recovery_code, created_at, updated_at
+		FROM users
+		WHERE recovery_code = $1
+		`,
+		recoveryCode,
+	).Scan(
+		&currentUser.ID,
+		&currentUser.PlayerName,
+		&currentUser.RecoveryCode,
+		&currentUser.CreatedAt,
+		&currentUser.UpdatedAt,
+	)
+
+	if errors.Is(err, sql.ErrNoRows) {
+		return user.User{}, user.ErrUserNotFound
+	}
+
+	if err != nil {
+		return user.User{}, err
+	}
+
+	return currentUser, nil
+}

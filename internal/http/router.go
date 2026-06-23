@@ -83,6 +83,8 @@ func NewRouter(
 		}
 	})
 
+	mux.HandleFunc("/users/login", userHandler.LoginUser)
+
 	mux.HandleFunc("/users", userHandler.CreateUser)
 	mux.HandleFunc("/users/", func(w http.ResponseWriter, r *http.Request) {
 		path := strings.TrimPrefix(r.URL.Path, "/users/")

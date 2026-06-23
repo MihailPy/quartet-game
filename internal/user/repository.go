@@ -15,6 +15,7 @@ type Repository interface {
 	UpdatePlayerName(ctx context.Context, userID UserID, playerName string) (User, error)
 	SaveGameHistoryRecord(ctx context.Context, record GameHistoryRecord) error
 	FindGameHistoryByUserID(ctx context.Context, userID UserID) ([]GameHistoryRecord, error)
+	FindUserByRecoveryCode(ctx context.Context, recoveryCode string) (User, error)
 }
 
 type MemoryRepository struct {
@@ -100,4 +101,19 @@ func (r *MemoryRepository) FindGameHistoryByUserID(ctx context.Context, userID U
 	}
 
 	return records, nil
+}
+
+func (r *MemoryRepository) FindUserByRecoveryCode(ctx context.Context, recoveryCode string) (User, error) {
+	_ = ctx
+
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	for _, currentUser := range r.users {
+		if currentUser.RecoveryCode == recoveryCode {
+			return currentUser, nil
+		}
+	}
+
+	return User{}, ErrUserNotFound
 }

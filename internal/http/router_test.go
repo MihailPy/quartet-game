@@ -97,3 +97,10 @@ func (f fakeUserRepository) FindGameHistoryByUserID(
 ) ([]user.GameHistoryRecord, error) {
 	return []user.GameHistoryRecord{}, nil
 }
+
+func (f fakeUserRepository) FindUserByRecoveryCode(
+	ctx context.Context,
+	recoveryCode string,
+) (user.User, error) {
+	return user.User{}, user.ErrUserNotFound
+}
