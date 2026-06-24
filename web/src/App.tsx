@@ -935,7 +935,6 @@ function App() {
   }
 
   void userHistory
-  void createUserQuartet
 
   useEffect(() => {
     if (!room || !player) return
@@ -1286,6 +1285,11 @@ function App() {
             ) : currentView === 'quartets' ? (
               <QuartetsPanel
                 userQuartets={userQuartets}
+                quartetTitle={quartetTitle}
+                quartetCards={quartetCards}
+                onQuartetTitleChange={setQuartetTitle}
+                onQuartetCardsChange={setQuartetCards}
+                onCreateUserQuartet={createUserQuartet}
                 onBack={() => setCurrentView('home')}
               />
             ) : (
