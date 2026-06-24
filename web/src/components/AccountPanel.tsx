@@ -8,6 +8,8 @@ type AccountPanelProps = {
   onLoginUser: () => void
   onLogoutUser: () => void
   onBack: () => void
+  accountPlayerName: string
+  onAccountPlayerNameChange: (value: string) => void
 }
 
 export function AccountPanel({
@@ -18,6 +20,8 @@ export function AccountPanel({
   onLoginUser,
   onLogoutUser,
   onBack,
+  accountPlayerName,
+  onAccountPlayerNameChange,
 }: AccountPanelProps) {
   return (
     <div className="panel">
@@ -41,6 +45,13 @@ export function AccountPanel({
         </>
       ) : (
         <>
+          <input
+            className="input"
+            type="text"
+            value={accountPlayerName}
+            onChange={(event) => onAccountPlayerNameChange(event.target.value)}
+            placeholder="Имя игрока"
+          />
           <button
             className="button secondary-button"
             type="button"

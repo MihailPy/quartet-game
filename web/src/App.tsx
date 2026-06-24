@@ -95,6 +95,7 @@ function App() {
   const [quartetTitle, setQuartetTitle] = useState('')
   const [quartetCards, setQuartetCards] = useState(['', '', '', ''])
   const [currentView, setCurrentView] = useState<AppView>('home')
+  const [accountPlayerName, setAccountPlayerName] = useState('')
 
   function resetGameState() {
     updateDeck(null)
@@ -183,7 +184,7 @@ function App() {
   }
 
   async function createUser() {
-    const trimmedName = playerName.trim()
+    const trimmedName = accountPlayerName.trim()
 
     if (!trimmedName) {
       setError('Введите имя игрока.')
@@ -197,6 +198,8 @@ function App() {
 
       saveUser(data.user)
       showToast('Аккаунт создан.', 'success')
+      setPlayerName(data.user.player_name)
+      setAccountPlayerName('')
     } catch (err) {
       const message =
         err instanceof Error ? err.message : 'Не удалось создать аккаунт.'
@@ -879,6 +882,7 @@ function App() {
       const data = await loginUserRequest(trimmedCode)
 
       saveUser(data.user)
+      setPlayerName(data.user.player_name)
       setRecoveryCode('')
       showToast('Вы вошли в аккаунт.', 'success')
     } catch (err) {
@@ -1276,6 +1280,8 @@ function App() {
                 onLoginUser={loginUser}
                 onLogoutUser={logoutUser}
                 onBack={() => setCurrentView('home')}
+                accountPlayerName={accountPlayerName}
+                onAccountPlayerNameChange={setAccountPlayerName}
               />
             ) : currentView === 'quartets' ? (
               <QuartetsPanel
