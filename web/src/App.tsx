@@ -54,6 +54,8 @@ import {
   buildRoomWebSocketURL,
 } from './websocket'
 
+type AppView = 'home' | 'account' | 'quartets'
+
 function App() {
   const [room, setRoom] = useState<Room | null>(null)
   const roomRef = useRef<Room | null>(null)
@@ -91,6 +93,10 @@ function App() {
   const [userQuartets, setUserQuartets] = useState<Quartet[]>([])
   const [quartetTitle, setQuartetTitle] = useState('')
   const [quartetCards, setQuartetCards] = useState(['', '', '', ''])
+  const [currentView, setCurrentView] = useState<AppView>('home')
+
+  void currentView
+  void setCurrentView
 
   function resetGameState() {
     updateDeck(null)
