@@ -929,6 +929,10 @@ function App() {
     }
   }
 
+  void userHistory
+  void userQuartets
+  void createUserQuartet
+
   useEffect(() => {
     if (!room || !player) return
 
@@ -1284,18 +1288,8 @@ function App() {
                 isCreatingRoom={isCreatingRoom}
                 isJoiningRoom={isJoiningRoom}
                 user={user}
-                onCreateUser={createUser}
-                userHistory={userHistory}
-                onLogoutUser={logoutUser}
-                recoveryCode={recoveryCode}
-                onRecoveryCodeChange={setRecoveryCode}
-                onLoginUser={loginUser}
-                quartetTitle={quartetTitle}
-                quartetCards={quartetCards}
-                onQuartetTitleChange={setQuartetTitle}
-                onQuartetCardsChange={setQuartetCards}
-                onCreateUserQuartet={createUserQuartet}
-                userQuartets={userQuartets}
+                onOpenAccount={() => setCurrentView('account')}
+                onOpenQuartets={() => setCurrentView('quartets')}
               />
             )
           )}
