@@ -18,6 +18,7 @@ import {
   toggleSelectedQuartetRequest,
 } from './api'
 import './App.css'
+import { AccountPanel } from './components/AccountPanel'
 import { EntryPanel } from './components/EntryPanel'
 import { GameLogPanel } from './components/GameLogPanel'
 import { GamePanel } from './components/GamePanel'
@@ -53,7 +54,6 @@ import {
   buildRequestCardMessage,
   buildRoomWebSocketURL,
 } from './websocket'
-
 type AppView = 'home' | 'account' | 'quartets'
 
 function App() {
@@ -97,6 +97,7 @@ function App() {
 
   void currentView
   void setCurrentView
+  void AccountPanel
 
   function resetGameState() {
     updateDeck(null)
