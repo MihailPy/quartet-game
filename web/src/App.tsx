@@ -1277,6 +1277,19 @@ function App() {
                 onLogoutUser={logoutUser}
                 onBack={() => setCurrentView('home')}
               />
+            ) : currentView === 'quartets' ? (
+              <div className="panel">
+                <h2>Мои квартеты</h2>
+                <p className="form-hint">Экран квартетов в разработке.</p>
+
+                <button
+                  className="button"
+                  type="button"
+                  onClick={() => setCurrentView('home')}
+                >
+                  Назад
+                </button>
+              </div>
             ) : (
               <EntryPanel
                 playerName={playerName}
