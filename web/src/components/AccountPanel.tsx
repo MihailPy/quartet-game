@@ -31,9 +31,21 @@ export function AccountPanel({
         <>
           <p className="form-hint">Аккаунт: {user.player_name}</p>
 
-          <p className="form-hint">
-            Код восстановления: {user.recovery_code}
-          </p>
+          <div className="form-block">
+            <h3>Код восстановления</h3>
+
+            <p className="form-hint">
+              Сохрани этот код. Он нужен, чтобы войти в аккаунт после выхода или на другом устройстве.
+            </p>
+
+            <div className="player-row">
+              <input
+                className="input"
+                value={user.recovery_code}
+                readOnly
+              />
+            </div>
+          </div>
 
           <button
             className="button secondary-button"
