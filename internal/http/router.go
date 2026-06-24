@@ -102,8 +102,16 @@ func NewRouter(
 
 		if len(parts) == 3 && parts[1] == "quartets" {
 			quartetID := game.QuartetID(parts[2])
-			quartetHandler.DeleteUserQuartet(w, r, userID, quartetID)
-			return
+
+			if r.Method == http.MethodDelete {
+				quartetHandler.DeleteUserQuartet(w, r, userID, quartetID)
+				return
+			}
+
+			if r.Method == http.MethodPatch {
+				quartetHandler.UpdateUserQuartet(w, r, userID, quartetID)
+				return
+			}
 		}
 
 		if r.Method == http.MethodPatch {

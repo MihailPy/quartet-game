@@ -26,6 +26,12 @@ type QuartetRepository interface {
 		ownerUserID user.UserID,
 		quartetID game.QuartetID,
 	) error
+	UpdateUserQuartet(
+		ctx context.Context,
+		ownerUserID user.UserID,
+		updatedQuartet game.Quartet,
+		now time.Time,
+	) error
 }
 
 type QuartetHandler struct {
@@ -36,6 +42,11 @@ type CreateUserQuartetRequest struct {
 	OwnerUserID user.UserID `json:"owner_user_id"`
 	Title       string      `json:"title"`
 	Cards       []string    `json:"cards"`
+}
+
+type UpdateUserQuartetRequest struct {
+	Title string   `json:"title"`
+	Cards []string `json:"cards"`
 }
 
 func NewQuartetHandler(repository QuartetRepository) *QuartetHandler {
@@ -151,4 +162,51 @@ func (h *QuartetHandler) DeleteUserQuartet(
 	}
 
 	w.WriteHeader(http.StatusNoContent)
+}
+
+func (h *QuartetHandler) UpdateUserQuartet(
+	w http.ResponseWriter,
+	r *http.Request,
+	ownerUserID user.UserID,
+	quartetID game.QuartetID,
+) {
+	if r.Method != http.MethodPatch {
+		writeError(w, http.StatusMethodNotAllowed, "method not allowed")
+		return
+	}
+
+	var request UpdateUserQuartetRequest
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		writeError(w, http.StatusBadRequest, "invalid update quartet request")
+		return
+	}
+
+	cards := make([]game.Card, 0, 4)
+
+	for _, title := range request.Cards {
+		cards = append(cards, game.Card{
+			ID:        game.CardID(generateID()),
+			QuartetID: quartetID,
+			Title:     title,
+		})
+	}
+
+	updatedQuartet := game.Quartet{
+		ID:    quartetID,
+		Title: request.Title,
+		Cards: cards,
+	}
+
+	err := h.repository.UpdateUserQuartet(
+		r.Context(),
+		ownerUserID,
+		updatedQuartet,
+		time.Now().UTC(),
+	)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
 }

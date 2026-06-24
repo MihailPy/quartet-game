@@ -134,3 +134,12 @@ func (f fakeQuartetRepository) DeleteUserQuartet(
 ) error {
 	return nil
 }
+
+func (f fakeQuartetRepository) UpdateUserQuartet(
+	ctx context.Context,
+	ownerUserID user.UserID,
+	updatedQuartet game.Quartet,
+	now time.Time,
+) error {
+	return nil
+}

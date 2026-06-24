@@ -209,3 +209,83 @@ func (r *QuartetRepository) DeleteUserQuartet(
 
 	return err
 }
+
+func (r *QuartetRepository) UpdateUserQuartet(
+	ctx context.Context,
+	ownerUserID user.UserID,
+	updatedQuartet game.Quartet,
+	now time.Time,
+) error {
+	tx, err := r.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	_, err = tx.ExecContext(
+		ctx,
+		`
+		UPDATE quartets
+		SET title = $3
+		WHERE id = $1
+		  AND EXISTS (
+			SELECT 1
+			FROM quartet_metadata
+			WHERE quartet_id = $1
+			  AND owner_user_id = $2
+		  )
+		`,
+		updatedQuartet.ID,
+		ownerUserID,
+		updatedQuartet.Title,
+	)
+	if err != nil {
+		return err
+	}
+
+	_, err = tx.ExecContext(
+		ctx,
+		`
+		DELETE FROM cards
+		WHERE quartet_id = $1
+		`,
+		updatedQuartet.ID,
+	)
+	if err != nil {
+		return err
+	}
+
+	for _, card := range updatedQuartet.Cards {
+		_, err = tx.ExecContext(
+			ctx,
+			`
+			INSERT INTO cards (id, quartet_id, title)
+			VALUES ($1, $2, $3)
+			`,
+			card.ID,
+			card.QuartetID,
+			card.Title,
+		)
+		if err != nil {
+			return err
+		}
+	}
+
+	_, err = tx.ExecContext(
+		ctx,
+		`
+		UPDATE quartet_metadata
+		SET updated_at = $3
+		WHERE quartet_id = $1
+		  AND owner_user_id = $2
+		`,
+		updatedQuartet.ID,
+		ownerUserID,
+		now,
+	)
+	if err != nil {
+		return err
+	}
+
+	return tx.Commit()
+}
