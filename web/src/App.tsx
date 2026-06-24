@@ -16,6 +16,7 @@ import {
   startGameRequest,
   toggleSelectedPlayerRequest,
   toggleSelectedQuartetRequest,
+  updatePlayerNameRequest,
 } from './api'
 import './App.css'
 import { AccountPanel } from './components/AccountPanel'
@@ -96,6 +97,7 @@ function App() {
   const [quartetCards, setQuartetCards] = useState(['', '', '', ''])
   const [currentView, setCurrentView] = useState<AppView>('home')
   const [accountPlayerName, setAccountPlayerName] = useState('')
+  const [nextPlayerName, setNextPlayerName] = useState('')
 
   function resetGameState() {
     updateDeck(null)
@@ -934,6 +936,35 @@ function App() {
     }
   }
 
+  async function updatePlayerName() {
+    if (!user) {
+      return
+    }
+
+    const trimmedName = nextPlayerName.trim()
+
+    if (!trimmedName) {
+      setError('Введите новое имя.')
+      return
+    }
+
+    try {
+      setError('')
+
+      const updatedUser = await updatePlayerNameRequest(user.id, trimmedName)
+
+      saveUser(updatedUser)
+      setPlayerName(updatedUser.player_name)
+      setNextPlayerName('')
+      showToast('Имя изменено.', 'success')
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : 'Не удалось изменить имя.'
+
+      setError(message)
+    }
+  }
+
   void userHistory
 
   useEffect(() => {
@@ -1281,6 +1312,9 @@ function App() {
                 onBack={() => setCurrentView('home')}
                 accountPlayerName={accountPlayerName}
                 onAccountPlayerNameChange={setAccountPlayerName}
+                nextPlayerName={nextPlayerName}
+                onNextPlayerNameChange={setNextPlayerName}
+                onUpdatePlayerName={updatePlayerName}
               />
             ) : currentView === 'quartets' ? (
               <QuartetsPanel

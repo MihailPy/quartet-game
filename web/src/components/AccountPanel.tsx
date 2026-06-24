@@ -10,6 +10,9 @@ type AccountPanelProps = {
   onBack: () => void
   accountPlayerName: string
   onAccountPlayerNameChange: (value: string) => void
+  nextPlayerName: string
+  onNextPlayerNameChange: (value: string) => void
+  onUpdatePlayerName: () => void
 }
 
 export function AccountPanel({
@@ -22,6 +25,9 @@ export function AccountPanel({
   onBack,
   accountPlayerName,
   onAccountPlayerNameChange,
+  nextPlayerName,
+  onNextPlayerNameChange,
+  onUpdatePlayerName,
 }: AccountPanelProps) {
   return (
     <div className="panel">
@@ -30,6 +36,26 @@ export function AccountPanel({
       {user ? (
         <>
           <p className="form-hint">Аккаунт: {user.player_name}</p>
+
+          <div className="form-block">
+            <h3>Изменить имя</h3>
+
+            <input
+              className="input"
+              type="text"
+              value={nextPlayerName}
+              onChange={(event) => onNextPlayerNameChange(event.target.value)}
+              placeholder="Новое имя игрока"
+            />
+
+            <button
+              className="button secondary-button"
+              type="button"
+              onClick={onUpdatePlayerName}
+            >
+              Сохранить имя
+            </button>
+          </div>
 
           <div className="form-block">
             <h3>Код восстановления</h3>

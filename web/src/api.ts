@@ -328,3 +328,23 @@ export async function loadUserQuartetsRequest(
 
   return (await response.json()) as Quartet[]
 }
+
+export async function updatePlayerNameRequest(
+  userID: string,
+  playerName: string,
+): Promise<User> {
+  const response = await fetch(`${API_URL}/users/${userID}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      player_name: playerName,
+    }),
+  })
+
+  if (!response.ok) {
+    const errorPayload = await response.json().catch(() => null)
+    throw new Error(errorPayload?.error ?? 'Не удалось изменить имя.')
+  }
+
+  return (await response.json()) as User
+}
