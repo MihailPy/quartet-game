@@ -12,6 +12,7 @@ type EntryPanelProps = {
   user: User | null
   onOpenAccount: () => void
   onOpenQuartets: () => void
+  onOpenHistory: () => void
 }
 
 export function EntryPanel({
@@ -26,6 +27,7 @@ export function EntryPanel({
   user,
   onOpenAccount,
   onOpenQuartets,
+  onOpenHistory,
 }: EntryPanelProps) {
   const playerNameIsEmpty = playerName.trim() === ''
   const roomIdIsEmpty = roomIdInput.trim() === ''
@@ -44,6 +46,14 @@ export function EntryPanel({
 
               <button className="button secondary-button" type="button" onClick={onOpenQuartets}>
                 Мои квартеты
+              </button>
+
+              <button
+                className="button secondary-button"
+                type="button"
+                onClick={onOpenHistory}
+              >
+                История игр
               </button>
             </div>
           </>

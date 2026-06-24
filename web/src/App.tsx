@@ -58,7 +58,9 @@ import {
   buildRequestCardMessage,
   buildRoomWebSocketURL,
 } from './websocket'
-type AppView = 'home' | 'account' | 'quartets'
+import { HistoryPanel } from './components/HistoryPanel'
+
+type AppView = 'home' | 'account' | 'quartets' | 'history'
 
 function App() {
   const [room, setRoom] = useState<Room | null>(null)
@@ -1077,8 +1079,6 @@ function App() {
     })
   }
 
-  void userHistory
-
   useEffect(() => {
     if (!room || !player) return
 
@@ -1442,6 +1442,11 @@ function App() {
                 onSaveQuartetChanges={saveQuartetChanges}
                 onBack={() => setCurrentView('home')}
               />
+            ) : currentView === 'history' ? (
+              <HistoryPanel
+                records={userHistory}
+                onBack={() => setCurrentView('home')}
+              />
             ) : (
               <EntryPanel
                 playerName={playerName}
@@ -1455,6 +1460,7 @@ function App() {
                 user={user}
                 onOpenAccount={() => setCurrentView('account')}
                 onOpenQuartets={() => setCurrentView('quartets')}
+                onOpenHistory={() => setCurrentView('history')}
               />
             )
           )}
