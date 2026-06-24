@@ -56,15 +56,21 @@ export function EntryPanel({
 
       <h2>Войти в игру</h2>
 
-      <label className="form-field">
-        <span>Имя игрока</span>
-        <input
-          className="input"
-          placeholder="Например, Mihail"
-          value={playerName}
-          onChange={(event) => onPlayerNameChange(event.target.value)}
-        />
-      </label>
+      {user ? (
+        <p className="form-hint">
+          В игре ты будешь: {user.player_name}
+        </p>
+      ) : (
+        <label className="form-field">
+          <span>Имя игрока</span>
+          <input
+            className="input"
+            placeholder="Например, Mihail"
+            value={playerName}
+            onChange={(event) => onPlayerNameChange(event.target.value)}
+          />
+        </label>
+      )}
 
       <div className="entry-actions">
         {user && (
