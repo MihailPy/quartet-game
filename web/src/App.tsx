@@ -912,6 +912,11 @@ function App() {
       return
     }
 
+    if (hasDuplicateQuartetTitle(trimmedTitle, editingQuartetID)) {
+      setError('Квартет с таким названием уже есть.')
+      return
+    }
+
     if (trimmedCards.some((card) => !card)) {
       setError('Заполни все 4 карты.')
       return
@@ -1020,6 +1025,11 @@ function App() {
       return
     }
 
+    if (hasDuplicateQuartetTitle(trimmedTitle, editingQuartetID)) {
+      setError('Квартет с таким названием уже есть.')
+      return
+    }
+
     if (trimmedCards.some((card) => !card)) {
       setError('Заполни все 4 карты.')
       return
@@ -1053,6 +1063,18 @@ function App() {
 
       setError(message)
     }
+  }
+
+  function hasDuplicateQuartetTitle(title: string, currentQuartetID?: string | null) {
+    const normalizedTitle = title.trim().toLowerCase()
+
+    return userQuartets.some((quartet) => {
+      if (currentQuartetID && quartet.ID === currentQuartetID) {
+        return false
+      }
+
+      return quartet.Title.trim().toLowerCase() === normalizedTitle
+    })
   }
 
   void userHistory
