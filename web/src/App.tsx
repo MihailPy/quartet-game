@@ -18,6 +18,7 @@ import {
   toggleSelectedPlayerRequest,
   toggleSelectedQuartetRequest,
   updatePlayerNameRequest,
+  updateUserQuartetRequest,
 } from './api'
 import './App.css'
 import { AccountPanel } from './components/AccountPanel'
@@ -99,6 +100,7 @@ function App() {
   const [currentView, setCurrentView] = useState<AppView>('home')
   const [accountPlayerName, setAccountPlayerName] = useState('')
   const [nextPlayerName, setNextPlayerName] = useState('')
+  const [editingQuartetID, setEditingQuartetID] = useState<string | null>(null)
 
   function resetGameState() {
     updateDeck(null)
@@ -989,6 +991,42 @@ function App() {
     }
   }
 
+  function startEditQuartet(quartet: Quartet) {
+    setEditingQuartetID(quartet.ID)
+    setQuartetTitle(quartet.Title)
+    setQuartetCards(quartet.Cards.map((card) => card.Title))
+  }
+
+  async function saveQuartetChanges() {
+    if (!user || !editingQuartetID) {
+      return
+    }
+
+    try {
+      setError('')
+
+      await updateUserQuartetRequest(
+        user.id,
+        editingQuartetID,
+        quartetTitle,
+        quartetCards,
+      )
+
+      await loadUserQuartets(user.id)
+
+      setEditingQuartetID(null)
+      setQuartetTitle('')
+      setQuartetCards(['', '', '', ''])
+
+      showToast('Квартет обновлён.', 'success')
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : 'Не удалось обновить квартет.'
+
+      setError(message)
+    }
+  }
+
   void userHistory
 
   useEffect(() => {
@@ -1349,6 +1387,9 @@ function App() {
                 onQuartetCardsChange={setQuartetCards}
                 onCreateUserQuartet={createUserQuartet}
                 onDeleteUserQuartet={deleteUserQuartet}
+                editingQuartetID={editingQuartetID}
+                onStartEditQuartet={startEditQuartet}
+                onSaveQuartetChanges={saveQuartetChanges}
                 onBack={() => setCurrentView('home')}
               />
             ) : (

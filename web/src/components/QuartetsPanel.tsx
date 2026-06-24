@@ -8,6 +8,9 @@ type QuartetsPanelProps = {
   onQuartetCardsChange: (cards: string[]) => void
   onCreateUserQuartet: () => void
   onDeleteUserQuartet: (quartetID: string) => void
+  editingQuartetID: string | null
+  onStartEditQuartet: (quartet: Quartet) => void
+  onSaveQuartetChanges: () => void
   onBack: () => void
 }
 
@@ -19,6 +22,9 @@ export function QuartetsPanel({
   onQuartetCardsChange,
   onCreateUserQuartet,
   onDeleteUserQuartet,
+  editingQuartetID,
+  onStartEditQuartet,
+  onSaveQuartetChanges,
   onBack,
 }: QuartetsPanelProps) {
   return (
@@ -52,9 +58,9 @@ export function QuartetsPanel({
         <button
           className="button secondary-button"
           type="button"
-          onClick={onCreateUserQuartet}
+          onClick={editingQuartetID ? onSaveQuartetChanges : onCreateUserQuartet}
         >
-          Создать квартет
+          {editingQuartetID ? 'Сохранить изменения' : 'Создать квартет'}
         </button>
       </div>
 
@@ -67,6 +73,13 @@ export function QuartetsPanel({
           <div key={quartet.ID} className="player-row">
             <span>{quartet.Title}</span>
             <span>{quartet.Cards.length} карт</span>
+            <button
+              className="button secondary-button"
+              type="button"
+              onClick={() => onStartEditQuartet(quartet)}
+            >
+              Редактировать
+            </button>
             <button
               className="button secondary-button"
               type="button"
