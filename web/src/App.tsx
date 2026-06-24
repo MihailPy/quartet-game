@@ -95,10 +95,6 @@ function App() {
   const [quartetCards, setQuartetCards] = useState(['', '', '', ''])
   const [currentView, setCurrentView] = useState<AppView>('home')
 
-  void currentView
-  void setCurrentView
-  void AccountPanel
-
   function resetGameState() {
     updateDeck(null)
     setPublicGameState(null)
@@ -1267,29 +1263,41 @@ function App() {
 
         <section className={isEntered ? 'game-layout' : 'game-layout entry-layout'}>
           {isSessionRestored && !isEntered && (
-            <EntryPanel
-              playerName={playerName}
-              roomIdInput={roomIdInput}
-              onPlayerNameChange={setPlayerName}
-              onRoomIdInputChange={setRoomIdInput}
-              onCreateRoom={createRoom}
-              onJoinRoomByID={joinRoomByID}
-              isCreatingRoom={isCreatingRoom}
-              isJoiningRoom={isJoiningRoom}
-              user={user}
-              onCreateUser={createUser}
-              userHistory={userHistory}
-              onLogoutUser={logoutUser}
-              recoveryCode={recoveryCode}
-              onRecoveryCodeChange={setRecoveryCode}
-              onLoginUser={loginUser}
-              quartetTitle={quartetTitle}
-              quartetCards={quartetCards}
-              onQuartetTitleChange={setQuartetTitle}
-              onQuartetCardsChange={setQuartetCards}
-              onCreateUserQuartet={createUserQuartet}
-              userQuartets={userQuartets}
-            />
+            currentView === 'account' ? (
+              <AccountPanel
+                user={user}
+                recoveryCode={recoveryCode}
+                onRecoveryCodeChange={setRecoveryCode}
+                onCreateUser={createUser}
+                onLoginUser={loginUser}
+                onLogoutUser={logoutUser}
+                onBack={() => setCurrentView('home')}
+              />
+            ) : (
+              <EntryPanel
+                playerName={playerName}
+                roomIdInput={roomIdInput}
+                onPlayerNameChange={setPlayerName}
+                onRoomIdInputChange={setRoomIdInput}
+                onCreateRoom={createRoom}
+                onJoinRoomByID={joinRoomByID}
+                isCreatingRoom={isCreatingRoom}
+                isJoiningRoom={isJoiningRoom}
+                user={user}
+                onCreateUser={createUser}
+                userHistory={userHistory}
+                onLogoutUser={logoutUser}
+                recoveryCode={recoveryCode}
+                onRecoveryCodeChange={setRecoveryCode}
+                onLoginUser={loginUser}
+                quartetTitle={quartetTitle}
+                quartetCards={quartetCards}
+                onQuartetTitleChange={setQuartetTitle}
+                onQuartetCardsChange={setQuartetCards}
+                onCreateUserQuartet={createUserQuartet}
+                userQuartets={userQuartets}
+              />
+            )
           )}
 
           {isSessionRestored && isEntered && (
