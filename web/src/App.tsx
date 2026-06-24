@@ -3,6 +3,7 @@ import {
   createRoomRequest,
   createUserQuartetRequest,
   createUserRequest,
+  deleteUserQuartetRequest,
   joinRoomRequest,
   loadAvailableQuartetsRequest,
   loadDeckRequest,
@@ -16,13 +17,17 @@ import {
   startGameRequest,
   toggleSelectedPlayerRequest,
   toggleSelectedQuartetRequest,
+  updatePlayerNameRequest,
+  updateUserQuartetRequest,
 } from './api'
 import './App.css'
+import { AccountPanel } from './components/AccountPanel'
 import { EntryPanel } from './components/EntryPanel'
 import { GameLogPanel } from './components/GameLogPanel'
 import { GamePanel } from './components/GamePanel'
 import { PlayerHandPanel } from './components/PlayerHandPanel'
 import { PlayerPanel } from './components/PlayerPanel'
+import { QuartetsPanel } from './components/QuartetsPanel'
 import { RoomPanel } from './components/RoomPanel'
 import { ToastContainer } from './components/ToastContainer'
 import {
@@ -53,6 +58,9 @@ import {
   buildRequestCardMessage,
   buildRoomWebSocketURL,
 } from './websocket'
+import { HistoryPanel } from './components/HistoryPanel'
+
+type AppView = 'home' | 'account' | 'quartets' | 'history'
 
 function App() {
   const [room, setRoom] = useState<Room | null>(null)
@@ -91,6 +99,10 @@ function App() {
   const [userQuartets, setUserQuartets] = useState<Quartet[]>([])
   const [quartetTitle, setQuartetTitle] = useState('')
   const [quartetCards, setQuartetCards] = useState(['', '', '', ''])
+  const [currentView, setCurrentView] = useState<AppView>('home')
+  const [accountPlayerName, setAccountPlayerName] = useState('')
+  const [nextPlayerName, setNextPlayerName] = useState('')
+  const [editingQuartetID, setEditingQuartetID] = useState<string | null>(null)
 
   function resetGameState() {
     updateDeck(null)
@@ -179,7 +191,7 @@ function App() {
   }
 
   async function createUser() {
-    const trimmedName = playerName.trim()
+    const trimmedName = accountPlayerName.trim()
 
     if (!trimmedName) {
       setError('Введите имя игрока.')
@@ -193,6 +205,8 @@ function App() {
 
       saveUser(data.user)
       showToast('Аккаунт создан.', 'success')
+      setPlayerName(data.user.player_name)
+      setAccountPlayerName('')
     } catch (err) {
       const message =
         err instanceof Error ? err.message : 'Не удалось создать аккаунт.'
@@ -875,6 +889,7 @@ function App() {
       const data = await loginUserRequest(trimmedCode)
 
       saveUser(data.user)
+      setPlayerName(data.user.player_name)
       setRecoveryCode('')
       showToast('Вы вошли в аккаунт.', 'success')
     } catch (err) {
@@ -899,8 +914,18 @@ function App() {
       return
     }
 
+    if (hasDuplicateQuartetTitle(trimmedTitle, editingQuartetID)) {
+      setError('Квартет с таким названием уже есть.')
+      return
+    }
+
     if (trimmedCards.some((card) => !card)) {
       setError('Заполни все 4 карты.')
+      return
+    }
+
+    if (hasDuplicateCards(trimmedCards)) {
+      setError('Карты внутри квартета не должны повторяться.')
       return
     }
 
@@ -924,6 +949,134 @@ function App() {
 
       setError(message)
     }
+  }
+
+  function hasDuplicateCards(cards: string[]) {
+    const normalizedCards = cards.map((card) => card.trim().toLowerCase())
+    return new Set(normalizedCards).size !== normalizedCards.length
+  }
+
+  async function updatePlayerName() {
+    if (!user) {
+      return
+    }
+
+    const trimmedName = nextPlayerName.trim()
+
+    if (!trimmedName) {
+      setError('Введите новое имя.')
+      return
+    }
+
+    try {
+      setError('')
+
+      const updatedUser = await updatePlayerNameRequest(user.id, trimmedName)
+
+      saveUser(updatedUser)
+      setPlayerName(updatedUser.player_name)
+      setNextPlayerName('')
+      showToast('Имя изменено.', 'success')
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : 'Не удалось изменить имя.'
+
+      setError(message)
+    }
+  }
+
+  async function deleteUserQuartet(quartetID: string) {
+    if (!user) {
+      return
+    }
+
+    try {
+      setError('')
+
+      await deleteUserQuartetRequest(user.id, quartetID)
+
+      setUserQuartets((current) =>
+        current.filter((quartet) => quartet.ID !== quartetID),
+      )
+
+      showToast('Квартет удалён.', 'success')
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : 'Не удалось удалить квартет.'
+
+      setError(message)
+    }
+  }
+
+  function startEditQuartet(quartet: Quartet) {
+    setEditingQuartetID(quartet.ID)
+    setQuartetTitle(quartet.Title)
+    setQuartetCards(quartet.Cards.map((card) => card.Title))
+  }
+
+  async function saveQuartetChanges() {
+    if (!user || !editingQuartetID) {
+      return
+    }
+
+    const trimmedTitle = quartetTitle.trim()
+    const trimmedCards = quartetCards.map((card) => card.trim())
+
+    if (!trimmedTitle) {
+      setError('Введите название квартета.')
+      return
+    }
+
+    if (hasDuplicateQuartetTitle(trimmedTitle, editingQuartetID)) {
+      setError('Квартет с таким названием уже есть.')
+      return
+    }
+
+    if (trimmedCards.some((card) => !card)) {
+      setError('Заполни все 4 карты.')
+      return
+    }
+
+    if (hasDuplicateCards(trimmedCards)) {
+      setError('Карты внутри квартета не должны повторяться.')
+      return
+    }
+
+    try {
+      setError('')
+
+      await updateUserQuartetRequest(
+        user.id,
+        editingQuartetID,
+        trimmedTitle,
+        trimmedCards,
+      )
+
+      await loadUserQuartets(user.id)
+
+      setEditingQuartetID(null)
+      setQuartetTitle('')
+      setQuartetCards(['', '', '', ''])
+
+      showToast('Квартет обновлён.', 'success')
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : 'Не удалось обновить квартет.'
+
+      setError(message)
+    }
+  }
+
+  function hasDuplicateQuartetTitle(title: string, currentQuartetID?: string | null) {
+    const normalizedTitle = title.trim().toLowerCase()
+
+    return userQuartets.some((quartet) => {
+      if (currentQuartetID && quartet.ID === currentQuartetID) {
+        return false
+      }
+
+      return quartet.Title.trim().toLowerCase() === normalizedTitle
+    })
   }
 
   useEffect(() => {
@@ -1260,29 +1413,56 @@ function App() {
 
         <section className={isEntered ? 'game-layout' : 'game-layout entry-layout'}>
           {isSessionRestored && !isEntered && (
-            <EntryPanel
-              playerName={playerName}
-              roomIdInput={roomIdInput}
-              onPlayerNameChange={setPlayerName}
-              onRoomIdInputChange={setRoomIdInput}
-              onCreateRoom={createRoom}
-              onJoinRoomByID={joinRoomByID}
-              isCreatingRoom={isCreatingRoom}
-              isJoiningRoom={isJoiningRoom}
-              user={user}
-              onCreateUser={createUser}
-              userHistory={userHistory}
-              onLogoutUser={logoutUser}
-              recoveryCode={recoveryCode}
-              onRecoveryCodeChange={setRecoveryCode}
-              onLoginUser={loginUser}
-              quartetTitle={quartetTitle}
-              quartetCards={quartetCards}
-              onQuartetTitleChange={setQuartetTitle}
-              onQuartetCardsChange={setQuartetCards}
-              onCreateUserQuartet={createUserQuartet}
-              userQuartets={userQuartets}
-            />
+            currentView === 'account' ? (
+              <AccountPanel
+                user={user}
+                recoveryCode={recoveryCode}
+                onRecoveryCodeChange={setRecoveryCode}
+                onCreateUser={createUser}
+                onLoginUser={loginUser}
+                onLogoutUser={logoutUser}
+                onBack={() => setCurrentView('home')}
+                accountPlayerName={accountPlayerName}
+                onAccountPlayerNameChange={setAccountPlayerName}
+                nextPlayerName={nextPlayerName}
+                onNextPlayerNameChange={setNextPlayerName}
+                onUpdatePlayerName={updatePlayerName}
+              />
+            ) : currentView === 'quartets' ? (
+              <QuartetsPanel
+                userQuartets={userQuartets}
+                quartetTitle={quartetTitle}
+                quartetCards={quartetCards}
+                onQuartetTitleChange={setQuartetTitle}
+                onQuartetCardsChange={setQuartetCards}
+                onCreateUserQuartet={createUserQuartet}
+                onDeleteUserQuartet={deleteUserQuartet}
+                editingQuartetID={editingQuartetID}
+                onStartEditQuartet={startEditQuartet}
+                onSaveQuartetChanges={saveQuartetChanges}
+                onBack={() => setCurrentView('home')}
+              />
+            ) : currentView === 'history' ? (
+              <HistoryPanel
+                records={userHistory}
+                onBack={() => setCurrentView('home')}
+              />
+            ) : (
+              <EntryPanel
+                playerName={playerName}
+                roomIdInput={roomIdInput}
+                onPlayerNameChange={setPlayerName}
+                onRoomIdInputChange={setRoomIdInput}
+                onCreateRoom={createRoom}
+                onJoinRoomByID={joinRoomByID}
+                isCreatingRoom={isCreatingRoom}
+                isJoiningRoom={isJoiningRoom}
+                user={user}
+                onOpenAccount={() => setCurrentView('account')}
+                onOpenQuartets={() => setCurrentView('quartets')}
+                onOpenHistory={() => setCurrentView('history')}
+              />
+            )
           )}
 
           {isSessionRestored && isEntered && (

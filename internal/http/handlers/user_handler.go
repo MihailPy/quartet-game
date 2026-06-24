@@ -2,7 +2,9 @@ package handlers
 
 import (
 	"context"
+	"crypto/rand"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -163,7 +165,19 @@ func (h *UserHandler) GetUserHistory(w http.ResponseWriter, r *http.Request, use
 }
 
 func generateRecoveryCode() string {
-	return time.Now().UTC().Format("150405000")
+	var bytes [4]byte
+
+	if _, err := rand.Read(bytes[:]); err != nil {
+		return uuid.NewString()[:8]
+	}
+
+	return fmt.Sprintf(
+		"%02X%02X-%02X%02X",
+		bytes[0],
+		bytes[1],
+		bytes[2],
+		bytes[3],
+	)
 }
 
 func (h *UserHandler) LoginUser(w http.ResponseWriter, r *http.Request) {

@@ -328,3 +328,58 @@ export async function loadUserQuartetsRequest(
 
   return (await response.json()) as Quartet[]
 }
+
+export async function updatePlayerNameRequest(
+  userID: string,
+  playerName: string,
+): Promise<User> {
+  const response = await fetch(`${API_URL}/users/${userID}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      player_name: playerName,
+    }),
+  })
+
+  if (!response.ok) {
+    const errorPayload = await response.json().catch(() => null)
+    throw new Error(errorPayload?.error ?? 'Не удалось изменить имя.')
+  }
+
+  return (await response.json()) as User
+}
+
+export async function deleteUserQuartetRequest(
+  userID: string,
+  quartetID: string,
+): Promise<void> {
+  const response = await fetch(`${API_URL}/users/${userID}/quartets/${quartetID}`, {
+    method: 'DELETE',
+  })
+
+  if (!response.ok) {
+    const errorPayload = await response.json().catch(() => null)
+    throw new Error(errorPayload?.error ?? 'Не удалось удалить квартет.')
+  }
+}
+
+export async function updateUserQuartetRequest(
+  userID: string,
+  quartetID: string,
+  title: string,
+  cards: string[],
+): Promise<void> {
+  const response = await fetch(`${API_URL}/users/${userID}/quartets/${quartetID}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      title,
+      cards,
+    }),
+  })
+
+  if (!response.ok) {
+    const errorPayload = await response.json().catch(() => null)
+    throw new Error(errorPayload?.error ?? 'Не удалось обновить квартет.')
+  }
+}
