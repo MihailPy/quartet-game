@@ -24,6 +24,7 @@ import { GameLogPanel } from './components/GameLogPanel'
 import { GamePanel } from './components/GamePanel'
 import { PlayerHandPanel } from './components/PlayerHandPanel'
 import { PlayerPanel } from './components/PlayerPanel'
+import { QuartetsPanel } from './components/QuartetsPanel'
 import { RoomPanel } from './components/RoomPanel'
 import { ToastContainer } from './components/ToastContainer'
 import {
@@ -930,7 +931,6 @@ function App() {
   }
 
   void userHistory
-  void userQuartets
   void createUserQuartet
 
   useEffect(() => {
@@ -1278,18 +1278,10 @@ function App() {
                 onBack={() => setCurrentView('home')}
               />
             ) : currentView === 'quartets' ? (
-              <div className="panel">
-                <h2>Мои квартеты</h2>
-                <p className="form-hint">Экран квартетов в разработке.</p>
-
-                <button
-                  className="button"
-                  type="button"
-                  onClick={() => setCurrentView('home')}
-                >
-                  Назад
-                </button>
-              </div>
+              <QuartetsPanel
+                userQuartets={userQuartets}
+                onBack={() => setCurrentView('home')}
+              />
             ) : (
               <EntryPanel
                 playerName={playerName}
