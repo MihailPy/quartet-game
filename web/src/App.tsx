@@ -917,6 +917,11 @@ function App() {
       return
     }
 
+    if (hasDuplicateCards(trimmedCards)) {
+      setError('Карты внутри квартета не должны повторяться.')
+      return
+    }
+
     try {
       setError('')
 
@@ -937,6 +942,11 @@ function App() {
 
       setError(message)
     }
+  }
+
+  function hasDuplicateCards(cards: string[]) {
+    const normalizedCards = cards.map((card) => card.trim().toLowerCase())
+    return new Set(normalizedCards).size !== normalizedCards.length
   }
 
   async function updatePlayerName() {
@@ -1002,14 +1012,32 @@ function App() {
       return
     }
 
+    const trimmedTitle = quartetTitle.trim()
+    const trimmedCards = quartetCards.map((card) => card.trim())
+
+    if (!trimmedTitle) {
+      setError('Введите название квартета.')
+      return
+    }
+
+    if (trimmedCards.some((card) => !card)) {
+      setError('Заполни все 4 карты.')
+      return
+    }
+
+    if (hasDuplicateCards(trimmedCards)) {
+      setError('Карты внутри квартета не должны повторяться.')
+      return
+    }
+
     try {
       setError('')
 
       await updateUserQuartetRequest(
         user.id,
         editingQuartetID,
-        quartetTitle,
-        quartetCards,
+        trimmedTitle,
+        trimmedCards,
       )
 
       await loadUserQuartets(user.id)
