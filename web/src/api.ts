@@ -348,3 +348,17 @@ export async function updatePlayerNameRequest(
 
   return (await response.json()) as User
 }
+
+export async function deleteUserQuartetRequest(
+  userID: string,
+  quartetID: string,
+): Promise<void> {
+  const response = await fetch(`${API_URL}/users/${userID}/quartets/${quartetID}`, {
+    method: 'DELETE',
+  })
+
+  if (!response.ok) {
+    const errorPayload = await response.json().catch(() => null)
+    throw new Error(errorPayload?.error ?? 'Не удалось удалить квартет.')
+  }
+}

@@ -21,6 +21,11 @@ type QuartetRepository interface {
 		ctx context.Context,
 		ownerUserID user.UserID,
 	) ([]game.Quartet, error)
+	DeleteUserQuartet(
+		ctx context.Context,
+		ownerUserID user.UserID,
+		quartetID game.QuartetID,
+	) error
 }
 
 type QuartetHandler struct {
@@ -117,4 +122,33 @@ func (h *QuartetHandler) ListUserQuartets(w http.ResponseWriter, r *http.Request
 	w.WriteHeader(http.StatusOK)
 
 	_ = json.NewEncoder(w).Encode(quartets)
+}
+
+func (h *QuartetHandler) DeleteUserQuartet(
+	w http.ResponseWriter,
+	r *http.Request,
+	ownerUserID user.UserID,
+	quartetID game.QuartetID,
+) {
+	if r.Method != http.MethodDelete {
+		writeError(w, http.StatusMethodNotAllowed, "method not allowed")
+		return
+	}
+
+	if ownerUserID == "" || quartetID == "" {
+		writeError(w, http.StatusBadRequest, "invalid quartet delete request")
+		return
+	}
+
+	err := h.repository.DeleteUserQuartet(
+		r.Context(),
+		ownerUserID,
+		quartetID,
+	)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }

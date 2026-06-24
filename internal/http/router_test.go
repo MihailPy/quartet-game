@@ -126,3 +126,11 @@ func (f fakeQuartetRepository) ListUserQuartets(
 ) ([]game.Quartet, error) {
 	return []game.Quartet{}, nil
 }
+
+func (f fakeQuartetRepository) DeleteUserQuartet(
+	ctx context.Context,
+	ownerUserID user.UserID,
+	quartetID game.QuartetID,
+) error {
+	return nil
+}

@@ -5,6 +5,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/MihailPy/quartet-game/internal/game"
 	"github.com/MihailPy/quartet-game/internal/http/handlers"
 	"github.com/MihailPy/quartet-game/internal/room"
 	"github.com/MihailPy/quartet-game/internal/user"
@@ -99,6 +100,12 @@ func NewRouter(
 			return
 		}
 
+		if len(parts) == 3 && parts[1] == "quartets" {
+			quartetID := game.QuartetID(parts[2])
+			quartetHandler.DeleteUserQuartet(w, r, userID, quartetID)
+			return
+		}
+
 		if r.Method == http.MethodPatch {
 			userHandler.UpdatePlayerName(w, r, userID)
 			return
@@ -162,7 +169,7 @@ func withCORS(next http.Handler) http.Handler {
 		if isAllowedOrigin(origin) {
 			w.Header().Set("Access-Control-Allow-Origin", origin)
 		}
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PATCH, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 
 		if r.Method == http.MethodOptions {

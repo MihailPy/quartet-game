@@ -7,6 +7,7 @@ type QuartetsPanelProps = {
   onQuartetTitleChange: (value: string) => void
   onQuartetCardsChange: (cards: string[]) => void
   onCreateUserQuartet: () => void
+  onDeleteUserQuartet: (quartetID: string) => void
   onBack: () => void
 }
 
@@ -17,6 +18,7 @@ export function QuartetsPanel({
   onQuartetTitleChange,
   onQuartetCardsChange,
   onCreateUserQuartet,
+  onDeleteUserQuartet,
   onBack,
 }: QuartetsPanelProps) {
   return (
@@ -65,6 +67,13 @@ export function QuartetsPanel({
           <div key={quartet.ID} className="player-row">
             <span>{quartet.Title}</span>
             <span>{quartet.Cards.length} карт</span>
+            <button
+              className="button secondary-button"
+              type="button"
+              onClick={() => onDeleteUserQuartet(quartet.ID)}
+            >
+              Удалить
+            </button>
           </div>
         ))
       )}

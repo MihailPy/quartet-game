@@ -3,6 +3,7 @@ import {
   createRoomRequest,
   createUserQuartetRequest,
   createUserRequest,
+  deleteUserQuartetRequest,
   joinRoomRequest,
   loadAvailableQuartetsRequest,
   loadDeckRequest,
@@ -965,6 +966,29 @@ function App() {
     }
   }
 
+  async function deleteUserQuartet(quartetID: string) {
+    if (!user) {
+      return
+    }
+
+    try {
+      setError('')
+
+      await deleteUserQuartetRequest(user.id, quartetID)
+
+      setUserQuartets((current) =>
+        current.filter((quartet) => quartet.ID !== quartetID),
+      )
+
+      showToast('Квартет удалён.', 'success')
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : 'Не удалось удалить квартет.'
+
+      setError(message)
+    }
+  }
+
   void userHistory
 
   useEffect(() => {
@@ -1324,6 +1348,7 @@ function App() {
                 onQuartetTitleChange={setQuartetTitle}
                 onQuartetCardsChange={setQuartetCards}
                 onCreateUserQuartet={createUserQuartet}
+                onDeleteUserQuartet={deleteUserQuartet}
                 onBack={() => setCurrentView('home')}
               />
             ) : (

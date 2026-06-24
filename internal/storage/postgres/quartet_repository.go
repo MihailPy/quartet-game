@@ -185,3 +185,27 @@ func (r *QuartetRepository) IsUserQuartet(ctx context.Context, quartetID game.Qu
 
 	return exists, nil
 }
+
+func (r *QuartetRepository) DeleteUserQuartet(
+	ctx context.Context,
+	ownerUserID user.UserID,
+	quartetID game.QuartetID,
+) error {
+	_, err := r.db.ExecContext(
+		ctx,
+		`
+		DELETE FROM quartets
+		WHERE id = $1
+		  AND EXISTS (
+			SELECT 1
+			FROM quartet_metadata
+			WHERE quartet_id = $1
+			  AND owner_user_id = $2
+		  )
+		`,
+		quartetID,
+		ownerUserID,
+	)
+
+	return err
+}
