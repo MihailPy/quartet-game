@@ -62,7 +62,18 @@ func (r *UserHistoryRepository) FindGameHistoryByUserID(
 	rows, err := r.db.QueryContext(
 		ctx,
 		`
-		SELECT id, game_id, room_id, user_id, role, score, is_winner, created_at
+		SELECT
+				id,
+				game_id,
+				room_id,
+				user_id,
+				role,
+				score,
+				winner_score,
+				winner_player_name,
+				duration_seconds,
+				is_winner,
+				created_at
 		FROM user_game_history
 		WHERE user_id = $1
 		ORDER BY created_at DESC
