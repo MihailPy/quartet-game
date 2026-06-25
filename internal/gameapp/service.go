@@ -272,6 +272,18 @@ func (s *Service) saveGameHistory(
 
 	scoreByPlayerID := make(map[string]int)
 
+	winnerScore := 0
+	winnerPlayerName := ""
+
+	for _, player := range currentRoom.Players {
+		score := scoreByPlayerID[string(player.ID)]
+
+		if winnerIDs[string(player.ID)] && score >= winnerScore {
+			winnerScore = score
+			winnerPlayerName = player.Name
+		}
+	}
+
 	for playerID, score := range result.Scores {
 		scoreByPlayerID[string(playerID)] = score
 	}
@@ -289,14 +301,17 @@ func (s *Service) saveGameHistory(
 		}
 
 		record := user.GameHistoryRecord{
-			ID:        generateHistoryID(),
-			GameID:    string(state.ID),
-			RoomID:    string(roomID),
-			UserID:    user.UserID(player.UserID),
-			Role:      role,
-			Score:     scoreByPlayerID[string(player.ID)],
-			IsWinner:  winnerIDs[string(player.ID)],
-			CreatedAt: now,
+			ID:               generateHistoryID(),
+			GameID:           string(state.ID),
+			RoomID:           string(roomID),
+			UserID:           user.UserID(player.UserID),
+			Role:             role,
+			Score:            scoreByPlayerID[string(player.ID)],
+			WinnerScore:      winnerScore,
+			WinnerPlayerName: winnerPlayerName,
+			DurationSeconds:  0,
+			IsWinner:         winnerIDs[string(player.ID)],
+			CreatedAt:        now,
 		}
 
 		if err := s.userHistoryRepository.SaveGameHistoryRecord(ctx, record); err != nil {
