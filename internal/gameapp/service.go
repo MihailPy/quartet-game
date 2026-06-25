@@ -272,6 +272,10 @@ func (s *Service) saveGameHistory(
 
 	scoreByPlayerID := make(map[string]int)
 
+	for playerID, score := range result.Scores {
+		scoreByPlayerID[string(playerID)] = score
+	}
+
 	winnerScore := 0
 	winnerPlayerName := ""
 
@@ -282,10 +286,6 @@ func (s *Service) saveGameHistory(
 			winnerScore = score
 			winnerPlayerName = player.Name
 		}
-	}
-
-	for playerID, score := range result.Scores {
-		scoreByPlayerID[string(playerID)] = score
 	}
 
 	now := time.Now().UTC()
