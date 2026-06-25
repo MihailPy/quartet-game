@@ -25,16 +25,19 @@ func (r *UserHistoryRepository) SaveGameHistoryRecord(
 		ctx,
 		`
 		INSERT INTO user_game_history (
-			id,
-			game_id,
-			room_id,
-			user_id,
-			role,
-			score,
-			is_winner,
-			created_at
+				id,
+				game_id,
+				room_id,
+				user_id,
+				role,
+				score,
+				winner_score,
+				winner_player_name,
+				duration_seconds,
+				is_winner,
+				created_at
 		)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
 		`,
 		record.ID,
 		record.GameID,
@@ -42,6 +45,9 @@ func (r *UserHistoryRepository) SaveGameHistoryRecord(
 		record.UserID,
 		record.Role,
 		record.Score,
+		record.WinnerScore,
+		record.WinnerPlayerName,
+		record.DurationSeconds,
 		record.IsWinner,
 		record.CreatedAt,
 	)
@@ -56,7 +62,18 @@ func (r *UserHistoryRepository) FindGameHistoryByUserID(
 	rows, err := r.db.QueryContext(
 		ctx,
 		`
-		SELECT id, game_id, room_id, user_id, role, score, is_winner, created_at
+		SELECT
+				id,
+				game_id,
+				room_id,
+				user_id,
+				role,
+				score,
+				winner_score,
+				winner_player_name,
+				duration_seconds,
+				is_winner,
+				created_at
 		FROM user_game_history
 		WHERE user_id = $1
 		ORDER BY created_at DESC
@@ -80,6 +97,9 @@ func (r *UserHistoryRepository) FindGameHistoryByUserID(
 			&record.UserID,
 			&record.Role,
 			&record.Score,
+			&record.WinnerScore,
+			&record.WinnerPlayerName,
+			&record.DurationSeconds,
 			&record.IsWinner,
 			&record.CreatedAt,
 		); err != nil {

@@ -136,6 +136,9 @@ export type GameHistoryRecord = {
   user_id: string
   role: string
   score: number
+  winner_score: number
+  winner_player_name: string
+  duration_seconds: number
   is_winner: boolean
   created_at: string
 }

@@ -803,6 +803,10 @@ function App() {
       return 'Не удалось подключиться к серверу.'
     }
 
+    if (message.includes('user already in room')) {
+      return 'Этот аккаунт уже находится в комнате.'
+    }
+
     return message
   }
 

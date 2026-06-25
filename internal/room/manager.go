@@ -19,6 +19,7 @@ var ErrOnlyOwnerCanSelectPlayers = errors.New("only owner can select players")
 var ErrOnlyOwnerCanSelectQuartets = errors.New("only owner can select quartets")
 var ErrInvalidQuartetSelection = errors.New("invalid quartet selection")
 var ErrNotEnoughCards = errors.New("not enough cards")
+var ErrUserAlreadyInRoom = errors.New("user already in room")
 
 type Repository interface {
 	SaveRoom(ctx context.Context, currentRoom Room) error
@@ -249,23 +250,34 @@ func (m *Manager) JoinRoomForUser(
 	playerName string,
 	userID string,
 ) (Player, Room, error) {
-	player, currentRoom, err := m.JoinRoom(ctx, roomID, playerName)
+	currentRoom, err := m.GetRoom(ctx, roomID)
+	if err != nil {
+		return Player{}, Room{}, err
+	}
+
+	for _, player := range currentRoom.Players {
+		if player.UserID == userID && userID != "" {
+			return Player{}, Room{}, ErrUserAlreadyInRoom
+		}
+	}
+
+	player, joinedRoom, err := m.JoinRoom(ctx, roomID, playerName)
 	if err != nil {
 		return Player{}, Room{}, err
 	}
 
 	player.UserID = userID
 
-	for i := range currentRoom.Players {
-		if currentRoom.Players[i].ID == player.ID {
-			currentRoom.Players[i].UserID = userID
+	for i := range joinedRoom.Players {
+		if joinedRoom.Players[i].ID == player.ID {
+			joinedRoom.Players[i].UserID = userID
 			break
 		}
 	}
 
-	m.rooms[roomID] = currentRoom
+	m.rooms[roomID] = joinedRoom
 
-	return player, currentRoom, nil
+	return player, joinedRoom, nil
 }
 
 func (m *Manager) ToggleSelectedPlayer(

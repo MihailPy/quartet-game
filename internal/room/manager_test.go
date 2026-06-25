@@ -328,3 +328,28 @@ func TestStartRoomFailsWhenNotEnoughCards(t *testing.T) {
 		t.Fatalf("expected ErrNotEnoughCards, got %v", err)
 	}
 }
+
+func TestJoinRoomForUserReturnsErrorWhenUserAlreadyJoined(t *testing.T) {
+	manager := NewMemoryManager()
+
+	owner, currentRoom, err := manager.CreateRoomForUser(
+		context.Background(),
+		"Owner",
+		"user-1",
+	)
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	_ = owner
+
+	_, _, err = manager.JoinRoomForUser(
+		context.Background(),
+		currentRoom.ID,
+		"Owner Again",
+		"user-1",
+	)
+	if err != ErrUserAlreadyInRoom {
+		t.Fatalf("expected ErrUserAlreadyInRoom, got %v", err)
+	}
+}
