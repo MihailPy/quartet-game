@@ -40,7 +40,7 @@ func (r *UserHistoryRepository) SaveGameHistoryRecord(
 				winner_score,
 				winner_player_name,
 				duration_seconds,
-				player_results
+				player_results,
 				is_winner,
 				created_at
 		)
