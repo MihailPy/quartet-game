@@ -139,6 +139,14 @@ export type GameHistoryRecord = {
   winner_score: number
   winner_player_name: string
   duration_seconds: number
+  player_results: PlayerGameResult[]
   is_winner: boolean
   created_at: string
+}
+
+export type PlayerGameResult = {
+  player_id: string
+  player_name: string
+  score: number
+  is_winner: boolean
 }
