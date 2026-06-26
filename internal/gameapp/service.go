@@ -288,6 +288,17 @@ func (s *Service) saveGameHistory(
 		}
 	}
 
+	playerResults := make([]user.PlayerGameResult, 0, len(currentRoom.Players))
+
+	for _, player := range currentRoom.Players {
+		playerResults = append(playerResults, user.PlayerGameResult{
+			PlayerID:   string(player.ID),
+			PlayerName: player.Name,
+			Score:      scoreByPlayerID[string(player.ID)],
+			IsWinner:   winnerIDs[string(player.ID)],
+		})
+	}
+
 	now := time.Now().UTC()
 
 	for _, player := range currentRoom.Players {
@@ -310,6 +321,7 @@ func (s *Service) saveGameHistory(
 			WinnerScore:      winnerScore,
 			WinnerPlayerName: winnerPlayerName,
 			DurationSeconds:  0,
+			PlayerResults:    playerResults,
 			IsWinner:         winnerIDs[string(player.ID)],
 			CreatedAt:        now,
 		}
