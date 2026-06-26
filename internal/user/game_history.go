@@ -15,3 +15,10 @@ type GameHistoryRecord struct {
 	IsWinner         bool      `json:"is_winner"`
 	CreatedAt        time.Time `json:"created_at"`
 }
+
+type PlayerGameResult struct {
+	PlayerID   string `json:"player_id"`
+	PlayerName string `json:"player_name"`
+	Score      int    `json:"score"`
+	IsWinner   bool   `json:"is_winner"`
+}
