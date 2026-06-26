@@ -301,6 +301,11 @@ func (s *Service) saveGameHistory(
 	}
 
 	now := time.Now().UTC()
+	durationSeconds := 0
+
+	if !state.StartedAt.IsZero() {
+		durationSeconds = int(now.Sub(state.StartedAt).Seconds())
+	}
 
 	for _, player := range currentRoom.Players {
 		if player.UserID == "" {
@@ -321,7 +326,7 @@ func (s *Service) saveGameHistory(
 			Score:            scoreByPlayerID[string(player.ID)],
 			WinnerScore:      winnerScore,
 			WinnerPlayerName: winnerPlayerName,
-			DurationSeconds:  0,
+			DurationSeconds:  durationSeconds,
 			PlayerResults:    playerResults,
 			IsWinner:         winnerIDs[string(player.ID)],
 			CreatedAt:        now,
