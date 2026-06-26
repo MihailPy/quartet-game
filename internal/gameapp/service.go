@@ -112,6 +112,7 @@ func (s *Service) StartGame(ctx context.Context, currentRoom room.Room) (game.Ga
 	}
 
 	state.Status = game.GameStatusPlaying
+	state.StartedAt = time.Now().UTC()
 
 	if s.gameRepository != nil {
 		if err := s.gameRepository.SaveGame(ctx, currentRoom.ID, s.deckID, state); err != nil {
@@ -288,7 +289,23 @@ func (s *Service) saveGameHistory(
 		}
 	}
 
+	playerResults := make([]user.PlayerGameResult, 0, len(currentRoom.Players))
+
+	for _, player := range currentRoom.Players {
+		playerResults = append(playerResults, user.PlayerGameResult{
+			PlayerID:   string(player.ID),
+			PlayerName: player.Name,
+			Score:      scoreByPlayerID[string(player.ID)],
+			IsWinner:   winnerIDs[string(player.ID)],
+		})
+	}
+
 	now := time.Now().UTC()
+	durationSeconds := 0
+
+	if !state.StartedAt.IsZero() {
+		durationSeconds = int(now.Sub(state.StartedAt).Seconds())
+	}
 
 	for _, player := range currentRoom.Players {
 		if player.UserID == "" {
@@ -309,7 +326,8 @@ func (s *Service) saveGameHistory(
 			Score:            scoreByPlayerID[string(player.ID)],
 			WinnerScore:      winnerScore,
 			WinnerPlayerName: winnerPlayerName,
-			DurationSeconds:  0,
+			DurationSeconds:  durationSeconds,
+			PlayerResults:    playerResults,
 			IsWinner:         winnerIDs[string(player.ID)],
 			CreatedAt:        now,
 		}

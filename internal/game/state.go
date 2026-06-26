@@ -1,6 +1,9 @@
 package game
 
-import "errors"
+import (
+	"errors"
+	"time"
+)
 
 var ErrInvalidGameState = errors.New("invalid game state")
 
@@ -22,6 +25,7 @@ type GameState struct {
 	CurrentPlayerID PlayerID
 	Hands           map[PlayerID][]Card
 	Completed       map[PlayerID][]QuartetID
+	StartedAt       time.Time
 }
 
 func NewGameState(id GameID, deck Deck, players []Player) (GameState, error) {

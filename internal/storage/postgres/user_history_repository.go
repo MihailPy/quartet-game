@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 
 	"github.com/MihailPy/quartet-game/internal/user"
 )
@@ -21,7 +22,12 @@ func (r *UserHistoryRepository) SaveGameHistoryRecord(
 	ctx context.Context,
 	record user.GameHistoryRecord,
 ) error {
-	_, err := r.db.ExecContext(
+	playerResultsJSON, err := json.Marshal(record.PlayerResults)
+	if err != nil {
+		return err
+	}
+
+	_, err = r.db.ExecContext(
 		ctx,
 		`
 		INSERT INTO user_game_history (
@@ -34,10 +40,11 @@ func (r *UserHistoryRepository) SaveGameHistoryRecord(
 				winner_score,
 				winner_player_name,
 				duration_seconds,
+				player_results,
 				is_winner,
 				created_at
 		)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
 		`,
 		record.ID,
 		record.GameID,
@@ -48,6 +55,7 @@ func (r *UserHistoryRepository) SaveGameHistoryRecord(
 		record.WinnerScore,
 		record.WinnerPlayerName,
 		record.DurationSeconds,
+		playerResultsJSON,
 		record.IsWinner,
 		record.CreatedAt,
 	)
@@ -72,6 +80,7 @@ func (r *UserHistoryRepository) FindGameHistoryByUserID(
 				winner_score,
 				winner_player_name,
 				duration_seconds,
+				player_results,
 				is_winner,
 				created_at
 		FROM user_game_history
@@ -89,6 +98,7 @@ func (r *UserHistoryRepository) FindGameHistoryByUserID(
 
 	for rows.Next() {
 		var record user.GameHistoryRecord
+		var playerResultsJSON []byte
 
 		if err := rows.Scan(
 			&record.ID,
@@ -100,9 +110,14 @@ func (r *UserHistoryRepository) FindGameHistoryByUserID(
 			&record.WinnerScore,
 			&record.WinnerPlayerName,
 			&record.DurationSeconds,
+			&playerResultsJSON,
 			&record.IsWinner,
 			&record.CreatedAt,
 		); err != nil {
+			return nil, err
+		}
+
+		if err := json.Unmarshal(playerResultsJSON, &record.PlayerResults); err != nil {
 			return nil, err
 		}
 
