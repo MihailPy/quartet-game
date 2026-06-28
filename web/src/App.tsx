@@ -1472,15 +1472,17 @@ function App() {
           {isSessionRestored && isEntered && (
             <>
               <div className="layout-main-column">
-                <RoomPanel
-                  room={room}
-                  currentPlayerID={player?.id ?? null}
-                  onLeaveRoom={leaveRoom}
-                  onCopyRoomID={copyRoomID}
-                  onToggleSelectedPlayer={toggleSelectedPlayer}
-                  availableQuartets={availableQuartets}
-                  onToggleSelectedQuartet={toggleSelectedQuartet}
-                />
+                {room && (room.status === 'waiting' || room.status !== 'finished') && (
+                  <RoomPanel
+                    room={room}
+                    currentPlayerID={player?.id ?? null}
+                    onLeaveRoom={leaveRoom}
+                    onCopyRoomID={copyRoomID}
+                    onToggleSelectedPlayer={toggleSelectedPlayer}
+                    availableQuartets={availableQuartets}
+                    onToggleSelectedQuartet={toggleSelectedQuartet}
+                  />
+                )}
 
                 <PlayerHandPanel
                   player={player}
