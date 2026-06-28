@@ -902,10 +902,13 @@ code {
   display: grid;
   gap: 8px;
 }
+
 .request-choice-card {
   display: flex;
   align-items: center;
   gap: 12px;
+  width: 100%;
+  min-height: 64px;
   text-align: left;
   border: 1px solid #d0d7de;
   border-radius: 12px;
@@ -931,7 +934,12 @@ code {
 }
 
 .request-choice-card-avatar {
+  width: 42px;
+  height: 42px;
   border-radius: 999px;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
 }
 
 .request-choice-card-content {
