@@ -1538,6 +1538,17 @@ function App() {
                     gameFinished,
                   }}
                 />
+                {room && isGamePlaying && (
+                  <div className="panel">
+                    <button
+                      className="button secondary-button"
+                      type="button"
+                      onClick={leaveRoom}
+                    >
+                      Выйти из комнаты
+                    </button>
+                  </div>
+                )}
               </div>
             </>
           )}
