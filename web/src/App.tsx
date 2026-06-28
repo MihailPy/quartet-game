@@ -1526,17 +1526,28 @@ function App() {
               </div>
 
               <div className="layout-side-column">
-                <button
-                  className="button secondary-button"
-                  type="button"
-                  onClick={() => setIsPlayerPanelOpen(true)}
-                >
-                  {player.name.charAt(0).toUpperCase()}
-                </button>
+                {player && (
+                  <div className="player-avatar-fixed">
+                    <button
+                      className="player-avatar-button"
+                      type="button"
+                      onClick={() => setIsPlayerPanelOpen(true)}
+                      aria-label="Открыть игрока"
+                    >
+                      {player.name.charAt(0).toUpperCase()}
+                    </button>
+                  </div>
+                )}
 
                 {player && isPlayerPanelOpen && (
-                  <div className="modal-backdrop">
-                    <div className="modal">
+                  <div
+                    className="player-popover-backdrop"
+                    onClick={() => setIsPlayerPanelOpen(false)}
+                  >
+                    <div
+                      className="player-popover"
+                      onClick={(event) => event.stopPropagation()}
+                    >
                       <PlayerPanel player={player} />
 
                       <button
