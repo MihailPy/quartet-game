@@ -266,7 +266,7 @@ export function GamePanel({
             </div>
           )}
 
-          {player && publicGameState && !gameFinished && (
+          {player && publicGameState && !gameFinished && isCurrentPlayerTurn && (
             <div className="request-form">
               <h3>Запрос карты</h3>
 
