@@ -103,6 +103,7 @@ function App() {
   const [accountPlayerName, setAccountPlayerName] = useState('')
   const [nextPlayerName, setNextPlayerName] = useState('')
   const [editingQuartetID, setEditingQuartetID] = useState<string | null>(null)
+  const [isPlayerPanelOpen, setIsPlayerPanelOpen] = useState(false)
 
   function resetGameState() {
     updateDeck(null)
@@ -1520,7 +1521,29 @@ function App() {
               </div>
 
               <div className="layout-side-column">
-                <PlayerPanel player={player} />
+                <button
+                  className="button secondary-button"
+                  type="button"
+                  onClick={() => setIsPlayerPanelOpen(true)}
+                >
+                  {player.name.charAt(0).toUpperCase()}
+                </button>
+
+                {player && isPlayerPanelOpen && (
+                  <div className="modal-backdrop">
+                    <div className="modal">
+                      <PlayerPanel player={player} />
+
+                      <button
+                        className="button"
+                        type="button"
+                        onClick={() => setIsPlayerPanelOpen(false)}
+                      >
+                        Закрыть
+                      </button>
+                    </div>
+                  </div>
+                )}
 
                 <GameLogPanel
                   gameLog={gameLog}
