@@ -1396,6 +1396,7 @@ function App() {
   }, [user?.id])
 
   const isEntered = room !== null && player !== null && isCurrentPlayerInRoom()
+  const isGamePlaying = publicGameState?.status === 'playing'
 
   return (
     <main className="app">
@@ -1472,7 +1473,7 @@ function App() {
           {isSessionRestored && isEntered && (
             <>
               <div className="layout-main-column">
-                {room && (room.status === 'waiting' || room.status !== 'finished') && (
+                {room && !isGamePlaying && (
                   <RoomPanel
                     room={room}
                     currentPlayerID={player?.id ?? null}
