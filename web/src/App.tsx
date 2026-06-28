@@ -104,6 +104,7 @@ function App() {
   const [nextPlayerName, setNextPlayerName] = useState('')
   const [editingQuartetID, setEditingQuartetID] = useState<string | null>(null)
   const [isPlayerPanelOpen, setIsPlayerPanelOpen] = useState(false)
+  const hasGameStarted = publicGameState !== null
 
   function resetGameState() {
     updateDeck(null)
@@ -1486,38 +1487,42 @@ function App() {
                   />
                 )}
 
-                <PlayerHandPanel
-                  player={player}
-                  playerHand={playerHand}
-                  getQuartetTitle={getQuartetTitle}
-                />
+                {hasGameStarted && (
+                  <PlayerHandPanel
+                    player={player}
+                    playerHand={playerHand}
+                    getQuartetTitle={getQuartetTitle}
+                  />
+                )}
               </div>
 
               <div className="layout-center-column">
-                <GamePanel
-                  room={room}
-                  player={player}
-                  publicGameState={publicGameState}
-                  currentTurnPlayerID={currentTurnPlayerID}
-                  temporaryMessages={temporaryMessages}
-                  gameFinished={gameFinished}
-                  socketStatus={socketStatus}
-                  targetPlayerID={targetPlayerID}
-                  selectedCardID={selectedCardID}
-                  availableRequestCards={availableRequestCards}
-                  availableRequestCardsByQuartet={getAvailableRequestCardsByQuartet()}
-                  onTargetPlayerIDChange={setTargetPlayerID}
-                  onSelectedCardIDChange={setSelectedCardID}
-                  onRequestCard={requestCard}
-                  onStartGame={startGame}
-                  isRoomOwner={isRoomOwner()}
-                  canStartGame={canStartGame()}
-                  getPlayerName={getPlayerName}
-                  canRequestCard={canRequestCard}
-                  getRequestButtonText={getRequestButtonText}
-                  completedQuartets={getCompletedQuartets()}
-                  isStartingGame={isStartingGame}
-                />
+                {hasGameStarted && (
+                  <GamePanel
+                    room={room}
+                    player={player}
+                    publicGameState={publicGameState}
+                    currentTurnPlayerID={currentTurnPlayerID}
+                    temporaryMessages={temporaryMessages}
+                    gameFinished={gameFinished}
+                    socketStatus={socketStatus}
+                    targetPlayerID={targetPlayerID}
+                    selectedCardID={selectedCardID}
+                    availableRequestCards={availableRequestCards}
+                    availableRequestCardsByQuartet={getAvailableRequestCardsByQuartet()}
+                    onTargetPlayerIDChange={setTargetPlayerID}
+                    onSelectedCardIDChange={setSelectedCardID}
+                    onRequestCard={requestCard}
+                    onStartGame={startGame}
+                    isRoomOwner={isRoomOwner()}
+                    canStartGame={canStartGame()}
+                    getPlayerName={getPlayerName}
+                    canRequestCard={canRequestCard}
+                    getRequestButtonText={getRequestButtonText}
+                    completedQuartets={getCompletedQuartets()}
+                    isStartingGame={isStartingGame}
+                  />
+                )}
               </div>
 
               <div className="layout-side-column">
@@ -1545,22 +1550,24 @@ function App() {
                   </div>
                 )}
 
-                <GameLogPanel
-                  gameLog={gameLog}
-                  events={events}
-                  showDebugEvents={showDebugEvents}
-                  onToggleDebugEvents={() => setShowDebugEvents((current) => !current)}
-                  isDevMode={isDevMode}
-                  diagnostics={{
-                    room,
-                    player,
-                    socketStatus,
-                    publicGameState,
-                    playerHand,
-                    currentTurnPlayerID,
-                    gameFinished,
-                  }}
-                />
+                {hasGameStarted && (
+                  <GameLogPanel
+                    gameLog={gameLog}
+                    events={events}
+                    showDebugEvents={showDebugEvents}
+                    onToggleDebugEvents={() => setShowDebugEvents((current) => !current)}
+                    isDevMode={isDevMode}
+                    diagnostics={{
+                      room,
+                      player,
+                      socketStatus,
+                      publicGameState,
+                      playerHand,
+                      currentTurnPlayerID,
+                      gameFinished,
+                    }}
+                  />
+                )}
                 {room && isGamePlaying && (
                   <div className="panel">
                     <button
