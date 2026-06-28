@@ -1488,7 +1488,7 @@ function App() {
                   />
                 )}
 
-                {hasGameStarted && (
+                {hasGameStarted && room && isGamePlaying && (
                   <PlayerHandPanel
                     player={player}
                     playerHand={playerHand}
