@@ -899,8 +899,23 @@ code {
 }
 
 .request-card-group {
+  padding: 12px;
+  border-radius: 16px;
+  background: rgba(148, 163, 184, 0.1);
+}
+
+.request-card-group > strong {
+  display: block;
+  margin-bottom: 10px;
+}
+
+.request-choice-card-image-placeholder {
+  width: 42px;
+  height: 56px;
+  border-radius: 10px;
   display: grid;
-  gap: 8px;
+  place-items: center;
+  font-size: 24px;
 }
 
 .request-choice-card {
