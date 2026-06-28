@@ -105,6 +105,7 @@ function App() {
   const [editingQuartetID, setEditingQuartetID] = useState<string | null>(null)
   const [isPlayerPanelOpen, setIsPlayerPanelOpen] = useState(false)
   const hasGameStarted = publicGameState !== null
+  const [isGameLogOpen, setIsGameLogOpen] = useState(false)
 
   function resetGameState() {
     updateDeck(null)
@@ -1497,32 +1498,30 @@ function App() {
               </div>
 
               <div className="layout-center-column">
-                {hasGameStarted && (
-                  <GamePanel
-                    room={room}
-                    player={player}
-                    publicGameState={publicGameState}
-                    currentTurnPlayerID={currentTurnPlayerID}
-                    temporaryMessages={temporaryMessages}
-                    gameFinished={gameFinished}
-                    socketStatus={socketStatus}
-                    targetPlayerID={targetPlayerID}
-                    selectedCardID={selectedCardID}
-                    availableRequestCards={availableRequestCards}
-                    availableRequestCardsByQuartet={getAvailableRequestCardsByQuartet()}
-                    onTargetPlayerIDChange={setTargetPlayerID}
-                    onSelectedCardIDChange={setSelectedCardID}
-                    onRequestCard={requestCard}
-                    onStartGame={startGame}
-                    isRoomOwner={isRoomOwner()}
-                    canStartGame={canStartGame()}
-                    getPlayerName={getPlayerName}
-                    canRequestCard={canRequestCard}
-                    getRequestButtonText={getRequestButtonText}
-                    completedQuartets={getCompletedQuartets()}
-                    isStartingGame={isStartingGame}
-                  />
-                )}
+                <GamePanel
+                  room={room}
+                  player={player}
+                  publicGameState={publicGameState}
+                  currentTurnPlayerID={currentTurnPlayerID}
+                  temporaryMessages={temporaryMessages}
+                  gameFinished={gameFinished}
+                  socketStatus={socketStatus}
+                  targetPlayerID={targetPlayerID}
+                  selectedCardID={selectedCardID}
+                  availableRequestCards={availableRequestCards}
+                  availableRequestCardsByQuartet={getAvailableRequestCardsByQuartet()}
+                  onTargetPlayerIDChange={setTargetPlayerID}
+                  onSelectedCardIDChange={setSelectedCardID}
+                  onRequestCard={requestCard}
+                  onStartGame={startGame}
+                  isRoomOwner={isRoomOwner()}
+                  canStartGame={canStartGame()}
+                  getPlayerName={getPlayerName}
+                  canRequestCard={canRequestCard}
+                  getRequestButtonText={getRequestButtonText}
+                  completedQuartets={getCompletedQuartets()}
+                  isStartingGame={isStartingGame}
+                />
               </div>
 
               <div className="layout-side-column">
@@ -1549,7 +1548,23 @@ function App() {
                       onClick={(event) => event.stopPropagation()}
                     >
                       <PlayerPanel player={player} />
+                      <button
+                        className="button secondary-button"
+                        type="button"
+                        onClick={() => setIsGameLogOpen((current) => !current)}
+                      >
+                        {isGameLogOpen ? 'Скрыть журнал' : 'Показать журнал'}
+                      </button>
 
+                      {room && (
+                        <button
+                          className="button secondary-button"
+                          type="button"
+                          onClick={leaveRoom}
+                        >
+                          Выйти из комнаты
+                        </button>
+                      )}
                       <button
                         className="button"
                         type="button"
@@ -1561,7 +1576,7 @@ function App() {
                   </div>
                 )}
 
-                {hasGameStarted && (
+                {isGameLogOpen && (
                   <GameLogPanel
                     gameLog={gameLog}
                     events={events}
@@ -1578,17 +1593,6 @@ function App() {
                       gameFinished,
                     }}
                   />
-                )}
-                {room && isGamePlaying && (
-                  <div className="panel">
-                    <button
-                      className="button secondary-button"
-                      type="button"
-                      onClick={leaveRoom}
-                    >
-                      Выйти из комнаты
-                    </button>
-                  </div>
                 )}
               </div>
             </>
