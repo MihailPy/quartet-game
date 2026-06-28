@@ -89,6 +89,8 @@ export function GamePanel({
     ) ?? []
 
   const isCurrentPlayerTurn = player !== null && currentTurnPlayerID === player.id
+  const turnPlayerID = currentTurnPlayerID || publicGameState?.current_player_id || ''
+  const turnPlayerName = turnPlayerID ? getPlayerName(turnPlayerID) : ''
 
   const hasAvailableRequestCards = availableRequestCards.length > 0
   const hasRequestTargetPlayers = requestTargetPlayers.length > 0
@@ -169,33 +171,21 @@ export function GamePanel({
 
       {publicGameState && (
         <div className="game-info">
-          <p>
-            <strong>Статус:</strong> {publicGameState.status}
-          </p>
+          <div className={isCurrentPlayerTurn ? 'turn-banner my-turn' : 'turn-banner'}>
+            <strong>
+              {isCurrentPlayerTurn
+                ? 'Ваш ход'
+                : turnPlayerName
+                  ? `Ход игрока ${turnPlayerName}`
+                  : 'Ожидаем ход'}
+            </strong>
 
-          <p>
-            <strong>Сейчас ходит:</strong>
-          </p>
-
-          {(() => {
-            const turnPlayerID =
-              currentTurnPlayerID || publicGameState.current_player_id || ''
-
-            if (!turnPlayerID) {
-              return <p>Пока неизвестно.</p>
-            }
-
-            return (
-              <div>
-                <p className="turn-player-name">
-                  {getPlayerName(turnPlayerID)}
-                  {player?.id === turnPlayerID ? ' — твой ход' : ''}
-                </p>
-
-                <small className="technical-id">{turnPlayerID}</small>
-              </div>
-            )
-          })()}
+            <p className="form-hint">
+              {isCurrentPlayerTurn
+                ? 'Выберите игрока и карту, чтобы сделать запрос.'
+                : 'Ожидайте действия другого игрока.'}
+            </p>
+          </div>
 
           {temporaryMessages.length > 0 && (
             <div className="temporary-messages">
