@@ -89,6 +89,8 @@ export function GamePanel({
     ) ?? []
 
   const isCurrentPlayerTurn = player !== null && currentTurnPlayerID === player.id
+  const turnPlayerID = currentTurnPlayerID || publicGameState?.current_player_id || ''
+  const turnPlayerName = turnPlayerID ? getPlayerName(turnPlayerID) : ''
 
   const hasAvailableRequestCards = availableRequestCards.length > 0
   const hasRequestTargetPlayers = requestTargetPlayers.length > 0
@@ -169,34 +171,23 @@ export function GamePanel({
 
       {publicGameState && (
         <div className="game-info">
-          <p>
-            <strong>Статус:</strong> {publicGameState.status}
-          </p>
+          {!gameFinished && (
+            <div className={isCurrentPlayerTurn ? 'turn-banner my-turn' : 'turn-banner'}>
+              <strong>
+                {isCurrentPlayerTurn
+                  ? 'Ваш ход'
+                  : turnPlayerName
+                    ? `Ход игрока ${turnPlayerName}`
+                    : 'Ожидаем ход'}
+              </strong>
 
-          <p>
-            <strong>Сейчас ходит:</strong>
-          </p>
-
-          {(() => {
-            const turnPlayerID =
-              currentTurnPlayerID || publicGameState.current_player_id || ''
-
-            if (!turnPlayerID) {
-              return <p>Пока неизвестно.</p>
-            }
-
-            return (
-              <div>
-                <p className="turn-player-name">
-                  {getPlayerName(turnPlayerID)}
-                  {player?.id === turnPlayerID ? ' — твой ход' : ''}
-                </p>
-
-                <small className="technical-id">{turnPlayerID}</small>
-              </div>
-            )
-          })()}
-
+              <p className="form-hint">
+                {isCurrentPlayerTurn
+                  ? 'Выберите игрока и карту, чтобы сделать запрос.'
+                  : 'Ожидайте действия другого игрока.'}
+              </p>
+            </div>
+          )}
           {temporaryMessages.length > 0 && (
             <div className="temporary-messages">
               {temporaryMessages.map((message) => (
@@ -207,24 +198,29 @@ export function GamePanel({
             </div>
           )}
 
-          <h3>Игроки</h3>
+          {!gameFinished && (
+            <>
 
-          {publicGameState.players.map((gamePlayer) => (
-            <div
-              className={
-                gamePlayer.id === currentTurnPlayerID
-                  ? 'player-row player-row-active'
-                  : 'player-row'
-              }
-              key={gamePlayer.id}
-            >
-              <span>
-                {gamePlayer.name}
-                {player?.id === gamePlayer.id ? ' (ты)' : ''}
-              </span>
-              <span>{gamePlayer.card_count} карт</span>
-            </div>
-          ))}
+              <h3>Игроки</h3>
+
+              {publicGameState.players.map((gamePlayer) => (
+                <div
+                  className={
+                    gamePlayer.id === currentTurnPlayerID
+                      ? 'player-row player-row-active'
+                      : 'player-row'
+                  }
+                  key={gamePlayer.id}
+                >
+                  <span>
+                    {gamePlayer.name}
+                    {player?.id === gamePlayer.id ? ' (ты)' : ''}
+                  </span>
+                  <span>{gamePlayer.card_count} карт</span>
+                </div>
+              ))}
+            </>
+          )}
 
           {completedQuartets.length > 0 && (
             <div className="completed-quartets-box">
@@ -247,6 +243,7 @@ export function GamePanel({
           {gameFinished && (
             <div className="game-finished-box">
               <h3>Игра завершена</h3>
+              <p className="form-hint">Итоговые результаты партии.</p>
 
               <div className="winners-box">
                 <strong>{winnerLabel}:</strong>
@@ -276,7 +273,7 @@ export function GamePanel({
             </div>
           )}
 
-          {player && publicGameState && !gameFinished && (
+          {player && publicGameState && !gameFinished && isCurrentPlayerTurn && (
             <div className="request-form">
               <h3>Запрос карты</h3>
 

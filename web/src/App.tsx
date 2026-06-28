@@ -103,6 +103,9 @@ function App() {
   const [accountPlayerName, setAccountPlayerName] = useState('')
   const [nextPlayerName, setNextPlayerName] = useState('')
   const [editingQuartetID, setEditingQuartetID] = useState<string | null>(null)
+  const [isPlayerPanelOpen, setIsPlayerPanelOpen] = useState(false)
+  const hasGameStarted = publicGameState !== null
+  const [isGameLogOpen, setIsGameLogOpen] = useState(false)
 
   function resetGameState() {
     updateDeck(null)
@@ -1396,6 +1399,7 @@ function App() {
   }, [user?.id])
 
   const isEntered = room !== null && player !== null && isCurrentPlayerInRoom()
+  const isGamePlaying = publicGameState?.status === 'playing'
 
   return (
     <main className="app">
@@ -1472,21 +1476,25 @@ function App() {
           {isSessionRestored && isEntered && (
             <>
               <div className="layout-main-column">
-                <RoomPanel
-                  room={room}
-                  currentPlayerID={player?.id ?? null}
-                  onLeaveRoom={leaveRoom}
-                  onCopyRoomID={copyRoomID}
-                  onToggleSelectedPlayer={toggleSelectedPlayer}
-                  availableQuartets={availableQuartets}
-                  onToggleSelectedQuartet={toggleSelectedQuartet}
-                />
+                {room && !isGamePlaying && (
+                  <RoomPanel
+                    room={room}
+                    currentPlayerID={player?.id ?? null}
+                    onLeaveRoom={leaveRoom}
+                    onCopyRoomID={copyRoomID}
+                    onToggleSelectedPlayer={toggleSelectedPlayer}
+                    availableQuartets={availableQuartets}
+                    onToggleSelectedQuartet={toggleSelectedQuartet}
+                  />
+                )}
 
-                <PlayerHandPanel
-                  player={player}
-                  playerHand={playerHand}
-                  getQuartetTitle={getQuartetTitle}
-                />
+                {hasGameStarted && room && isGamePlaying && (
+                  <PlayerHandPanel
+                    player={player}
+                    playerHand={playerHand}
+                    getQuartetTitle={getQuartetTitle}
+                  />
+                )}
               </div>
 
               <div className="layout-center-column">
@@ -1517,24 +1525,75 @@ function App() {
               </div>
 
               <div className="layout-side-column">
-                <PlayerPanel player={player} />
+                {player && (
+                  <div className="player-avatar-fixed">
+                    <button
+                      className="player-avatar-button"
+                      type="button"
+                      onClick={() => setIsPlayerPanelOpen(true)}
+                      aria-label="Открыть игрока"
+                    >
+                      {player.name.charAt(0).toUpperCase()}
+                    </button>
+                  </div>
+                )}
 
-                <GameLogPanel
-                  gameLog={gameLog}
-                  events={events}
-                  showDebugEvents={showDebugEvents}
-                  onToggleDebugEvents={() => setShowDebugEvents((current) => !current)}
-                  isDevMode={isDevMode}
-                  diagnostics={{
-                    room,
-                    player,
-                    socketStatus,
-                    publicGameState,
-                    playerHand,
-                    currentTurnPlayerID,
-                    gameFinished,
-                  }}
-                />
+                {player && isPlayerPanelOpen && (
+                  <div
+                    className="player-popover-backdrop"
+                    onClick={() => setIsPlayerPanelOpen(false)}
+                  >
+                    <div
+                      className="player-popover"
+                      onClick={(event) => event.stopPropagation()}
+                    >
+                      <PlayerPanel player={player} />
+                      <button
+                        className="button secondary-button"
+                        type="button"
+                        onClick={() => setIsGameLogOpen((current) => !current)}
+                      >
+                        {isGameLogOpen ? 'Скрыть журнал' : 'Показать журнал'}
+                      </button>
+
+                      {room && (
+                        <button
+                          className="button secondary-button"
+                          type="button"
+                          onClick={leaveRoom}
+                        >
+                          Выйти из комнаты
+                        </button>
+                      )}
+                      <button
+                        className="button"
+                        type="button"
+                        onClick={() => setIsPlayerPanelOpen(false)}
+                      >
+                        Закрыть
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {isGameLogOpen && (
+                  <GameLogPanel
+                    gameLog={gameLog}
+                    events={events}
+                    showDebugEvents={showDebugEvents}
+                    onToggleDebugEvents={() => setShowDebugEvents((current) => !current)}
+                    isDevMode={isDevMode}
+                    diagnostics={{
+                      room,
+                      player,
+                      socketStatus,
+                      publicGameState,
+                      playerHand,
+                      currentTurnPlayerID,
+                      gameFinished,
+                    }}
+                  />
+                )}
               </div>
             </>
           )}
