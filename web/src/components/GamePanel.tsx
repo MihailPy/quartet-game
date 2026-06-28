@@ -243,6 +243,7 @@ export function GamePanel({
           {gameFinished && (
             <div className="game-finished-box">
               <h3>Игра завершена</h3>
+              <p className="form-hint">Итоговые результаты партии.</p>
 
               <div className="winners-box">
                 <strong>{winnerLabel}:</strong>
