@@ -305,6 +305,18 @@ function App() {
       const message =
         err instanceof Error ? err.message : 'Не удалось начать игру.'
 
+      if (message.trim().toLowerCase() === 'room already started' && room) {
+        await loadDeck(room.id)
+        await loadGameState(room.id)
+
+        if (player) {
+          await loadPlayerHand(room.id, player.id)
+        }
+
+        setError('')
+        return
+      }
+
       setError(getStartGameErrorMessage(message))
     } finally {
       setIsStartingGame(false)
