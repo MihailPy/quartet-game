@@ -217,6 +217,46 @@ func (s *Service) RequestCard(
 		return game.RequestCardResult{}, game.GameState{}, err
 	}
 
+	if err := s.saveGameEvent(ctx, game.GameEvent{
+		ID:       generateHistoryID(),
+		GameID:   state.ID,
+		RoomID:   string(roomID),
+		Type:     game.GameEventTypeCardRequested,
+		ActorID:  game.PlayerID(actorID),
+		TargetID: game.PlayerID(targetPlayerID),
+		Payload: map[string]any{
+			"card_id":    string(cardID),
+			"card_title": result.RequestedCard.Title,
+			"quartet_id": string(result.RequestedCard.QuartetID),
+		},
+		CreatedAt: time.Now().UTC(),
+	}); err != nil {
+		return game.RequestCardResult{}, game.GameState{}, err
+	}
+
+	eventType := game.GameEventTypeCardRequestFailed
+	if result.Success {
+		eventType = game.GameEventTypeCardRequestSucceeded
+	}
+
+	if err := s.saveGameEvent(ctx, game.GameEvent{
+		ID:       generateHistoryID(),
+		GameID:   state.ID,
+		RoomID:   string(roomID),
+		Type:     eventType,
+		ActorID:  game.PlayerID(actorID),
+		TargetID: game.PlayerID(targetPlayerID),
+		Payload: map[string]any{
+			"card_id":        string(cardID),
+			"card_title":     result.RequestedCard.Title,
+			"quartet_id":     string(result.RequestedCard.QuartetID),
+			"next_player_id": string(result.NextPlayerID),
+		},
+		CreatedAt: time.Now().UTC(),
+	}); err != nil {
+		return game.RequestCardResult{}, game.GameState{}, err
+	}
+
 	if state.Status == game.GameStatusFinished && s.gameRepository != nil {
 		gameResult := game.CalculateGameResult(&state)
 
