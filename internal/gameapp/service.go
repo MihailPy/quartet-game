@@ -121,6 +121,17 @@ func (s *Service) StartGame(ctx context.Context, currentRoom room.Room) (game.Ga
 	state.Status = game.GameStatusPlaying
 	state.StartedAt = time.Now().UTC()
 
+	if err := s.saveGameEvent(ctx, game.GameEvent{
+		ID:        generateHistoryID(),
+		GameID:    state.ID,
+		RoomID:    string(currentRoom.ID),
+		Type:      game.GameEventTypeGameStarted,
+		Payload:   map[string]any{},
+		CreatedAt: time.Now().UTC(),
+	}); err != nil {
+		return game.GameState{}, err
+	}
+
 	if s.gameRepository != nil {
 		if err := s.gameRepository.SaveGame(ctx, currentRoom.ID, s.deckID, state); err != nil {
 			return game.GameState{}, err
@@ -345,6 +356,17 @@ func (s *Service) saveGameHistory(
 	}
 
 	return nil
+}
+
+func (s *Service) saveGameEvent(
+	ctx context.Context,
+	event game.GameEvent,
+) error {
+	if s.gameEventRepository == nil {
+		return nil
+	}
+
+	return s.gameEventRepository.SaveGameEvent(ctx, event)
 }
 
 func generateHistoryID() string {
