@@ -294,6 +294,26 @@ func (s *Service) RequestCard(
 	if state.Status == game.GameStatusFinished && s.gameRepository != nil {
 		gameResult := game.CalculateGameResult(&state)
 
+		winnerIDs := make([]string, 0, len(gameResult.Winners))
+
+		for _, winnerID := range gameResult.Winners {
+			winnerIDs = append(winnerIDs, string(winnerID))
+		}
+
+		if err := s.saveGameEvent(ctx, game.GameEvent{
+			ID:     generateHistoryID(),
+			GameID: state.ID,
+			RoomID: string(roomID),
+			Type:   game.GameEventTypeGameFinished,
+			Payload: map[string]any{
+				"winner_ids": winnerIDs,
+				"scores":     gameResult.Scores,
+			},
+			CreatedAt: time.Now().UTC(),
+		}); err != nil {
+			return game.RequestCardResult{}, game.GameState{}, err
+		}
+
 		if err := s.saveGameHistory(ctx, roomID, state, gameResult); err != nil {
 			return game.RequestCardResult{}, game.GameState{}, err
 		}
