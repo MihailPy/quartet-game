@@ -60,12 +60,15 @@ func (r *fakeGameRepository) UpdateGameState(
 	return nil
 }
 
-type fakeGameEventRepository struct{}
+type fakeGameEventRepository struct {
+	events []game.GameEvent
+}
 
 func (r *fakeGameEventRepository) SaveGameEvent(
 	ctx context.Context,
 	event game.GameEvent,
 ) error {
+	r.events = append(r.events, event)
 	return nil
 }
 
