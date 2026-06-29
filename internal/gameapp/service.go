@@ -257,6 +257,23 @@ func (s *Service) RequestCard(
 		return game.RequestCardResult{}, game.GameState{}, err
 	}
 
+	for _, quartetID := range result.CompletedQuartets {
+		if err := s.saveGameEvent(ctx, game.GameEvent{
+			ID:       generateHistoryID(),
+			GameID:   state.ID,
+			RoomID:   string(roomID),
+			Type:     game.GameEventTypeQuartetCompleted,
+			ActorID:  game.PlayerID(actorID),
+			TargetID: "",
+			Payload: map[string]any{
+				"quartet_id": string(quartetID),
+			},
+			CreatedAt: time.Now().UTC(),
+		}); err != nil {
+			return game.RequestCardResult{}, game.GameState{}, err
+		}
+	}
+
 	if state.Status == game.GameStatusFinished && s.gameRepository != nil {
 		gameResult := game.CalculateGameResult(&state)
 
