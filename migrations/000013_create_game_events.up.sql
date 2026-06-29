@@ -1,5 +1,5 @@
 CREATE TABLE game_events (
-    id UUID PRIMARY KEY,
+    id TEXT PRIMARY KEY,
     game_id UUID NOT NULL,
     room_id UUID NOT NULL,
     type TEXT NOT NULL,
