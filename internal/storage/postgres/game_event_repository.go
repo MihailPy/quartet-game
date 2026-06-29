@@ -46,8 +46,8 @@ func (r *GameEventRepository) SaveGameEvent(
 		event.GameID,
 		event.RoomID,
 		event.Type,
-		event.ActorID,
-		event.TargetID,
+		nullablePlayerID(event.ActorID),
+		nullablePlayerID(event.TargetID),
 		payloadJSON,
 		event.CreatedAt,
 	)
@@ -101,4 +101,12 @@ func (r *GameEventRepository) FindGameEventsByGameID(
 	}
 
 	return events, rows.Err()
+}
+
+func nullablePlayerID(playerID game.PlayerID) any {
+	if playerID == "" {
+		return nil
+	}
+
+	return string(playerID)
 }
