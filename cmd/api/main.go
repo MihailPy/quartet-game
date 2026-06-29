@@ -40,13 +40,14 @@ func main() {
 	roomManager := room.NewManager(roomRepository, maxPlayers)
 	userRepository := postgres.NewUserRepository(db)
 	userHistoryRepository := postgres.NewUserHistoryRepository(db)
-
+	gameEventRepository := postgres.NewGameEventRepository(db)
 	gameRepository := postgres.NewGameRepository(db)
 
 	gameService := gameapp.NewService(
 		deckService,
 		gameRepository,
 		userHistoryRepository,
+		gameEventRepository,
 		game.DeckID(cfg.DefaultDeckID),
 	)
 

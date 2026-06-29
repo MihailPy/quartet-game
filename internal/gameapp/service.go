@@ -29,11 +29,16 @@ type UserHistoryRepository interface {
 	SaveGameHistoryRecord(ctx context.Context, record user.GameHistoryRecord) error
 }
 
+type GameEventRepository interface {
+	SaveGameEvent(ctx context.Context, event game.GameEvent) error
+}
+
 type Service struct {
 	mu                    sync.Mutex
 	deckService           DeckService
 	gameRepository        GameRepository
 	userHistoryRepository UserHistoryRepository
+	gameEventRepository   GameEventRepository
 	deckID                game.DeckID
 	games                 map[room.RoomID]game.GameState
 	rooms                 map[room.RoomID]room.Room
@@ -43,12 +48,14 @@ func NewService(
 	deckService DeckService,
 	gameRepository GameRepository,
 	userHistoryRepository UserHistoryRepository,
+	gameEventRepository GameEventRepository,
 	deckID game.DeckID,
 ) *Service {
 	return &Service{
 		deckService:           deckService,
 		gameRepository:        gameRepository,
 		userHistoryRepository: userHistoryRepository,
+		gameEventRepository:   gameEventRepository,
 		deckID:                deckID,
 		games:                 make(map[room.RoomID]game.GameState),
 		rooms:                 make(map[room.RoomID]room.Room),
