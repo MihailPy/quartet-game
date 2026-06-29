@@ -274,6 +274,23 @@ func (s *Service) RequestCard(
 		}
 	}
 
+	if result.NextPlayerID != "" {
+		if err := s.saveGameEvent(ctx, game.GameEvent{
+			ID:       generateHistoryID(),
+			GameID:   state.ID,
+			RoomID:   string(roomID),
+			Type:     game.GameEventTypeTurnChanged,
+			ActorID:  game.PlayerID(actorID),
+			TargetID: game.PlayerID(result.NextPlayerID),
+			Payload: map[string]any{
+				"next_player_id": string(result.NextPlayerID),
+			},
+			CreatedAt: time.Now().UTC(),
+		}); err != nil {
+			return game.RequestCardResult{}, game.GameState{}, err
+		}
+	}
+
 	if state.Status == game.GameStatusFinished && s.gameRepository != nil {
 		gameResult := game.CalculateGameResult(&state)
 
