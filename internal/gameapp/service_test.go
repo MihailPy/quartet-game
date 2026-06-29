@@ -60,6 +60,18 @@ func (r *fakeGameRepository) UpdateGameState(
 	return nil
 }
 
+type fakeGameEventRepository struct {
+	events []game.GameEvent
+}
+
+func (r *fakeGameEventRepository) SaveGameEvent(
+	ctx context.Context,
+	event game.GameEvent,
+) error {
+	r.events = append(r.events, event)
+	return nil
+}
+
 func TestGetGameStateRestoresFinishedGameFromRepository(t *testing.T) {
 	ctx := context.Background()
 	roomID := room.RoomID("room_1")
@@ -83,7 +95,7 @@ func TestGetGameStateRestoresFinishedGameFromRepository(t *testing.T) {
 		},
 	}
 
-	service := NewService(nil, repository, nil, "deck_1")
+	service := NewService(nil, repository, nil, &fakeGameEventRepository{}, "deck_1")
 
 	restoredState, ok := service.GetGameState(ctx, roomID)
 	if !ok {
@@ -128,7 +140,7 @@ func TestGetGameStateReturnsCachedGameBeforeRepository(t *testing.T) {
 		err: errors.New("repository should not be called"),
 	}
 
-	service := NewService(nil, repository, nil, "deck_1")
+	service := NewService(nil, repository, nil, &fakeGameEventRepository{}, "deck_1")
 
 	cachedState := game.GameState{
 		ID:     game.GameID(roomID),
@@ -166,7 +178,7 @@ func TestGetGameStateReturnsFalseWhenRepositoryCannotFindGame(t *testing.T) {
 		err: errors.New("game not found"),
 	}
 
-	service := NewService(nil, repository, nil, "deck_1")
+	service := NewService(nil, repository, nil, &fakeGameEventRepository{}, "deck_1")
 
 	_, ok := service.GetGameState(ctx, roomID)
 	if ok {

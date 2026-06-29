@@ -29,11 +29,16 @@ type UserHistoryRepository interface {
 	SaveGameHistoryRecord(ctx context.Context, record user.GameHistoryRecord) error
 }
 
+type GameEventRepository interface {
+	SaveGameEvent(ctx context.Context, event game.GameEvent) error
+}
+
 type Service struct {
 	mu                    sync.Mutex
 	deckService           DeckService
 	gameRepository        GameRepository
 	userHistoryRepository UserHistoryRepository
+	gameEventRepository   GameEventRepository
 	deckID                game.DeckID
 	games                 map[room.RoomID]game.GameState
 	rooms                 map[room.RoomID]room.Room
@@ -43,12 +48,14 @@ func NewService(
 	deckService DeckService,
 	gameRepository GameRepository,
 	userHistoryRepository UserHistoryRepository,
+	gameEventRepository GameEventRepository,
 	deckID game.DeckID,
 ) *Service {
 	return &Service{
 		deckService:           deckService,
 		gameRepository:        gameRepository,
 		userHistoryRepository: userHistoryRepository,
+		gameEventRepository:   gameEventRepository,
 		deckID:                deckID,
 		games:                 make(map[room.RoomID]game.GameState),
 		rooms:                 make(map[room.RoomID]room.Room),
@@ -118,6 +125,17 @@ func (s *Service) StartGame(ctx context.Context, currentRoom room.Room) (game.Ga
 		if err := s.gameRepository.SaveGame(ctx, currentRoom.ID, s.deckID, state); err != nil {
 			return game.GameState{}, err
 		}
+	}
+
+	if err := s.saveGameEvent(ctx, game.GameEvent{
+		ID:        generateHistoryID(),
+		GameID:    state.ID,
+		RoomID:    string(currentRoom.ID),
+		Type:      game.GameEventTypeGameStarted,
+		Payload:   map[string]any{},
+		CreatedAt: time.Now().UTC(),
+	}); err != nil {
+		return game.GameState{}, err
 	}
 
 	s.mu.Lock()
@@ -199,8 +217,102 @@ func (s *Service) RequestCard(
 		return game.RequestCardResult{}, game.GameState{}, err
 	}
 
+	if err := s.saveGameEvent(ctx, game.GameEvent{
+		ID:       generateHistoryID(),
+		GameID:   state.ID,
+		RoomID:   string(roomID),
+		Type:     game.GameEventTypeCardRequested,
+		ActorID:  game.PlayerID(actorID),
+		TargetID: game.PlayerID(targetPlayerID),
+		Payload: map[string]any{
+			"card_id":    string(cardID),
+			"card_title": result.RequestedCard.Title,
+			"quartet_id": string(result.RequestedCard.QuartetID),
+		},
+		CreatedAt: time.Now().UTC(),
+	}); err != nil {
+		return game.RequestCardResult{}, game.GameState{}, err
+	}
+
+	eventType := game.GameEventTypeCardRequestFailed
+	if result.Success {
+		eventType = game.GameEventTypeCardRequestSucceeded
+	}
+
+	if err := s.saveGameEvent(ctx, game.GameEvent{
+		ID:       generateHistoryID(),
+		GameID:   state.ID,
+		RoomID:   string(roomID),
+		Type:     eventType,
+		ActorID:  game.PlayerID(actorID),
+		TargetID: game.PlayerID(targetPlayerID),
+		Payload: map[string]any{
+			"card_id":        string(cardID),
+			"card_title":     result.RequestedCard.Title,
+			"quartet_id":     string(result.RequestedCard.QuartetID),
+			"next_player_id": string(result.NextPlayerID),
+		},
+		CreatedAt: time.Now().UTC(),
+	}); err != nil {
+		return game.RequestCardResult{}, game.GameState{}, err
+	}
+
+	for _, quartetID := range result.CompletedQuartets {
+		if err := s.saveGameEvent(ctx, game.GameEvent{
+			ID:       generateHistoryID(),
+			GameID:   state.ID,
+			RoomID:   string(roomID),
+			Type:     game.GameEventTypeQuartetCompleted,
+			ActorID:  game.PlayerID(actorID),
+			TargetID: "",
+			Payload: map[string]any{
+				"quartet_id": string(quartetID),
+			},
+			CreatedAt: time.Now().UTC(),
+		}); err != nil {
+			return game.RequestCardResult{}, game.GameState{}, err
+		}
+	}
+
+	if result.NextPlayerID != "" {
+		if err := s.saveGameEvent(ctx, game.GameEvent{
+			ID:       generateHistoryID(),
+			GameID:   state.ID,
+			RoomID:   string(roomID),
+			Type:     game.GameEventTypeTurnChanged,
+			ActorID:  game.PlayerID(actorID),
+			TargetID: game.PlayerID(result.NextPlayerID),
+			Payload: map[string]any{
+				"next_player_id": string(result.NextPlayerID),
+			},
+			CreatedAt: time.Now().UTC(),
+		}); err != nil {
+			return game.RequestCardResult{}, game.GameState{}, err
+		}
+	}
+
 	if state.Status == game.GameStatusFinished && s.gameRepository != nil {
 		gameResult := game.CalculateGameResult(&state)
+
+		winnerIDs := make([]string, 0, len(gameResult.Winners))
+
+		for _, winnerID := range gameResult.Winners {
+			winnerIDs = append(winnerIDs, string(winnerID))
+		}
+
+		if err := s.saveGameEvent(ctx, game.GameEvent{
+			ID:     generateHistoryID(),
+			GameID: state.ID,
+			RoomID: string(roomID),
+			Type:   game.GameEventTypeGameFinished,
+			Payload: map[string]any{
+				"winner_ids": winnerIDs,
+				"scores":     gameResult.Scores,
+			},
+			CreatedAt: time.Now().UTC(),
+		}); err != nil {
+			return game.RequestCardResult{}, game.GameState{}, err
+		}
 
 		if err := s.saveGameHistory(ctx, roomID, state, gameResult); err != nil {
 			return game.RequestCardResult{}, game.GameState{}, err
@@ -338,6 +450,17 @@ func (s *Service) saveGameHistory(
 	}
 
 	return nil
+}
+
+func (s *Service) saveGameEvent(
+	ctx context.Context,
+	event game.GameEvent,
+) error {
+	if s.gameEventRepository == nil {
+		return nil
+	}
+
+	return s.gameEventRepository.SaveGameEvent(ctx, event)
 }
 
 func generateHistoryID() string {
