@@ -1,4 +1,5 @@
 import type {
+  GameEventsResponse,
   GameHistoryRecord,
   Player,
   PlayerHandPayload,
@@ -382,4 +383,16 @@ export async function updateUserQuartetRequest(
     const errorPayload = await response.json().catch(() => null)
     throw new Error(errorPayload?.error ?? 'Не удалось обновить квартет.')
   }
+}
+
+export async function loadGameEventsRequest(
+  roomID: string,
+): Promise<GameEventsResponse | null> {
+  const response = await fetch(`${API_URL}/rooms/${roomID}/events`)
+
+  if (!response.ok) {
+    return null
+  }
+
+  return (await response.json()) as GameEventsResponse
 }
