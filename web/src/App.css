@@ -1011,3 +1011,32 @@ code {
 .turn-banner.my-turn {
   background: rgba(34, 197, 94, 0.16);
 }
+
+.latest-game-event {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(148, 163, 184, 0.12);
+  font-weight: 700;
+}
+
+.game-log-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.game-log-item {
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.game-log-time {
+  color: #64748b;
+  font-weight: 600;
+  margin-right: 8px;
+}
+
+.game-log-message {
+  color: #111827;
+}

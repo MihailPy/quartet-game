@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"time"
 
 	"github.com/MihailPy/quartet-game/internal/game"
 	"github.com/MihailPy/quartet-game/internal/room"
@@ -14,6 +15,7 @@ import (
 type GameStarter interface {
 	StartGame(ctx context.Context, currentRoom room.Room) (game.GameState, error)
 	GetGameState(ctx context.Context, roomID room.RoomID) (game.GameState, bool)
+	GetGameEvents(ctx context.Context, gameID game.GameID) ([]game.GameEvent, error)
 }
 
 type RoomHandler struct {
@@ -101,6 +103,25 @@ type DeckService interface {
 		ownerPlayerID room.PlayerID,
 		ownerUserID user.UserID,
 	) ([]game.Quartet, error)
+}
+
+type AvailableQuartetsResponse struct {
+	Quartets []game.Quartet `json:"quartets"`
+}
+
+type GameEventPayload struct {
+	ID        string         `json:"id"`
+	GameID    string         `json:"game_id"`
+	RoomID    string         `json:"room_id"`
+	Type      string         `json:"type"`
+	ActorID   string         `json:"actor_id"`
+	TargetID  string         `json:"target_id"`
+	Payload   map[string]any `json:"payload"`
+	CreatedAt string         `json:"created_at"`
+}
+
+type GameEventsResponse struct {
+	Events []GameEventPayload `json:"events"`
 }
 
 func NewRoomHandler(
@@ -660,10 +681,6 @@ func buildPlayerHandPayload(state game.GameState, playerID game.PlayerID) Player
 	}
 }
 
-type AvailableQuartetsResponse struct {
-	Quartets []game.Quartet `json:"quartets"`
-}
-
 func (h *RoomHandler) GetAvailableQuartets(w http.ResponseWriter, r *http.Request, roomID room.RoomID) {
 	if r.Method != http.MethodGet {
 		writeError(w, http.StatusMethodNotAllowed, "method not allowed")
@@ -699,6 +716,51 @@ func (h *RoomHandler) GetAvailableQuartets(w http.ResponseWriter, r *http.Reques
 
 	response := AvailableQuartetsResponse{
 		Quartets: availableQuartets,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	_ = json.NewEncoder(w).Encode(response)
+}
+
+func buildGameEventPayload(event game.GameEvent) GameEventPayload {
+	return GameEventPayload{
+		ID:        event.ID,
+		GameID:    string(event.GameID),
+		RoomID:    event.RoomID,
+		Type:      string(event.Type),
+		ActorID:   string(event.ActorID),
+		TargetID:  string(event.TargetID),
+		Payload:   event.Payload,
+		CreatedAt: event.CreatedAt.Format(time.RFC3339),
+	}
+}
+
+func (h *RoomHandler) GetGameEvents(w http.ResponseWriter, r *http.Request, roomID room.RoomID) {
+	if r.Method != http.MethodGet {
+		writeError(w, http.StatusMethodNotAllowed, "method not allowed")
+		return
+	}
+
+	state, ok := h.gameStarter.GetGameState(r.Context(), roomID)
+	if !ok {
+		writeError(w, http.StatusNotFound, "game not found")
+		return
+	}
+
+	events, err := h.gameStarter.GetGameEvents(r.Context(), state.ID)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "failed to load game events")
+		return
+	}
+
+	response := GameEventsResponse{
+		Events: make([]GameEventPayload, 0, len(events)),
+	}
+
+	for _, event := range events {
+		response.Events = append(response.Events, buildGameEventPayload(event))
 	}
 
 	w.Header().Set("Content-Type", "application/json")

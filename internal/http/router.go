@@ -79,6 +79,9 @@ func NewRouter(
 			roomHandler.GetRoomDeck(w, r, roomID)
 		case "hand":
 			roomHandler.GetPlayerHand(w, r, roomID)
+		case "events":
+			roomHandler.GetGameEvents(w, r, roomID)
+			return
 		case "ws":
 			wsHandler.HandleConnection(w, r, roomID)
 		default:
