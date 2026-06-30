@@ -1096,6 +1096,34 @@ function App() {
     setGameEvents(data?.events ?? [])
   }
 
+  function formatGameEvent(event: GameEvent): string {
+    switch (event.type) {
+      case 'game_started':
+        return 'Игра началась.'
+
+      case 'card_requested':
+        return `${getPlayerName(event.actor_id)} запросил карту у ${getPlayerName(event.target_id)}.`
+
+      case 'card_request_succeeded':
+        return `Запрос успешен: карта передана.`
+
+      case 'card_request_failed':
+        return `Запрос неудачный: карты нет.`
+
+      case 'quartet_completed':
+        return `${getPlayerName(event.actor_id)} собрал квартет.`
+
+      case 'turn_changed':
+        return `Ход перешёл к ${getPlayerName(event.target_id)}.`
+
+      case 'game_finished':
+        return 'Игра завершена.'
+
+      default:
+        return event.type
+    }
+  }
+
   useEffect(() => {
     if (!room || !player) return
 
@@ -1578,7 +1606,7 @@ function App() {
                       <div className="game-log-list">
                         {gameEvents.map((event) => (
                           <div className="game-log-item" key={event.id}>
-                            <strong>{event.type}</strong>
+                            <strong>{formatGameEvent(event)}</strong>
                             <span>{new Date(event.created_at).toLocaleString()}</span>
                           </div>
                         ))}
