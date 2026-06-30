@@ -104,6 +104,7 @@ function App() {
   const hasGameStarted = publicGameState !== null
   const [isGameLogOpen, setIsGameLogOpen] = useState(false)
   const [gameEvents, setGameEvents] = useState<GameEvent[]>([])
+  const latestGameEvent = gameEvents.at(-1)
 
   function resetGameState() {
     updateDeck(null)
@@ -1541,6 +1542,7 @@ function App() {
                   getRequestButtonText={getRequestButtonText}
                   completedQuartets={getCompletedQuartets()}
                   isStartingGame={isStartingGame}
+                  latestEventText={latestGameEvent ? formatGameEvent(latestGameEvent) : ''}
                 />
               </div>
 

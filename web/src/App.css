@@ -1011,3 +1011,11 @@ code {
 .turn-banner.my-turn {
   background: rgba(34, 197, 94, 0.16);
 }
+
+.latest-game-event {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(148, 163, 184, 0.12);
+  font-weight: 700;
+}

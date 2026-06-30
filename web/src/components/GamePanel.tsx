@@ -35,6 +35,7 @@ type GamePanelProps = {
     quartetID: string
     quartetTitle: string
   }[]
+  latestEventText?: string
 }
 
 function getSocketStatusLabel(status: string): string {
@@ -80,6 +81,7 @@ export function GamePanel({
   getRequestButtonText,
   completedQuartets,
   isStartingGame,
+  latestEventText,
 }: GamePanelProps) {
 
   const requestTargetPlayers =
@@ -121,6 +123,12 @@ export function GamePanel({
       <div className={`connection-status connection-status-${socketStatus}`}>
         Соединение: {getSocketStatusLabel(socketStatus)}
       </div>
+
+      {latestEventText && (
+        <div className="latest-game-event">
+          {latestEventText}
+        </div>
+      )}
 
       {room && player && room.status !== 'playing' && (
         <div className="start-game-block">
