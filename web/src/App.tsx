@@ -1307,6 +1307,18 @@ function App() {
 
           updateRoom(payload)
         }
+
+        const persistentGameEventTypes = new Set([
+          'game_started',
+          'card_request_result',
+          'quartet_completed',
+          'turn_changed',
+          'game_finished',
+        ])
+
+        if (persistentGameEventTypes.has(message.type) && roomRef.current) {
+          void loadGameEvents(roomRef.current.id)
+        }
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : 'Не удалось обработать websocket-сообщение.'
