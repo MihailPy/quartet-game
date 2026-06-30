@@ -1101,28 +1101,31 @@ function App() {
   function formatGameEvent(event: GameEvent): string {
     switch (event.type) {
       case 'game_started':
-        return 'Игра началась.'
+        return 'Игра началась. '
 
       case 'card_requested':
-        return `${getPlayerName(event.actor_id)} запросил карту у ${getPlayerName(event.target_id)}.`
+        return `${getPlayerName(event.actor_id)} запросил карту у ${getPlayerName(event.target_id)}. `
 
       case 'card_request_succeeded': {
         const cardTitle = getEventPayloadString(event, 'card_title', 'карта')
 
-        return `Запрос успешен: ${cardTitle} передана игроку ${getPlayerName(event.actor_id)}.`
+        return `Запрос успешен: ${cardTitle} передана игроку ${getPlayerName(event.actor_id)}. `
       }
 
-      case 'card_request_failed':
-        return `Запрос неудачный: карты нет.`
+      case 'card_request_failed': {
+        const cardTitle = getEventPayloadString(event, 'card_title', 'запрошенной карты')
+
+        return `У ${getPlayerName(event.target_id)} нет карты ${cardTitle}. `
+      }
 
       case 'quartet_completed':
-        return `${getPlayerName(event.actor_id)} собрал квартет.`
+        return `${getPlayerName(event.actor_id)} собрал квартет. `
 
       case 'turn_changed':
-        return `Ход перешёл к ${getPlayerName(event.target_id)}.`
+        return `Ход перешёл к ${getPlayerName(event.target_id)}. `
 
       case 'game_finished':
-        return 'Игра завершена.'
+        return 'Игра завершена. '
 
       default:
         return event.type
