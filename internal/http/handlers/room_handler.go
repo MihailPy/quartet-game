@@ -736,3 +736,35 @@ func buildGameEventPayload(event game.GameEvent) GameEventPayload {
 		CreatedAt: event.CreatedAt.Format(time.RFC3339),
 	}
 }
+
+func (h *RoomHandler) GetGameEvents(w http.ResponseWriter, r *http.Request, roomID room.RoomID) {
+	if r.Method != http.MethodGet {
+		writeError(w, http.StatusMethodNotAllowed, "method not allowed")
+		return
+	}
+
+	state, ok := h.gameStarter.GetGameState(r.Context(), roomID)
+	if !ok {
+		writeError(w, http.StatusNotFound, "game not found")
+		return
+	}
+
+	events, err := h.gameStarter.GetGameEvents(r.Context(), state.ID)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "failed to load game events")
+		return
+	}
+
+	response := GameEventsResponse{
+		Events: make([]GameEventPayload, 0, len(events)),
+	}
+
+	for _, event := range events {
+		response.Events = append(response.Events, buildGameEventPayload(event))
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	_ = json.NewEncoder(w).Encode(response)
+}
