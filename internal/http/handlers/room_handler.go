@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"time"
 
 	"github.com/MihailPy/quartet-game/internal/game"
 	"github.com/MihailPy/quartet-game/internal/room"
@@ -102,6 +103,25 @@ type DeckService interface {
 		ownerPlayerID room.PlayerID,
 		ownerUserID user.UserID,
 	) ([]game.Quartet, error)
+}
+
+type AvailableQuartetsResponse struct {
+	Quartets []game.Quartet `json:"quartets"`
+}
+
+type GameEventPayload struct {
+	ID        string         `json:"id"`
+	GameID    string         `json:"game_id"`
+	RoomID    string         `json:"room_id"`
+	Type      string         `json:"type"`
+	ActorID   string         `json:"actor_id"`
+	TargetID  string         `json:"target_id"`
+	Payload   map[string]any `json:"payload"`
+	CreatedAt string         `json:"created_at"`
+}
+
+type GameEventsResponse struct {
+	Events []GameEventPayload `json:"events"`
 }
 
 func NewRoomHandler(
@@ -661,10 +681,6 @@ func buildPlayerHandPayload(state game.GameState, playerID game.PlayerID) Player
 	}
 }
 
-type AvailableQuartetsResponse struct {
-	Quartets []game.Quartet `json:"quartets"`
-}
-
 func (h *RoomHandler) GetAvailableQuartets(w http.ResponseWriter, r *http.Request, roomID room.RoomID) {
 	if r.Method != http.MethodGet {
 		writeError(w, http.StatusMethodNotAllowed, "method not allowed")
@@ -706,4 +722,17 @@ func (h *RoomHandler) GetAvailableQuartets(w http.ResponseWriter, r *http.Reques
 	w.WriteHeader(http.StatusOK)
 
 	_ = json.NewEncoder(w).Encode(response)
+}
+
+func buildGameEventPayload(event game.GameEvent) GameEventPayload {
+	return GameEventPayload{
+		ID:        event.ID,
+		GameID:    string(event.GameID),
+		RoomID:    event.RoomID,
+		Type:      string(event.Type),
+		ActorID:   string(event.ActorID),
+		TargetID:  string(event.TargetID),
+		Payload:   event.Payload,
+		CreatedAt: event.CreatedAt.Format(time.RFC3339),
+	}
 }
