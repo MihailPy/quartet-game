@@ -1101,32 +1101,32 @@ function App() {
   function formatGameEvent(event: GameEvent): string {
     switch (event.type) {
       case 'game_started':
-        return 'Игра началась. '
+        return 'Игра началась.'
 
       case 'card_requested':
-        return `${getPlayerName(event.actor_id)} запросил карту у ${getPlayerName(event.target_id)}. `
+        return `${getPlayerName(event.actor_id)} запросил карту у ${getPlayerName(event.target_id)}.`
 
       case 'card_request_succeeded': {
         const cardTitle = getEventPayloadString(event, 'card_title', 'карта')
 
-        return `Запрос успешен: ${cardTitle} передана игроку ${getPlayerName(event.actor_id)}. `
+        return `Запрос успешен: ${cardTitle} передана игроку ${getPlayerName(event.actor_id)}.`
       }
 
       case 'card_request_failed': {
         const cardTitle = getEventPayloadString(event, 'card_title', 'запрошенной карты')
 
-        return `У ${getPlayerName(event.target_id)} нет карты ${cardTitle}. `
+        return `У ${getPlayerName(event.target_id)} нет карты ${cardTitle}.`
       }
 
       case 'quartet_completed': {
         const quartetID = getEventPayloadString(event, 'quartet_id', '')
         const quartetTitle = quartetID ? getQuartetTitle(quartetID) : 'квартет'
 
-        return `${getPlayerName(event.actor_id)} собрал квартет “${quartetTitle}”. `
+        return `${getPlayerName(event.actor_id)} собрал квартет “${quartetTitle}”.`
       }
 
       case 'turn_changed':
-        return `Ход перешёл к ${getPlayerName(event.target_id)}. `
+        return `Ход перешёл к ${getPlayerName(event.target_id)}.`
 
       case 'game_finished': {
         const winnerIDs = event.payload.winner_ids
@@ -1139,10 +1139,10 @@ function App() {
 
           const winnerLabel = winnerIDs.length > 1 ? 'Победители' : 'Победитель'
 
-          return `Игра завершена. ${winnerLabel}: ${winnerNames}. `
+          return `Игра завершена. ${winnerLabel}: ${winnerNames}.`
         }
 
-        return 'Игра завершена. '
+        return 'Игра завершена.'
       }
 
       default:
@@ -1158,6 +1158,14 @@ function App() {
     const value = event.payload[key]
 
     return typeof value === 'string' && value ? value : fallback
+  }
+
+  function formatEventTime(timestamp: string): string {
+    return new Date(timestamp).toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    })
   }
 
   useEffect(() => {
@@ -1653,10 +1661,15 @@ function App() {
                       <p className="form-hint">Событий пока нет.</p>
                     ) : (
                       <div className="game-log-list">
-                        {gameEvents.map((event) => (
+                        {[...gameEvents].reverse().map((event) => (
                           <div className="game-log-item" key={event.id}>
-                            <strong>{formatGameEvent(event)}</strong>
-                            <span>{new Date(event.created_at).toLocaleString()}</span>
+                            <span className="game-log-time">
+                              [{formatEventTime(event.created_at)}]
+                            </span>
+
+                            <span className="game-log-message">
+                              {formatGameEvent(event)}
+                            </span>
                           </div>
                         ))}
                       </div>
