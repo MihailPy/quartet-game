@@ -1106,8 +1106,11 @@ function App() {
       case 'card_requested':
         return `${getPlayerName(event.actor_id)} запросил карту у ${getPlayerName(event.target_id)}.`
 
-      case 'card_request_succeeded':
-        return `Запрос успешен: карта передана.`
+      case 'card_request_succeeded': {
+        const cardTitle = getEventPayloadString(event, 'card_title', 'карта')
+
+        return `Запрос успешен: ${cardTitle} передана игроку ${getPlayerName(event.actor_id)}.`
+      }
 
       case 'card_request_failed':
         return `Запрос неудачный: карты нет.`
@@ -1124,6 +1127,16 @@ function App() {
       default:
         return event.type
     }
+  }
+
+  function getEventPayloadString(
+    event: GameEvent,
+    key: string,
+    fallback: string,
+  ): string {
+    const value = event.payload[key]
+
+    return typeof value === 'string' && value ? value : fallback
   }
 
   useEffect(() => {
