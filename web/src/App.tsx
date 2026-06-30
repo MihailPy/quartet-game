@@ -119,6 +119,7 @@ function App() {
     setReconnectAttempt(0)
     setToasts([])
     setAvailableQuartets([])
+    setGameEvents([])
   }
 
   function leaveRoom() {
