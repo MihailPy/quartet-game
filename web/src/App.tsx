@@ -24,7 +24,6 @@ import {
 import './App.css'
 import { AccountPanel } from './components/AccountPanel'
 import { EntryPanel } from './components/EntryPanel'
-import { GameLogPanel } from './components/GameLogPanel'
 import { GamePanel } from './components/GamePanel'
 import { PlayerHandPanel } from './components/PlayerHandPanel'
 import { PlayerPanel } from './components/PlayerPanel'
@@ -72,7 +71,6 @@ function App() {
   const [playerName, setPlayerName] = useState<string>('Mihail')
   const [roomIdInput, setRoomIdInput] = useState<string>('')
   const [socketStatus, setSocketStatus] = useState<string>('disconnected')
-  const [events, setEvents] = useState<string[]>([])
   const socketRef = useRef<WebSocket | null>(null)
   const [publicGameState, setPublicGameState] = useState<PublicGameState | null>(
     null,
@@ -82,14 +80,11 @@ function App() {
   const [selectedCardID, setSelectedCardID] = useState<string>('')
   const [currentTurnPlayerID, setCurrentTurnPlayerID] = useState<string>('')
   const [gameFinished, setGameFinished] = useState<GameFinishedPayload | null>(null)
-  const [gameLog, setGameLog] = useState<string[]>([])
   const [temporaryMessages, setTemporaryMessages] = useState<TemporaryMessage[]>([])
   const [toasts, setToasts] = useState<ToastMessage[]>([])
-  const [showDebugEvents, setShowDebugEvents] = useState<boolean>(false)
   const [deck, setDeck] = useState<Deck | null>(null)
   const deckRef = useRef<Deck | null>(null)
   const [reconnectAttempt, setReconnectAttempt] = useState<number>(0)
-  const isDevMode = import.meta.env.DEV
   const [isSessionRestored, setIsSessionRestored] = useState<boolean>(false)
   const [isCreatingRoom, setIsCreatingRoom] = useState<boolean>(false)
   const [isJoiningRoom, setIsJoiningRoom] = useState<boolean>(false)
@@ -108,7 +103,7 @@ function App() {
   const [isPlayerPanelOpen, setIsPlayerPanelOpen] = useState(false)
   const hasGameStarted = publicGameState !== null
   const [isGameLogOpen, setIsGameLogOpen] = useState(false)
-  const [, setGameEvents] = useState<GameEvent[]>([])
+  const [gameEvents, setGameEvents] = useState<GameEvent[]>([])
 
   function resetGameState() {
     updateDeck(null)
@@ -118,9 +113,7 @@ function App() {
     setSelectedCardID('')
     setCurrentTurnPlayerID('')
     setGameFinished(null)
-    setGameLog([])
     setTemporaryMessages([])
-    setEvents([])
     setError('')
     setReconnectAttempt(0)
     setToasts([])
@@ -494,10 +487,6 @@ function App() {
     )
   }
 
-  function addGameLog(message: string) {
-    setGameLog((currentLog) => [message, ...currentLog.slice(0, 9)])
-  }
-
   function createTemporaryMessageID(): string {
     if (crypto.randomUUID) {
       return crypto.randomUUID()
@@ -698,7 +687,6 @@ function App() {
       setCurrentTurnPlayerID('')
       setGameFinished(null)
       showTemporaryMessage('Не удалось восстановить состояние игры после reconnect.')
-      addGameLog('Не удалось восстановить состояние игры после reconnect.')
       return
     }
 
@@ -1122,7 +1110,6 @@ function App() {
     socket.onopen = () => {
       setSocketStatus('connected')
       setError('')
-      addGameLog('WebSocket подключён.')
 
       void loadDeck(room.id)
       void loadGameState(room.id)
@@ -1130,11 +1117,6 @@ function App() {
     }
 
     socket.onmessage = (event) => {
-      setEvents((currentEvents) => [
-        event.data,
-        ...currentEvents.slice(0, 9),
-      ])
-
       try {
         const message = JSON.parse(event.data)
 
@@ -1144,7 +1126,6 @@ function App() {
           updateRoom(payload.room)
           updateDeck(payload.deck)
           showToast('Игра началась.', 'success')
-          addGameLog('Игра началась.')
 
           void loadGameState(payload.room.id)
           void loadGameEvents(payload.room.id)
@@ -1159,8 +1140,6 @@ function App() {
 
           setPublicGameState(payload)
           setCurrentTurnPlayerID(payload.current_player_id)
-
-          addGameLog(`Сейчас ходит ${getPlayerName(payload.current_player_id)}.`)
         }
 
         if (message.type === 'turn_changed') {
@@ -1177,12 +1156,10 @@ function App() {
               : `Сейчас ходит ${playerName}.`
 
           showTemporaryMessage(messageText)
-          addGameLog(messageText)
         }
 
         if (message.type === 'player_hand') {
           setPlayerHand(message.payload as PlayerHandPayload)
-          addGameLog('Твоя рука обновлена.')
         }
 
         if (message.type === 'card_request_result') {
@@ -1213,7 +1190,6 @@ function App() {
             const resultMessage = `Карта “${cardTitle}” найдена. Игрок продолжает ход.`
 
             showToast(resultMessage, 'success')
-            addGameLog(resultMessage)
           } else {
             const resultMessage = `Карты “${cardTitle}” нет.`
             const nextPlayerName = getPlayerName(payload.next_player_id)
@@ -1224,8 +1200,6 @@ function App() {
 
             showToast(resultMessage, 'info')
             showToast(turnMessage, 'info')
-            addGameLog(resultMessage)
-            addGameLog(turnMessage)
           }
         }
 
@@ -1235,7 +1209,6 @@ function App() {
 
           setError(errorMessage)
           showTemporaryMessage(errorMessage)
-          addGameLog(`Ошибка запроса карты: ${errorMessage}`)
         }
 
         if (message.type === 'quartet_completed') {
@@ -1251,7 +1224,6 @@ function App() {
           const messageText = `${getPlayerName(payload.player_id)} собрал квартет “${quartetTitles}”.`
 
           showTemporaryMessage(messageText)
-          addGameLog(messageText)
         }
 
         if (message.type === 'game_finished') {
@@ -1264,7 +1236,6 @@ function App() {
           const finishedMessage = `Игра завершена. ${winnerLabel}: ${winnerNames}`
 
           showTemporaryMessage(finishedMessage)
-          addGameLog(finishedMessage)
         }
 
         if (message.type === 'room_updated' || message.type === 'room_state') {
@@ -1278,7 +1249,6 @@ function App() {
 
         console.error('Failed to handle websocket message:', err, event.data)
         setError(errorMessage)
-        addGameLog(`Ошибка websocket-сообщения: ${errorMessage}`)
       }
 
     }
@@ -1286,12 +1256,10 @@ function App() {
     socket.onerror = () => {
       setSocketStatus('error')
       setError('Ошибка websocket-подключения.')
-      addGameLog('Ошибка websocket-подключения.')
     }
 
     socket.onclose = () => {
       setSocketStatus('disconnected')
-      addGameLog('WebSocket отключён.')
 
       if (!shouldReconnect) {
         return
@@ -1313,21 +1281,21 @@ function App() {
 
   useEffect(() => {
     async function restoreSession() {
-      const savedRoomID = loadRoomID()
-      const savedPlayer = loadPlayer()
-      const savedUserID = window.localStorage.getItem('quartetUserID')
-
-      if (savedUserID) {
-        const loadedUser = await loadUserRequest(savedUserID)
-        saveUser(loadedUser)
-      }
-
-      if (!savedRoomID) {
-        setIsSessionRestored(true)
-        return
-      }
-
       try {
+        const savedRoomID = loadRoomID()
+        const savedPlayer = loadPlayer()
+        const savedUserID = window.localStorage.getItem('quartetUserID')
+
+        if (savedUserID) {
+          const loadedUser = await loadUserRequest(savedUserID)
+          saveUser(loadedUser)
+        }
+
+        if (!savedRoomID) {
+          setIsSessionRestored(true)
+          return
+        }
+
         let loadedRoom: Room
 
         try {
@@ -1362,7 +1330,8 @@ function App() {
         }
 
         clearSession()
-      } catch {
+      } catch (err) {
+        console.error('Failed to restore session:', err)
         clearSession()
       } finally {
         setIsSessionRestored(true)
@@ -1600,22 +1569,22 @@ function App() {
                 )}
 
                 {isGameLogOpen && (
-                  <GameLogPanel
-                    gameLog={gameLog}
-                    events={events}
-                    showDebugEvents={showDebugEvents}
-                    onToggleDebugEvents={() => setShowDebugEvents((current) => !current)}
-                    isDevMode={isDevMode}
-                    diagnostics={{
-                      room,
-                      player,
-                      socketStatus,
-                      publicGameState,
-                      playerHand,
-                      currentTurnPlayerID,
-                      gameFinished,
-                    }}
-                  />
+                  <div className="panel">
+                    <h2>Журнал игры</h2>
+
+                    {gameEvents.length === 0 ? (
+                      <p className="form-hint">Событий пока нет.</p>
+                    ) : (
+                      <div className="game-log-list">
+                        {gameEvents.map((event) => (
+                          <div className="game-log-item" key={event.id}>
+                            <strong>{event.type}</strong>
+                            <span>{new Date(event.created_at).toLocaleString()}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 )}
               </div>
             </>
