@@ -31,6 +31,7 @@ type UserHistoryRepository interface {
 
 type GameEventRepository interface {
 	SaveGameEvent(ctx context.Context, event game.GameEvent) error
+	FindGameEventsByGameID(ctx context.Context, gameID game.GameID) ([]game.GameEvent, error)
 }
 
 type Service struct {
@@ -465,4 +466,15 @@ func (s *Service) saveGameEvent(
 
 func generateHistoryID() string {
 	return time.Now().UTC().Format("20060102150405.000000000")
+}
+
+func (s *Service) GetGameEvents(
+	ctx context.Context,
+	gameID game.GameID,
+) ([]game.GameEvent, error) {
+	if s.gameEventRepository == nil {
+		return []game.GameEvent{}, nil
+	}
+
+	return s.gameEventRepository.FindGameEventsByGameID(ctx, gameID)
 }

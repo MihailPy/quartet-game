@@ -55,6 +55,13 @@ func (f fakeGameStarter) RequestCard(
 	return game.RequestCardResult{}, game.GameState{}, nil
 }
 
+func (s fakeGameStarter) GetGameEvents(
+	ctx context.Context,
+	gameID game.GameID,
+) ([]game.GameEvent, error) {
+	return []game.GameEvent{}, nil
+}
+
 var _ ws.GameService = fakeGameStarter{}
 
 func TestHealthHandler(t *testing.T) {

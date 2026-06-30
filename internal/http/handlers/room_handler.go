@@ -14,6 +14,7 @@ import (
 type GameStarter interface {
 	StartGame(ctx context.Context, currentRoom room.Room) (game.GameState, error)
 	GetGameState(ctx context.Context, roomID room.RoomID) (game.GameState, bool)
+	GetGameEvents(ctx context.Context, gameID game.GameID) ([]game.GameEvent, error)
 }
 
 type RoomHandler struct {

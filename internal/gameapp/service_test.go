@@ -72,6 +72,13 @@ func (r *fakeGameEventRepository) SaveGameEvent(
 	return nil
 }
 
+func (r *fakeGameEventRepository) FindGameEventsByGameID(
+	ctx context.Context,
+	gameID game.GameID,
+) ([]game.GameEvent, error) {
+	return r.events, nil
+}
+
 func TestGetGameStateRestoresFinishedGameFromRepository(t *testing.T) {
 	ctx := context.Background()
 	roomID := room.RoomID("room_1")
