@@ -78,6 +78,8 @@ func (r *GameEventRepository) FindGameEventsByGameID(
 
 	for rows.Next() {
 		var event game.GameEvent
+		var actorID sql.NullString
+		var targetID sql.NullString
 		var payloadJSON []byte
 
 		if err := rows.Scan(
@@ -85,12 +87,20 @@ func (r *GameEventRepository) FindGameEventsByGameID(
 			&event.GameID,
 			&event.RoomID,
 			&event.Type,
-			&event.ActorID,
-			&event.TargetID,
+			&actorID,
+			&targetID,
 			&payloadJSON,
 			&event.CreatedAt,
 		); err != nil {
 			return nil, err
+		}
+
+		if actorID.Valid {
+			event.ActorID = game.PlayerID(actorID.String)
+		}
+
+		if targetID.Valid {
+			event.TargetID = game.PlayerID(targetID.String)
 		}
 
 		if err := json.Unmarshal(payloadJSON, &event.Payload); err != nil {
