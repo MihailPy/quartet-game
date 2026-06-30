@@ -19,6 +19,7 @@ import {
   toggleSelectedQuartetRequest,
   updatePlayerNameRequest,
   updateUserQuartetRequest,
+  loadGameEventsRequest,
 } from './api'
 import './App.css'
 import { AccountPanel } from './components/AccountPanel'
@@ -39,6 +40,7 @@ import {
 } from './session'
 import type {
   Deck,
+  GameEvent,
   GameFinishedPayload,
   GameHistoryRecord,
   GameStartedPayload,
@@ -106,6 +108,7 @@ function App() {
   const [isPlayerPanelOpen, setIsPlayerPanelOpen] = useState(false)
   const hasGameStarted = publicGameState !== null
   const [isGameLogOpen, setIsGameLogOpen] = useState(false)
+  const [, setGameEvents] = useState<GameEvent[]>([])
 
   function resetGameState() {
     updateDeck(null)
@@ -701,6 +704,7 @@ function App() {
 
     setPublicGameState(data)
     setCurrentTurnPlayerID(data.current_player_id)
+    void loadGameEvents(roomID)
 
     if (data.status === 'finished') {
       setGameFinished(buildGameFinishedFromState(data))
@@ -1098,6 +1102,12 @@ function App() {
     })
   }
 
+  async function loadGameEvents(roomID: string) {
+    const data = await loadGameEventsRequest(roomID)
+
+    setGameEvents(data?.events ?? [])
+  }
+
   useEffect(() => {
     if (!room || !player) return
 
@@ -1137,6 +1147,7 @@ function App() {
           addGameLog('Игра началась.')
 
           void loadGameState(payload.room.id)
+          void loadGameEvents(payload.room.id)
 
           if (player) {
             void loadPlayerHand(payload.room.id, player.id)
