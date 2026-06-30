@@ -150,3 +150,18 @@ export type PlayerGameResult = {
   score: number
   is_winner: boolean
 }
+
+export type GameEvent = {
+  id: string
+  game_id: string
+  room_id: string
+  type: string
+  actor_id: string
+  target_id: string
+  payload: Record<string, unknown>
+  created_at: string
+}
+
+export type GameEventsResponse = {
+  events: GameEvent[]
+}
