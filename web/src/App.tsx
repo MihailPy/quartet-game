@@ -1128,8 +1128,22 @@ function App() {
       case 'turn_changed':
         return `Ход перешёл к ${getPlayerName(event.target_id)}. `
 
-      case 'game_finished':
+      case 'game_finished': {
+        const winnerIDs = event.payload.winner_ids
+
+        if (Array.isArray(winnerIDs) && winnerIDs.length > 0) {
+          const winnerNames = winnerIDs
+            .filter((winnerID): winnerID is string => typeof winnerID === 'string')
+            .map(getPlayerName)
+            .join(', ')
+
+          const winnerLabel = winnerIDs.length > 1 ? 'Победители' : 'Победитель'
+
+          return `Игра завершена. ${winnerLabel}: ${winnerNames}. `
+        }
+
         return 'Игра завершена. '
+      }
 
       default:
         return event.type
