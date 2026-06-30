@@ -1118,8 +1118,12 @@ function App() {
         return `У ${getPlayerName(event.target_id)} нет карты ${cardTitle}. `
       }
 
-      case 'quartet_completed':
-        return `${getPlayerName(event.actor_id)} собрал квартет. `
+      case 'quartet_completed': {
+        const quartetID = getEventPayloadString(event, 'quartet_id', '')
+        const quartetTitle = quartetID ? getQuartetTitle(quartetID) : 'квартет'
+
+        return `${getPlayerName(event.actor_id)} собрал квартет “${quartetTitle}”. `
+      }
 
       case 'turn_changed':
         return `Ход перешёл к ${getPlayerName(event.target_id)}. `
