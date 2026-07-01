@@ -1173,3 +1173,10 @@ code {
   gap: 8px;
   margin-bottom: 16px;
 }
+
+.bottom-hand-zone {
+  position: sticky;
+  bottom: 0;
+  z-index: 20;
+  padding-top: 12px;
+}

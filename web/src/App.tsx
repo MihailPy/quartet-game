@@ -1564,26 +1564,18 @@ function App() {
                     onToggleSelectedQuartet={toggleSelectedQuartet}
                   />
                 )}
-
-                {hasGameStarted && room && isGamePlaying && (
-                  <PlayerHandPanel
-                    player={player}
-                    playerHand={playerHand}
-                    getQuartetTitle={getQuartetTitle}
-                  />
-                )}
               </div>
 
-              <GameplayTable
-                gameState={publicGameState}
-                currentPlayerID={currentTurnPlayerID}
-                latestEventTexts={[...gameEvents]
-                  .slice(-2)
-                  .reverse()
-                  .map(formatGameEvent)}
-              />
-
               <div className="layout-center-column">
+                <GameplayTable
+                  gameState={publicGameState}
+                  currentPlayerID={currentTurnPlayerID}
+                  latestEventTexts={[...gameEvents]
+                    .slice(-2)
+                    .reverse()
+                    .map(formatGameEvent)}
+                />
+
                 <GamePanel
                   room={room}
                   player={player}
@@ -1609,6 +1601,16 @@ function App() {
                   isStartingGame={isStartingGame}
                   latestEventText={latestGameEvent ? formatGameEvent(latestGameEvent) : ''}
                 />
+
+                {hasGameStarted && room && isGamePlaying && playerHand && (
+                  <div className='bottom-hand-zone'>
+                    <PlayerHandPanel
+                      player={player}
+                      playerHand={playerHand}
+                      getQuartetTitle={getQuartetTitle}
+                    />
+                  </div>
+                )}
               </div>
 
               <div className="layout-side-column">
