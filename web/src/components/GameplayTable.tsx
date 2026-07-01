@@ -42,7 +42,19 @@ export function GameplayTable({
 
               <strong>{player.name}</strong>
 
-              <span>{player.card_count} карт</span>
+              <div className="player-card-backs" aria-label={`${player.card_count} карт`}>
+                {Array.from({ length: Math.min(player.card_count, 6) }).map((_, cardIndex) => (
+                  <span
+                    className="player-card-back"
+                    key={cardIndex}
+                    style={{ transform: `translateX(${-cardIndex * 6}px)` }}
+                  />
+                ))}
+
+                {player.card_count > 6 && (
+                  <span className="player-card-count">+{player.card_count - 6}</span>
+                )}
+              </div>
             </div>
           ))}
         </div>
