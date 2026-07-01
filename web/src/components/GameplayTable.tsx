@@ -15,6 +15,17 @@ export function GameplayTable({
     return null
   }
 
+  const completedQuartets = Object.entries(gameState.completed).flatMap(
+    ([playerID, quartetIDs]) =>
+      quartetIDs.map((quartetID) => ({
+        playerID,
+        playerName:
+          gameState.players.find((player) => player.id === playerID)?.name ??
+          playerID,
+        quartetID,
+      })),
+  )
+
   return (
     <section className="panel gameplay-table">
       <h2>Игровой стол</h2>
@@ -26,6 +37,18 @@ export function GameplayTable({
       )}
 
       <div className="gameplay-table-center">
+        <div className="table-center-content">
+          {completedQuartets.length === 0 ? (
+            <span className="form-hint">Собранных квартетов пока нет</span>
+          ) : (
+            completedQuartets.map((quartet) => (
+              <div className="completed-quartet-chip" key={`${quartet.playerID}-${quartet.quartetID}`}>
+                {quartet.playerName}: {quartet.quartetID}
+              </div>
+            ))
+          )}
+        </div>
+
         <div className={`player-seats player-seats-count-${gameState.players.length}`}>
           {gameState.players.map((player, index) => (
             <div
