@@ -1061,3 +1061,34 @@ code {
   border: 2px dashed rgba(148, 163, 184, 0.3);
   border-radius: 16px;
 }
+
+.player-seats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+}
+
+.player-seat {
+  min-width: 120px;
+  padding: 12px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  text-align: center;
+}
+
+.player-seat-current {
+  border-width: 2px;
+}
+
+.player-seat-avatar {
+  width: 42px;
+  height: 42px;
+  margin: 0 auto 8px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  background: rgba(148, 163, 184, 0.18);
+}

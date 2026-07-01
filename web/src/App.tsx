@@ -1575,9 +1575,9 @@ function App() {
               </div>
 
               <GameplayTable
-                latestEventText={
-                  latestGameEvent ? formatGameEvent(latestGameEvent) : ''
-                }
+                gameState={publicGameState}
+                currentPlayerID={currentTurnPlayerID}
+                latestEventText={latestGameEvent ? formatGameEvent(latestGameEvent) : ''}
               />
 
               <div className="layout-center-column">
