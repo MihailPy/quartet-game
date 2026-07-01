@@ -26,13 +26,13 @@ export function GameplayTable({
       )}
 
       <div className="gameplay-table-center">
-        <div className="player-seats">
-          {gameState.players.map((player) => (
+        <div className={`player-seats player-seats-count-${gameState.players.length}`}>
+          {gameState.players.map((player, index) => (
             <div
               className={
                 player.id === currentPlayerID
-                  ? 'player-seat player-seat-current'
-                  : 'player-seat'
+                  ? `player-seat player-seat-current player-seat-${index}`
+                  : `player-seat player-seat-${index}`
               }
               key={player.id}
             >
