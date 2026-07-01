@@ -79,9 +79,7 @@ export function GamePanel({
   getPlayerName,
   canRequestCard,
   getRequestButtonText,
-  completedQuartets,
   isStartingGame,
-  latestEventText,
 }: GamePanelProps) {
 
   const requestTargetPlayers =
@@ -123,12 +121,6 @@ export function GamePanel({
       <div className={`connection-status connection-status-${socketStatus}`}>
         Соединение: {getSocketStatusLabel(socketStatus)}
       </div>
-
-      {latestEventText && (
-        <div className="latest-game-event">
-          {latestEventText}
-        </div>
-      )}
 
       {room && player && room.status !== 'playing' && (
         <div className="start-game-block">
@@ -203,48 +195,6 @@ export function GamePanel({
                   {message.text}
                 </div>
               ))}
-            </div>
-          )}
-
-          {!gameFinished && (
-            <>
-
-              <h3>Игроки</h3>
-
-              {publicGameState.players.map((gamePlayer) => (
-                <div
-                  className={
-                    gamePlayer.id === currentTurnPlayerID
-                      ? 'player-row player-row-active'
-                      : 'player-row'
-                  }
-                  key={gamePlayer.id}
-                >
-                  <span>
-                    {gamePlayer.name}
-                    {player?.id === gamePlayer.id ? ' (ты)' : ''}
-                  </span>
-                  <span>{gamePlayer.card_count} карт</span>
-                </div>
-              ))}
-            </>
-          )}
-
-          {completedQuartets.length > 0 && (
-            <div className="completed-quartets-box">
-              <h3>Собранные квартеты</h3>
-
-              <div className="completed-quartets-list">
-                {completedQuartets.map((quartet) => (
-                  <div
-                    className="completed-quartet-item"
-                    key={`${quartet.playerID}-${quartet.quartetID}`}
-                  >
-                    <strong>{quartet.quartetTitle}</strong>
-                    <span>Собрал: {quartet.playerName}</span>
-                  </div>
-                ))}
-              </div>
             </div>
           )}
 
