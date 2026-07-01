@@ -1577,7 +1577,10 @@ function App() {
               <GameplayTable
                 gameState={publicGameState}
                 currentPlayerID={currentTurnPlayerID}
-                latestEventText={latestGameEvent ? formatGameEvent(latestGameEvent) : ''}
+                latestEventTexts={[...gameEvents]
+                  .slice(-2)
+                  .reverse()
+                  .map(formatGameEvent)}
               />
 
               <div className="layout-center-column">

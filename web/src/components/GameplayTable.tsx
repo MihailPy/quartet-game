@@ -3,13 +3,13 @@ import type { PublicGameState } from '../types'
 type GameplayTableProps = {
   gameState: PublicGameState | null
   currentPlayerID: string
-  latestEventText?: string
+  latestEventTexts: string[]
 }
 
 export function GameplayTable({
   gameState,
   currentPlayerID,
-  latestEventText,
+  latestEventTexts,
 }: GameplayTableProps) {
   if (!gameState) {
     return null
@@ -30,9 +30,13 @@ export function GameplayTable({
     <section className="panel gameplay-table">
       <h2>Игровой стол</h2>
 
-      {latestEventText && (
-        <div className="gameplay-latest-event">
-          {latestEventText}
+      {latestEventTexts.length > 0 && (
+        <div className="gameplay-latest-events">
+          {latestEventTexts.map((eventText) => (
+            <div className="gameplay-latest-event" key={eventText}>
+              {eventText}
+            </div>
+          ))}
         </div>
       )}
 

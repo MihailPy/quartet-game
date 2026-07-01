@@ -1167,3 +1167,9 @@ code {
   background: rgba(34, 197, 94, 0.14);
   font-weight: 700;
 }
+
+.gameplay-latest-events {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 16px;
+}
