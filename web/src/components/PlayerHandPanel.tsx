@@ -1,15 +1,17 @@
-import type { Player, PlayerHandPayload } from '../types'
+import type { Player, PlayerHandPayload, PrivateCard } from '../types'
 
 type PlayerHandPanelProps = {
   player: Player | null
   playerHand: PlayerHandPayload | null
   getQuartetTitle: (quartetID: string) => string
+  onCardPreview?: (card: PrivateCard) => void
 }
 
 export function PlayerHandPanel({
   player,
   playerHand,
   getQuartetTitle,
+  onCardPreview,
 }: PlayerHandPanelProps) {
   const cardsByQuartet =
     playerHand?.cards.reduce<Record<string, typeof playerHand.cards>>(
@@ -57,10 +59,15 @@ export function PlayerHandPanel({
 
               <div className="cards-list">
                 {cards.map((card) => (
-                  <div className="card" key={card.id}>
+                  <button
+                    className="card"
+                    key={card.id}
+                    type="button"
+                    onClick={() => onCardPreview?.(card)}
+                  >
                     <strong>{card.title}</strong>
                     <small>{card.id}</small>
-                  </div>
+                  </button>
                 ))}
               </div>
             </div>

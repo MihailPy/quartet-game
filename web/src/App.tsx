@@ -47,6 +47,7 @@ import type {
   GameStartedPayload,
   Player,
   PlayerHandPayload,
+  PrivateCard,
   PublicGameState,
   Quartet,
   RequestableCard,
@@ -106,6 +107,7 @@ function App() {
   const [isGameLogOpen, setIsGameLogOpen] = useState(false)
   const [gameEvents, setGameEvents] = useState<GameEvent[]>([])
   const latestGameEvent = gameEvents.at(-1)
+  const [previewCard, setPreviewCard] = useState<PrivateCard | null>(null)
 
   function resetGameState() {
     updateDeck(null)
@@ -1608,10 +1610,27 @@ function App() {
                       player={player}
                       playerHand={playerHand}
                       getQuartetTitle={getQuartetTitle}
+                      onCardPreview={setPreviewCard}
                     />
                   </div>
                 )}
               </div>
+
+              {previewCard && (
+                <div className="modal-backdrop" onClick={() => setPreviewCard(null)}>
+                  <div
+                    className="card-preview-modal"
+                    onClick={(event) => event.stopPropagation()}
+                  >
+                    <h2>{previewCard.title}</h2>
+                    <p className="form-hint">Квартет: {getQuartetTitle(previewCard.quartet_id)}</p>
+
+                    <button className="button" type="button" onClick={() => setPreviewCard(null)}>
+                      Закрыть
+                    </button>
+                  </div>
+                </div>
+              )}
 
               <div className="layout-side-column">
                 {player && (
