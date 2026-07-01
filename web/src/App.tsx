@@ -7,6 +7,7 @@ import {
   joinRoomRequest,
   loadAvailableQuartetsRequest,
   loadDeckRequest,
+  loadGameEventsRequest,
   loadGameStateRequest,
   loadPlayerHandRequest,
   loadRoomRequest,
@@ -19,12 +20,13 @@ import {
   toggleSelectedQuartetRequest,
   updatePlayerNameRequest,
   updateUserQuartetRequest,
-  loadGameEventsRequest,
 } from './api'
 import './App.css'
 import { AccountPanel } from './components/AccountPanel'
 import { EntryPanel } from './components/EntryPanel'
 import { GamePanel } from './components/GamePanel'
+import { GameplayTable } from './components/GameplayTable'
+import { HistoryPanel } from './components/HistoryPanel'
 import { PlayerHandPanel } from './components/PlayerHandPanel'
 import { PlayerPanel } from './components/PlayerPanel'
 import { QuartetsPanel } from './components/QuartetsPanel'
@@ -45,6 +47,7 @@ import type {
   GameStartedPayload,
   Player,
   PlayerHandPayload,
+  PrivateCard,
   PublicGameState,
   Quartet,
   RequestableCard,
@@ -59,7 +62,6 @@ import {
   buildRequestCardMessage,
   buildRoomWebSocketURL,
 } from './websocket'
-import { HistoryPanel } from './components/HistoryPanel'
 
 type AppView = 'home' | 'account' | 'quartets' | 'history'
 
@@ -105,6 +107,7 @@ function App() {
   const [isGameLogOpen, setIsGameLogOpen] = useState(false)
   const [gameEvents, setGameEvents] = useState<GameEvent[]>([])
   const latestGameEvent = gameEvents.at(-1)
+  const [previewCard, setPreviewCard] = useState<PrivateCard | null>(null)
 
   function resetGameState() {
     updateDeck(null)
@@ -1563,17 +1566,18 @@ function App() {
                     onToggleSelectedQuartet={toggleSelectedQuartet}
                   />
                 )}
-
-                {hasGameStarted && room && isGamePlaying && (
-                  <PlayerHandPanel
-                    player={player}
-                    playerHand={playerHand}
-                    getQuartetTitle={getQuartetTitle}
-                  />
-                )}
               </div>
 
               <div className="layout-center-column">
+                <GameplayTable
+                  gameState={publicGameState}
+                  currentPlayerID={currentTurnPlayerID}
+                  latestEventTexts={[...gameEvents]
+                    .slice(-2)
+                    .reverse()
+                    .map(formatGameEvent)}
+                />
+
                 <GamePanel
                   room={room}
                   player={player}
@@ -1599,7 +1603,34 @@ function App() {
                   isStartingGame={isStartingGame}
                   latestEventText={latestGameEvent ? formatGameEvent(latestGameEvent) : ''}
                 />
+
+                {hasGameStarted && room && isGamePlaying && playerHand && (
+                  <div className='bottom-hand-zone'>
+                    <PlayerHandPanel
+                      player={player}
+                      playerHand={playerHand}
+                      getQuartetTitle={getQuartetTitle}
+                      onCardPreview={setPreviewCard}
+                    />
+                  </div>
+                )}
               </div>
+
+              {previewCard && (
+                <div className="modal-backdrop" onClick={() => setPreviewCard(null)}>
+                  <div
+                    className="card-preview-modal"
+                    onClick={(event) => event.stopPropagation()}
+                  >
+                    <h2>{previewCard.title}</h2>
+                    <p className="form-hint">Квартет: {getQuartetTitle(previewCard.quartet_id)}</p>
+
+                    <button className="button" type="button" onClick={() => setPreviewCard(null)}>
+                      Закрыть
+                    </button>
+                  </div>
+                </div>
+              )}
 
               <div className="layout-side-column">
                 {player && (
