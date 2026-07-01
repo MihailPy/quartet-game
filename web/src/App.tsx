@@ -7,6 +7,7 @@ import {
   joinRoomRequest,
   loadAvailableQuartetsRequest,
   loadDeckRequest,
+  loadGameEventsRequest,
   loadGameStateRequest,
   loadPlayerHandRequest,
   loadRoomRequest,
@@ -19,12 +20,13 @@ import {
   toggleSelectedQuartetRequest,
   updatePlayerNameRequest,
   updateUserQuartetRequest,
-  loadGameEventsRequest,
 } from './api'
 import './App.css'
 import { AccountPanel } from './components/AccountPanel'
 import { EntryPanel } from './components/EntryPanel'
 import { GamePanel } from './components/GamePanel'
+import { GameplayTable } from './components/GameplayTable'
+import { HistoryPanel } from './components/HistoryPanel'
 import { PlayerHandPanel } from './components/PlayerHandPanel'
 import { PlayerPanel } from './components/PlayerPanel'
 import { QuartetsPanel } from './components/QuartetsPanel'
@@ -59,7 +61,6 @@ import {
   buildRequestCardMessage,
   buildRoomWebSocketURL,
 } from './websocket'
-import { HistoryPanel } from './components/HistoryPanel'
 
 type AppView = 'home' | 'account' | 'quartets' | 'history'
 
@@ -1572,6 +1573,12 @@ function App() {
                   />
                 )}
               </div>
+
+              <GameplayTable
+                latestEventText={
+                  latestGameEvent ? formatGameEvent(latestGameEvent) : ''
+                }
+              />
 
               <div className="layout-center-column">
                 <GamePanel

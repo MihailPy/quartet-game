@@ -1040,3 +1040,24 @@ code {
 .game-log-message {
   color: #111827;
 }
+
+.gameplay-table {
+  min-height: 320px;
+}
+
+.gameplay-latest-event {
+  margin-bottom: 16px;
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(148, 163, 184, 0.12);
+  font-weight: 600;
+}
+
+.gameplay-table-center {
+  min-height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px dashed rgba(148, 163, 184, 0.3);
+  border-radius: 16px;
+}
