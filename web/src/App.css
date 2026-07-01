@@ -304,8 +304,26 @@ code {
 }
 
 .cards-list {
-  display: grid;
-  gap: 12px;
+  display: flex;
+  overflow-x: auto;
+  padding: 12px 16px 20px;
+  scroll-snap-type: x proximity;
+}
+
+.cards-list > .card {
+  flex: 0 0 120px;
+  scroll-snap-align: start;
+  transition: transform 0.15s ease;
+}
+
+.cards-list > .card + .card {
+  margin-left: -28px;
+}
+
+.cards-list > .card:hover,
+.cards-list > .card:focus-within {
+  transform: translateY(-8px);
+  z-index: 2;
 }
 
 .card {
@@ -561,18 +579,14 @@ code {
   font-weight: 600;
 }
 
-.hand-quartets-list{
-  display: grid;
-  gap: 14px;
+.hand-quartets-list {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
 }
 
 .hand-quartet-group {
-  display: grid;
-  gap: 2px;
-  padding: 14px;
-  border: 1px solid #dbeafe;
-  border-radius: 16px;
-  background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+  min-width: 260px;
 }
 
 .hand-quartet-group h4 {
