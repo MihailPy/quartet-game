@@ -1557,8 +1557,8 @@ function App() {
 
           {isSessionRestored && isEntered && (
             <>
-              <div className="layout-main-column">
-                {room && !isGamePlaying && (
+              {room && !isGamePlaying && (
+                <div className="layout-main-column">
                   <RoomPanel
                     room={room}
                     currentPlayerID={player?.id ?? null}
@@ -1568,11 +1568,11 @@ function App() {
                     availableQuartets={availableQuartets}
                     onToggleSelectedQuartet={toggleSelectedQuartet}
                   />
-                )}
-              </div>
+                </div>
+              )}
 
               <div className="gameplay-layout">
-                <div className='gamepley-main-zone'>
+                <div className='gameplay-main-zone'>
                   <GameplayTable
                     gameState={publicGameState}
                     currentPlayerID={currentTurnPlayerID}
@@ -1612,14 +1612,12 @@ function App() {
 
                 <div className='gameplay-hand-zone'>
                   {hasGameStarted && room && isGamePlaying && playerHand && (
-                    <div className='bottom-hand-zone'>
-                      <PlayerHandPanel
-                        player={player}
-                        playerHand={playerHand}
-                        getQuartetTitle={getQuartetTitle}
-                        onCardPreview={setPreviewCard}
-                      />
-                    </div>
+                    <PlayerHandPanel
+                      player={player}
+                      playerHand={playerHand}
+                      getQuartetTitle={getQuartetTitle}
+                      onCardPreview={setPreviewCard}
+                    />
                   )}
                 </div>
               </div>

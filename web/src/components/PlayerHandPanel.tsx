@@ -32,7 +32,7 @@ export function PlayerHandPanel({
   }
 
   return (
-    <div className="panel">
+    <section className="player-hand-zone">
       <h2>Моя рука</h2>
 
       {!player && <p>Сначала подключись к комнате.</p>}
@@ -74,6 +74,6 @@ export function PlayerHandPanel({
           ))}
         </div>
       )}
-    </div>
+    </section>
   )
 }
