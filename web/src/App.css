@@ -1142,6 +1142,25 @@ code {
   transform: translateY(-50%);
 }
 
+.player-seat {
+  min-width: 76px;
+  padding: 8px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.player-seat-avatar {
+  width: 42px;
+  height: 42px;
+  margin: 0 auto 6px;
+}
+
+.player-seat-current .player-seat-avatar {
+  outline: 3px solid rgba(59, 130, 246, 0.55);
+  outline-offset: 3px;
+}
+
 .player-card-backs {
   display: flex;
   justify-content: center;
@@ -1231,32 +1250,4 @@ code {
   position: sticky;
   bottom: 0;
   z-index: 20;
-}
-
-@media (min-width: 900px) {
-  .gameplay-layout {
-    min-height: calc(100vh - 140px);
-  }
-
-  .gameplay-main-zone {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .gameplay-hand-zone {
-    align-self: end;
-  }
-}
-
-@media (max-width: 899px) {
-  .gameplay-layout {
-    gap: 12px;
-  }
-
-  .gameplay-main-zone {
-    gap: 12px;
-  }
-
-  .gameplay-hand-zone {
-    bottom: 0;
-  }
 }
