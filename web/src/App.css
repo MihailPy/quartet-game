@@ -306,18 +306,18 @@ code {
 .cards-list {
   display: flex;
   overflow-x: auto;
-  padding: 12px 16px 20px;
+  overflow-x: visible;
+  padding: 8px 0 14px;
   scroll-snap-type: x proximity;
 }
 
 .cards-list > .card {
-  flex: 0 0 120px;
-  scroll-snap-align: start;
-  transition: transform 0.15s ease;
+  flex: 0 0 116px;
+  min-height: 150px;
 }
 
 .cards-list > .card + .card {
-  margin-left: -28px;
+  margin-left: -34px;
 }
 
 .cards-list > .card:hover,
@@ -581,13 +581,16 @@ code {
 
 .hand-quartets-list {
   display: flex;
-  gap: 16px;
+  gap: 12px;
   overflow-x: auto;
+  padding: 0 16px 12px;
 }
 
 .hand-quartet-group {
-  min-width: 260px;
+  flex: 0 0 210px;
+  min-width: 210px;
 }
+
 
 .hand-quartet-group h4 {
   margin: 0;
@@ -605,6 +608,7 @@ code {
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
+  min-height: 28px;
 }
 
 .quartet-progress {
