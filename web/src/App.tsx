@@ -1674,6 +1674,9 @@ function App() {
                   selectedTargetPlayerID={targetPlayerID}
                   onSelectTargetPlayer={setTargetPlayerID}
                   onClose={() => setIsRequestFlowOpen(false)}
+                  availableRequestCards={availableRequestCards}
+                  selectedCardID={selectedCardID}
+                  onSelectCard={setSelectedCardID}
                 />
               )}
 

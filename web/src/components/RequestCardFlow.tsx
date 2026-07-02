@@ -1,4 +1,4 @@
-import type { PublicGamePlayer } from '../types'
+import type { PublicGamePlayer, RequestableCard } from '../types'
 
 type RequestCardFlowProps = {
   players: PublicGamePlayer[]
@@ -6,6 +6,9 @@ type RequestCardFlowProps = {
   selectedTargetPlayerID: string
   onSelectTargetPlayer: (playerID: string) => void
   onClose: () => void
+  availableRequestCards: RequestableCard[]
+  selectedCardID: string
+  onSelectCard: (cardID: string) => void
 }
 
 export function RequestCardFlow({
@@ -14,6 +17,9 @@ export function RequestCardFlow({
   selectedTargetPlayerID,
   onSelectTargetPlayer,
   onClose,
+  availableRequestCards,
+  selectedCardID,
+  onSelectCard,
 }: RequestCardFlowProps) {
   const targetPlayers = players.filter(
     (player) => player.id !== currentPlayerID && player.card_count > 0,
@@ -56,6 +62,30 @@ export function RequestCardFlow({
               <span>{player.card_count} карт</span>
             </button>
           ))}
+
+          {availableRequestCards.length > 0 && (
+            <section>
+              <h3>Выбери карту</h3>
+
+              <div className="request-flow-cards-grid">
+                {availableRequestCards.map((card) => (
+                  <button
+                    key={card.id}
+                    type="button"
+                    className={
+                      card.id === selectedCardID
+                        ? 'request-flow-card request-flow-card-selected'
+                        : 'request-flow-card'
+                    }
+                    onClick={() => onSelectCard(card.id)}
+                  >
+                    <strong>{card.title}</strong>
+                    <small>{card.quartet_title}</small>
+                  </button>
+                ))}
+              </div>
+            </section>
+          )}
         </div>
       </section>
     </div>
