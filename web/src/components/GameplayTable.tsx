@@ -4,12 +4,14 @@ type GameplayTableProps = {
   gameState: PublicGameState | null
   currentPlayerID: string
   latestEventTexts: string[]
+  onPlayerClick?: (playerID: string) => void
 }
 
 export function GameplayTable({
   gameState,
   currentPlayerID,
   latestEventTexts,
+  onPlayerClick,
 }: GameplayTableProps) {
   if (!gameState) {
     return null
@@ -71,6 +73,7 @@ export function GameplayTable({
                 }
                 type="button"
                 title={player.name}
+                onClick={() => onPlayerClick?.(player.id)}
               >
                 <div className="player-seat-avatar">
                   {player.name.charAt(0).toUpperCase()}

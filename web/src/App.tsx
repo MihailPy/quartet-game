@@ -108,6 +108,7 @@ function App() {
   const [gameEvents, setGameEvents] = useState<GameEvent[]>([])
   const latestGameEvent = gameEvents.at(-1)
   const [previewCard, setPreviewCard] = useState<PrivateCard | null>(null)
+  const [selectedTablePlayerID, setSelectedTablePlayerID] = useState('')
 
   function resetGameState() {
     updateDeck(null)
@@ -1577,6 +1578,7 @@ function App() {
                       .slice(-2)
                       .reverse()
                       .map(formatGameEvent)}
+                    onPlayerClick={setSelectedTablePlayerID}
                   />
 
                   <GamePanel
