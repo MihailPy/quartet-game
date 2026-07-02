@@ -1260,3 +1260,14 @@ code {
   box-shadow: 0 24px 80px rgba(15, 23, 42, 0.28);
   text-align: center;
 }
+
+.table-turn-status {
+  font-weight: 800;
+  text-align: center;
+}
+
+.table-completed-quartets {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
