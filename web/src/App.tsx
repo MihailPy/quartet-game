@@ -1677,6 +1677,17 @@ function App() {
                   availableRequestCards={availableRequestCards}
                   selectedCardID={selectedCardID}
                   onSelectCard={setSelectedCardID}
+                  onPreviewCard={(cardID) => {
+                    const card = availableRequestCards.find((item) => item.id === cardID)
+
+                    if (card) {
+                      setPreviewCard({
+                        id: card.id,
+                        title: card.title,
+                        quartet_id: card.quartet_id,
+                      })
+                    }
+                  }}
                 />
               )}
 

@@ -9,6 +9,7 @@ type RequestCardFlowProps = {
   availableRequestCards: RequestableCard[]
   selectedCardID: string
   onSelectCard: (cardID: string) => void
+  onPreviewCard: (cardID: string) => void
 }
 
 export function RequestCardFlow({
@@ -20,6 +21,7 @@ export function RequestCardFlow({
   availableRequestCards,
   selectedCardID,
   onSelectCard,
+  onPreviewCard,
 }: RequestCardFlowProps) {
   const targetPlayers = players.filter(
     (player) => player.id !== currentPlayerID && player.card_count > 0,
@@ -69,19 +71,31 @@ export function RequestCardFlow({
 
               <div className="request-flow-cards-grid">
                 {availableRequestCards.map((card) => (
-                  <button
-                    key={card.id}
-                    type="button"
+                  <div
                     className={
                       card.id === selectedCardID
                         ? 'request-flow-card request-flow-card-selected'
                         : 'request-flow-card'
                     }
-                    onClick={() => onSelectCard(card.id)}
+                    key={card.id}
                   >
-                    <strong>{card.title}</strong>
-                    <small>{card.quartet_title}</small>
-                  </button>
+                    <button
+                      className="request-flow-card-main"
+                      type="button"
+                      onClick={() => onSelectCard(card.id)}
+                    >
+                      <strong>{card.title}</strong>
+                      <small>{card.quartet_title}</small>
+                    </button>
+
+                    <button
+                      className="secondary-button"
+                      type="button"
+                      onClick={() => onPreviewCard(card.id)}
+                    >
+                      Просмотр
+                    </button>
+                  </div>
                 ))}
               </div>
             </section>
