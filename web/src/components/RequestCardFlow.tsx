@@ -10,6 +10,8 @@ type RequestCardFlowProps = {
   selectedCardID: string
   onSelectCard: (cardID: string) => void
   onPreviewCard: (cardID: string) => void
+  onSubmit: () => void
+  canSubmit: boolean
 }
 
 export function RequestCardFlow({
@@ -22,6 +24,8 @@ export function RequestCardFlow({
   selectedCardID,
   onSelectCard,
   onPreviewCard,
+  onSubmit,
+  canSubmit,
 }: RequestCardFlowProps) {
   const targetPlayers = players.filter(
     (player) => player.id !== currentPlayerID && player.card_count > 0,
@@ -100,6 +104,17 @@ export function RequestCardFlow({
               </div>
             </section>
           )}
+
+          <footer className="request-flow-actions">
+            <button
+              className="button"
+              type="button"
+              disabled={!canSubmit}
+              onClick={onSubmit}
+            >
+              Спросить карту
+            </button>
+          </footer>
         </div>
       </section>
     </div>

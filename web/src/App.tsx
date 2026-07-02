@@ -1589,6 +1589,8 @@ function App() {
                       })
                     }
                   }}
+                  onSubmit={requestCard}
+                  canSubmit={targetPlayerID !== '' && selectedCardID !== ''}
                 />
               )}
 
