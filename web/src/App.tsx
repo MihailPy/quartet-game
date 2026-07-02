@@ -111,6 +111,7 @@ function App() {
   const [previewCard, setPreviewCard] = useState<PrivateCard | null>(null)
   const [selectedTablePlayerID, setSelectedTablePlayerID] = useState('')
   const selectedTablePlayer = publicGameState?.players.find((p) => p.id === selectedTablePlayerID) ?? null
+  const [isHandOpen, setIsHandOpen] = useState(true)
 
   function resetGameState() {
     updateDeck(null)
@@ -1610,14 +1611,27 @@ function App() {
                   />
                 </div>
 
-                <div className='gameplay-hand-zone'>
+                <div className={`gameplay-hand-zone ${isHandOpen ? 'hand-open' : 'hand-collapsed'}`}>
                   {hasGameStarted && room && isGamePlaying && playerHand && (
-                    <PlayerHandPanel
-                      player={player}
-                      playerHand={playerHand}
-                      getQuartetTitle={getQuartetTitle}
-                      onCardPreview={setPreviewCard}
-                    />
+                    <>
+                      <button
+                        className="hand-toggle-button"
+                        type="button"
+                        onClick={() => setIsHandOpen((current) => !current)}
+                      >
+                        Моя рука ({playerHand.cards.length} карт)
+                        <span>{isHandOpen ? 'Свернуть' : 'Открыть'}</span>
+                      </button>
+
+                      {isHandOpen && (
+                        <PlayerHandPanel
+                          player={player}
+                          playerHand={playerHand}
+                          getQuartetTitle={getQuartetTitle}
+                          onCardPreview={setPreviewCard}
+                        />
+                      )}
+                    </>
                   )}
                 </div>
               </div>

@@ -1285,3 +1285,33 @@ code {
 .player-hand-zone h2 {
   margin: 0 16px 12px;
 }
+
+.hand-toggle-button {
+  display: none;
+}
+
+@media (max-width: 720px) {
+  .hand-toggle-button {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    min-height: 52px;
+    padding: 12px 16px;
+    border: 0;
+    border-radius: 18px 18px 0 0;
+    background: #ffffff;
+    font: inherit;
+    font-weight: 800;
+    cursor: pointer;
+  }
+
+  .hand-toggle-button span {
+    color: #2563eb;
+    font-size: 13px;
+  }
+
+  .gameplay-hand-zone.hand-collapsed .player-hand-zone {
+    display: none;
+  }
+}
