@@ -22,6 +22,8 @@ import {
   updateUserQuartetRequest,
 } from './api'
 import './App.css'
+import { RequestCardFlow } from './components/RequestCardFlow'
+import { PlayerDetailsModal } from './components/PlayerDetailsModal'
 import { AccountPanel } from './components/AccountPanel'
 import { EntryPanel } from './components/EntryPanel'
 import { GamePanel } from './components/GamePanel'
@@ -106,8 +108,16 @@ function App() {
   const hasGameStarted = publicGameState !== null
   const [isGameLogOpen, setIsGameLogOpen] = useState(false)
   const [gameEvents, setGameEvents] = useState<GameEvent[]>([])
-  const latestGameEvent = gameEvents.at(-1)
   const [previewCard, setPreviewCard] = useState<PrivateCard | null>(null)
+  const [selectedTablePlayerID, setSelectedTablePlayerID] = useState('')
+  const selectedTablePlayer = publicGameState?.players.find((p) => p.id === selectedTablePlayerID) ?? null
+  const [isHandOpen, setIsHandOpen] = useState(true)
+  const [isRequestFlowOpen, setIsRequestFlowOpen] = useState(false)
+  const canOpenRequestFlow =
+    player !== null &&
+    publicGameState !== null &&
+    gameFinished === null &&
+    currentTurnPlayerID === player.id
 
   function resetGameState() {
     updateDeck(null)
@@ -579,60 +589,6 @@ function App() {
     return payload.message || 'Не удалось запросить карту.'
   }
 
-  function canRequestCard(): boolean {
-    return Boolean(
-      player &&
-      publicGameState &&
-      !gameFinished &&
-      socketStatus === 'connected' &&
-      isCurrentPlayerConnected() &&
-      currentTurnPlayerID === player.id &&
-      targetPlayerID &&
-      selectedCardID &&
-      availableRequestCards.length > 0,
-    )
-  }
-
-  function getRequestButtonText(): string {
-    if (!player) {
-      return 'Сначала подключись'
-    }
-
-    if (!isCurrentPlayerConnected()) {
-      return 'Нет подключения'
-    }
-
-    if (socketStatus !== 'connected') {
-      return 'Нет подключения'
-    }
-
-    if (gameFinished) {
-      return 'Игра завершена'
-    }
-
-    if (!currentTurnPlayerID) {
-      return 'Ожидание хода'
-    }
-
-    if (currentTurnPlayerID !== player.id) {
-      return 'Сейчас не твой ход'
-    }
-
-    if (availableRequestCards.length === 0) {
-      return 'Нет доступных карт'
-    }
-
-    if (!targetPlayerID) {
-      return 'Выбери игрока'
-    }
-
-    if (!selectedCardID) {
-      return 'Выбери карту'
-    }
-
-    return 'Спросить карту'
-  }
-
   async function loadDeck(roomID: string) {
     const data = await loadDeckRequest(roomID)
 
@@ -757,39 +713,6 @@ function App() {
     ).length
 
     return selectedPlayersCount >= 2
-  }
-
-  function getAvailableRequestCardsByQuartet() {
-    return availableRequestCards.reduce<Record<string, RequestableCard[]>>(
-      (groups, card) => {
-        const key = card.quartet_id
-
-        if (!groups[key]) {
-          groups[key] = []
-        }
-
-        groups[key].push(card)
-
-        return groups
-      },
-      {},
-    )
-  }
-
-  function getCompletedQuartets() {
-    if (!publicGameState) {
-      return []
-    }
-
-    return Object.entries(publicGameState.completed).flatMap(
-      ([playerID, quartetIDs]) =>
-        quartetIDs.map((quartetID) => ({
-          playerID,
-          playerName: getPlayerName(playerID),
-          quartetID,
-          quartetTitle: getQuartetTitle(quartetID),
-        })),
-    )
   }
 
   function getJoinRoomErrorMessage(message: string): string {
@@ -1554,8 +1477,8 @@ function App() {
 
           {isSessionRestored && isEntered && (
             <>
-              <div className="layout-main-column">
-                {room && !isGamePlaying && (
+              {room && !isGamePlaying && (
+                <div className="layout-main-column">
                   <RoomPanel
                     room={room}
                     currentPlayerID={player?.id ?? null}
@@ -1565,56 +1488,114 @@ function App() {
                     availableQuartets={availableQuartets}
                     onToggleSelectedQuartet={toggleSelectedQuartet}
                   />
-                )}
+                </div>
+              )}
+
+              <div className="gameplay-layout">
+                <div className='gameplay-main-zone'>
+                  <GameplayTable
+                    gameState={publicGameState}
+                    currentPlayerID={currentTurnPlayerID}
+                    latestEventTexts={[...gameEvents]
+                      .slice(-2)
+                      .reverse()
+                      .map(formatGameEvent)}
+                    onPlayerClick={setSelectedTablePlayerID}
+                  />
+
+                  {canOpenRequestFlow && (
+                    <button
+                      className="button request-flow-open-button"
+                      type="button"
+                      onClick={() => {
+                        console.log('open request flow')
+                        setIsRequestFlowOpen(true)
+                      }}
+                    >
+                      Открыть новый запрос карты
+                    </button>
+                  )}
+
+                  <GamePanel
+                    room={room}
+                    player={player}
+                    publicGameState={publicGameState}
+                    currentTurnPlayerID={currentTurnPlayerID}
+                    temporaryMessages={temporaryMessages}
+                    gameFinished={gameFinished}
+                    socketStatus={socketStatus}
+                    onStartGame={startGame}
+                    isRoomOwner={isRoomOwner()}
+                    canStartGame={canStartGame()}
+                    getPlayerName={getPlayerName}
+                    isStartingGame={isStartingGame}
+                  />
+                </div>
+
+                <div className={`gameplay-hand-zone ${isHandOpen ? 'hand-open' : 'hand-collapsed'}`}>
+                  {hasGameStarted && room && isGamePlaying && playerHand && (
+                    <>
+                      <button
+                        className="hand-toggle-button"
+                        type="button"
+                        onClick={() => setIsHandOpen((current) => !current)}
+                      >
+                        Моя рука ({playerHand.cards.length} карт)
+                        <span>{isHandOpen ? 'Свернуть' : 'Открыть'}</span>
+                      </button>
+
+                      {isHandOpen && (
+                        <PlayerHandPanel
+                          player={player}
+                          playerHand={playerHand}
+                          getQuartetTitle={getQuartetTitle}
+                          onCardPreview={setPreviewCard}
+                        />
+                      )}
+                    </>
+                  )}
+                </div>
               </div>
 
-              <div className="layout-center-column">
-                <GameplayTable
-                  gameState={publicGameState}
-                  currentPlayerID={currentTurnPlayerID}
-                  latestEventTexts={[...gameEvents]
-                    .slice(-2)
-                    .reverse()
-                    .map(formatGameEvent)}
+              {selectedTablePlayer && publicGameState && (
+                <PlayerDetailsModal
+                  player={selectedTablePlayer}
+                  isCurrentTurn={selectedTablePlayer.id === currentTurnPlayerID}
+                  completedQuartetsCount={
+                    publicGameState.completed[selectedTablePlayer.id]?.length ?? 0
+                  }
+                  onClose={() => setSelectedTablePlayerID('')}
                 />
+              )}
 
-                <GamePanel
-                  room={room}
-                  player={player}
-                  publicGameState={publicGameState}
-                  currentTurnPlayerID={currentTurnPlayerID}
-                  temporaryMessages={temporaryMessages}
-                  gameFinished={gameFinished}
-                  socketStatus={socketStatus}
-                  targetPlayerID={targetPlayerID}
-                  selectedCardID={selectedCardID}
+              {isRequestFlowOpen && publicGameState && (
+                <RequestCardFlow
+                  players={publicGameState.players}
+                  currentPlayerID={player?.id ?? ''}
+                  selectedTargetPlayerID={targetPlayerID}
+                  onSelectTargetPlayer={setTargetPlayerID}
+                  onClose={() => setIsRequestFlowOpen(false)}
                   availableRequestCards={availableRequestCards}
-                  availableRequestCardsByQuartet={getAvailableRequestCardsByQuartet()}
-                  onTargetPlayerIDChange={setTargetPlayerID}
-                  onSelectedCardIDChange={setSelectedCardID}
-                  onRequestCard={requestCard}
-                  onStartGame={startGame}
-                  isRoomOwner={isRoomOwner()}
-                  canStartGame={canStartGame()}
-                  getPlayerName={getPlayerName}
-                  canRequestCard={canRequestCard}
-                  getRequestButtonText={getRequestButtonText}
-                  completedQuartets={getCompletedQuartets()}
-                  isStartingGame={isStartingGame}
-                  latestEventText={latestGameEvent ? formatGameEvent(latestGameEvent) : ''}
-                />
+                  selectedCardID={selectedCardID}
+                  onSelectCard={setSelectedCardID}
+                  onPreviewCard={(cardID) => {
+                    const card = availableRequestCards.find((item) => item.id === cardID)
 
-                {hasGameStarted && room && isGamePlaying && playerHand && (
-                  <div className='bottom-hand-zone'>
-                    <PlayerHandPanel
-                      player={player}
-                      playerHand={playerHand}
-                      getQuartetTitle={getQuartetTitle}
-                      onCardPreview={setPreviewCard}
-                    />
-                  </div>
-                )}
-              </div>
+                    if (card) {
+                      setPreviewCard({
+                        id: card.id,
+                        title: card.title,
+                        quartet_id: card.quartet_id,
+                      })
+                    }
+                  }}
+                  onSubmit={() => {
+                    requestCard()
+                    setIsRequestFlowOpen(false)
+                  }}
+                  canSubmit={targetPlayerID !== '' && selectedCardID !== ''}
+                />
+              )}
 
               {previewCard && (
                 <div className="modal-backdrop" onClick={() => setPreviewCard(null)}>
@@ -1622,8 +1603,19 @@ function App() {
                     className="card-preview-modal"
                     onClick={(event) => event.stopPropagation()}
                   >
-                    <h2>{previewCard.title}</h2>
-                    <p className="form-hint">Квартет: {getQuartetTitle(previewCard.quartet_id)}</p>
+                    <div className="card-preview-art">
+                      <span>🂠</span>
+                    </div>
+
+                    <div className="card-preview-content">
+                      <p className="card-preview-kvartet">
+                        {getQuartetTitle(previewCard.quartet_id)}
+                      </p>
+
+                      <h2>{previewCard.title}</h2>
+
+                      <small>{previewCard.id}</small>
+                    </div>
 
                     <button className="button" type="button" onClick={() => setPreviewCard(null)}>
                       Закрыть

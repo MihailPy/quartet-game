@@ -4,12 +4,14 @@ type GameplayTableProps = {
   gameState: PublicGameState | null
   currentPlayerID: string
   latestEventTexts: string[]
+  onPlayerClick?: (playerID: string) => void
 }
 
 export function GameplayTable({
   gameState,
   currentPlayerID,
   latestEventTexts,
+  onPlayerClick,
 }: GameplayTableProps) {
   if (!gameState) {
     return null
@@ -25,6 +27,10 @@ export function GameplayTable({
         quartetID,
       })),
   )
+
+  const currentPlayerName =
+    gameState.players.find((player) => player.id === currentPlayerID)?.name ??
+    'неизвестно'
 
   return (
     <section className="panel gameplay-table">
@@ -42,47 +48,51 @@ export function GameplayTable({
 
       <div className="gameplay-table-center">
         <div className="table-center-content">
-          {completedQuartets.length === 0 ? (
-            <span className="form-hint">Собранных квартетов пока нет</span>
-          ) : (
-            completedQuartets.map((quartet) => (
-              <div className="completed-quartet-chip" key={`${quartet.playerID}-${quartet.quartetID}`}>
-                {quartet.playerName}: {quartet.quartetID}
-              </div>
-            ))
+          <div className="table-turn-status">
+            Ход игрока: {currentPlayerName}
+          </div>
+
+          {completedQuartets.length > 0 && (
+            <div className="table-completed-quartets">
+              {completedQuartets.map((quartet) => (
+                <div
+                  className="completed-quartet-chip"
+                  key={`${quartet.playerID}-${quartet.quartetID}`}
+                >
+                  {quartet.playerName}: {quartet.quartetID}
+                </div>
+              ))}
+            </div>
           )}
         </div>
 
         <div className={`player-seats player-seats-count-${gameState.players.length}`}>
           {gameState.players.map((player, index) => (
-            <div
+            <button
               className={
                 player.id === currentPlayerID
                   ? `player-seat player-seat-current player-seat-${index}`
                   : `player-seat player-seat-${index}`
               }
               key={player.id}
+              type="button"
+              title={player.name}
+              onClick={() => onPlayerClick?.(player.id)}
             >
               <div className="player-seat-avatar">
                 {player.name.charAt(0).toUpperCase()}
               </div>
 
-              <strong>{player.name}</strong>
-
               <div className="player-card-backs" aria-label={`${player.card_count} карт`}>
                 {Array.from({ length: Math.min(player.card_count, 6) }).map((_, cardIndex) => (
-                  <span
-                    className="player-card-back"
-                    key={cardIndex}
-                    style={{ transform: `translateX(${-cardIndex * 6}px)` }}
-                  />
+                  <span className="player-card-back" key={cardIndex} />
                 ))}
 
                 {player.card_count > 6 && (
                   <span className="player-card-count">+{player.card_count - 6}</span>
                 )}
               </div>
-            </div>
+            </button>
           ))}
         </div>
       </div>

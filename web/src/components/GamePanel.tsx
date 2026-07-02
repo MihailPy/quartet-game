@@ -3,8 +3,7 @@ import type {
   Player,
   PublicGameState,
   Room,
-  RequestableCard,
-  TemporaryMessage,
+  TemporaryMessage
 } from '../types'
 
 type GamePanelProps = {
@@ -15,27 +14,11 @@ type GamePanelProps = {
   temporaryMessages: TemporaryMessage[]
   gameFinished: GameFinishedPayload | null
   socketStatus: string
-  targetPlayerID: string
-  selectedCardID: string
-  availableRequestCards: RequestableCard[]
-  availableRequestCardsByQuartet: Record<string, RequestableCard[]>
-  onTargetPlayerIDChange: (value: string) => void
-  onSelectedCardIDChange: (value: string) => void
-  onRequestCard: () => void
   onStartGame: () => void
   isRoomOwner: boolean
   canStartGame: boolean
   getPlayerName: (playerID: string) => string
-  canRequestCard: () => boolean
-  getRequestButtonText: () => string
   isStartingGame: boolean
-  completedQuartets: {
-    playerID: string
-    playerName: string
-    quartetID: string
-    quartetTitle: string
-  }[]
-  latestEventText?: string
 }
 
 function getSocketStatusLabel(status: string): string {
@@ -66,40 +49,16 @@ export function GamePanel({
   temporaryMessages,
   gameFinished,
   socketStatus,
-  targetPlayerID,
-  selectedCardID,
-  availableRequestCards,
-  availableRequestCardsByQuartet,
-  onTargetPlayerIDChange,
-  onSelectedCardIDChange,
-  onRequestCard,
   onStartGame,
   isRoomOwner,
   canStartGame,
   getPlayerName,
-  canRequestCard,
-  getRequestButtonText,
   isStartingGame,
 }: GamePanelProps) {
-
-  const requestTargetPlayers =
-    publicGameState?.players.filter(
-      (gamePlayer) =>
-        gamePlayer.id !== player?.id && gamePlayer.card_count > 0,
-    ) ?? []
 
   const isCurrentPlayerTurn = player !== null && currentTurnPlayerID === player.id
   const turnPlayerID = currentTurnPlayerID || publicGameState?.current_player_id || ''
   const turnPlayerName = turnPlayerID ? getPlayerName(turnPlayerID) : ''
-
-  const hasAvailableRequestCards = availableRequestCards.length > 0
-  const hasRequestTargetPlayers = requestTargetPlayers.length > 0
-
-  const currentPlayerCannotRequest =
-    isCurrentPlayerTurn &&
-    gameFinished === null &&
-    socketStatus === 'connected' &&
-    (!hasAvailableRequestCards || !hasRequestTargetPlayers)
 
   const winnerNames =
     gameFinished?.winners.map(getPlayerName).join(', ') ?? ''
@@ -228,136 +187,6 @@ export function GamePanel({
                   )
                 })}
               </div>
-            </div>
-          )}
-
-          {player && publicGameState && !gameFinished && isCurrentPlayerTurn && (
-            <div className="request-form">
-              <h3>Запрос карты</h3>
-
-              <div className="request-section request-player-section">
-                <h4>1. Выбери игрока</h4>
-
-                {!hasRequestTargetPlayers && (
-                  <p className="muted-text">
-                    Нет игроков с картами, у которых можно спросить карту.
-                  </p>
-                )}
-
-                <div className="request-choice-grid">
-                  {requestTargetPlayers.map((gamePlayer) => (
-                    <button
-                      className={
-                        gamePlayer.id === targetPlayerID
-                          ? 'request-choice-card request-choice-card-selected'
-                          : 'request-choice-card'
-                      }
-                      type="button"
-                      key={gamePlayer.id}
-                      onClick={() => onTargetPlayerIDChange(gamePlayer.id)}
-                      disabled={
-                        !player ||
-                        gameFinished !== null ||
-                        socketStatus !== 'connected' ||
-                        currentTurnPlayerID !== player.id
-                      }
-                    >
-                      <div className="request-choice-card-media request-choice-card-avatar">
-                        {getPlayerName(gamePlayer.id).slice(0, 1).toUpperCase()}
-                      </div>
-
-                      <div className="request-choice-card-content">
-                        <strong>{getPlayerName(gamePlayer.id)}</strong>
-                        <span>{gamePlayer.card_count} карт</span>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="request-section request-card-section">
-                <h4>2. Выбери карту</h4>
-
-                <div className="request-card-groups">
-                  {Object.entries(availableRequestCardsByQuartet).map(([quartetID, cards]) => (
-                    <div className="request-card-group" key={quartetID}>
-                      <strong>{cards[0]?.quartet_title ?? quartetID}</strong>
-
-                      <div className="request-choice-grid">
-                        {cards.map((card) => (
-                          <button
-                            className={
-                              card.id === selectedCardID
-                                ? 'request-choice-card request-choice-card-selected'
-                                : 'request-choice-card'
-                            }
-                            type="button"
-                            key={card.id}
-                            onClick={() => onSelectedCardIDChange(card.id)}
-                            disabled={
-                              gameFinished !== null ||
-                              socketStatus !== 'connected' ||
-                              currentTurnPlayerID !== player.id
-                            }
-                          >
-                            <div className="request-choice-card-media request-choice-card-image-placeholder">
-                              🂠
-                            </div>
-
-                            <div className="request-choice-card-content">
-                              <strong>{card.title}</strong>
-                            </div>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                {!hasAvailableRequestCards && (
-                  <p className="form-hint">
-                    Нет доступных карт для запроса. Нужно иметь хотя бы одну карту из квартета.
-                  </p>
-                )}
-
-                {availableRequestCards.length > 0 && (
-                  <p className="form-hint">
-                    Можно просить только карты из квартетов, которые уже есть у тебя в руке.
-                  </p>
-                )}
-              </div>
-
-              {currentPlayerCannotRequest && (
-                <div className="form-hint">
-                  {!hasAvailableRequestCards && (
-                    <p>
-                      Сейчас твой ход, но нет карт, которые можно спросить. Нужно иметь хотя бы одну карту из квартета.
-                    </p>
-                  )}
-
-                  {hasAvailableRequestCards && !hasRequestTargetPlayers && (
-                    <p>
-                      Сейчас твой ход, но нет игроков с картами, у которых можно спросить карту.
-                    </p>
-                  )}
-                </div>
-              )}
-
-              <p className="form-hint">
-                {currentTurnPlayerID === player?.id
-                  ? 'Сейчас твой ход. Выбери игрока и карту.'
-                  : currentTurnPlayerID
-                    ? `Сейчас ходит ${getPlayerName(currentTurnPlayerID)}.`
-                    : 'Ожидаем состояние игры.'}
-              </p>
-
-              <button
-                className="button"
-                onClick={onRequestCard}
-                disabled={!canRequestCard() || !hasRequestTargetPlayers || !hasAvailableRequestCards}
-              >
-                {getRequestButtonText()}
-              </button>
             </div>
           )}
         </div>

@@ -306,18 +306,18 @@ code {
 .cards-list {
   display: flex;
   overflow-x: auto;
-  padding: 12px 16px 20px;
+  overflow-x: visible;
+  padding: 8px 0 14px;
   scroll-snap-type: x proximity;
 }
 
 .cards-list > .card {
-  flex: 0 0 120px;
-  scroll-snap-align: start;
-  transition: transform 0.15s ease;
+  flex: 0 0 116px;
+  min-height: 150px;
 }
 
 .cards-list > .card + .card {
-  margin-left: -28px;
+  margin-left: -34px;
 }
 
 .cards-list > .card:hover,
@@ -581,13 +581,16 @@ code {
 
 .hand-quartets-list {
   display: flex;
-  gap: 16px;
+  gap: 12px;
   overflow-x: auto;
+  padding: 0 16px 12px;
 }
 
 .hand-quartet-group {
-  min-width: 260px;
+  flex: 0 0 210px;
+  min-width: 210px;
 }
+
 
 .hand-quartet-group h4 {
   margin: 0;
@@ -605,6 +608,7 @@ code {
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
+  min-height: 28px;
 }
 
 .quartet-progress {
@@ -1142,6 +1146,25 @@ code {
   transform: translateY(-50%);
 }
 
+.player-seat {
+  min-width: 76px;
+  padding: 8px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.player-seat-avatar {
+  width: 42px;
+  height: 42px;
+  margin: 0 auto 6px;
+}
+
+.player-seat-current .player-seat-avatar {
+  outline: 3px solid rgba(59, 130, 246, 0.55);
+  outline-offset: 3px;
+}
+
 .player-card-backs {
   display: flex;
   justify-content: center;
@@ -1189,9 +1212,8 @@ code {
 }
 
 .bottom-hand-zone {
-  position: sticky;
-  bottom: 0;
-  z-index: 20;
+  position: relative;
+  z-index: auto:
   padding-top: 12px;
 }
 
@@ -1217,3 +1239,188 @@ code {
   justify-content: space-between;
 }
 
+.gameplay-layout {
+  display: grid;
+  gap: 16px;
+}
+
+.gameplay-main-zone {
+  display: grid;
+  gap: 16px;
+  z-index: 30;
+}
+
+.gameplay-hand-zone {
+  position: relative;
+  bottom: 0;
+  z-index: 20;
+}
+
+.player-details-modal {
+  width: min(360px, 90vw);
+  padding: 24px;
+  border-radius: 24px;
+  background: #fff;
+  box-shadow: 0 24px 80px rgba(15, 23, 42, 0.28);
+  text-align: center;
+}
+
+.table-turn-status {
+  font-weight: 800;
+  text-align: center;
+}
+
+.table-completed-quartets {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.player-hand-zone {
+  padding: 16px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.player-hand-zone h2 {
+  margin: 0 16px 12px;
+}
+
+.hand-toggle-button {
+  display: none;
+}
+
+@media (max-width: 720px) {
+  .hand-toggle-button {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    min-height: 52px;
+    padding: 12px 16px;
+    border: 0;
+    border-radius: 18px 18px 0 0;
+    background: #ffffff;
+    font: inherit;
+    font-weight: 800;
+    cursor: pointer;
+  }
+
+  .hand-toggle-button span {
+    color: #2563eb;
+    font-size: 13px;
+  }
+
+  .gameplay-hand-zone.hand-collapsed .player-hand-zone {
+    display: none;
+  }
+}
+
+.card-preview-art {
+  min-height: 220px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+  display: grid;
+  place-items: center;
+  font-size: 64px;
+}
+
+.card-preview-content {
+  display: grid;
+  gap: 6px;
+}
+
+.card-preview-kvartet {
+  margin: 0;
+  color: #71717a;
+  font-weight: 700;
+}
+
+.card-preview-content small {
+  color: #a1a1aa;
+  overflow-wrap: anywhere;
+}
+
+.request-flow-modal {
+  width: min(960px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+  overflow: auto;
+  padding: 24px;
+  border-radius: 28px;
+  background: #ffffff;
+  box-shadow: 0 24px 80px rgba(15, 23, 42, 0.28);
+}
+
+.request-flow-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.request-flow-header h2 {
+  margin: 0 0 6px;
+}
+
+.request-flow-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+.request-flow-player {
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+  padding: 16px;
+  border: 1px solid #e4e4e7;
+  border-radius: 18px;
+  background: #ffffff;
+  cursor: pointer;
+}
+
+.request-flow-player-selected {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18);
+}
+
+.request-flow-open-button {
+  position: relative;
+  z-index: 100;
+}
+
+.request-flow-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.request-flow-card {
+  display: grid;
+  gap: 8px;
+  text-align: left;
+  padding: 14px;
+  border: 1px solid #e4e4e7;
+  border-radius: 16px;
+  background: #ffffff;
+  cursor: pointer;
+}
+
+.request-flow-card-selected {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18);
+}
+
+.request-flow-card-main {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.request-flow-actions {
+  margin-top: 24px;
+}
