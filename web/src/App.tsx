@@ -22,6 +22,7 @@ import {
   updateUserQuartetRequest,
 } from './api'
 import './App.css'
+import { PlayerDetailsModal } from './components/PlayerDetailsModal'
 import { AccountPanel } from './components/AccountPanel'
 import { EntryPanel } from './components/EntryPanel'
 import { GamePanel } from './components/GamePanel'
@@ -109,6 +110,7 @@ function App() {
   const latestGameEvent = gameEvents.at(-1)
   const [previewCard, setPreviewCard] = useState<PrivateCard | null>(null)
   const [selectedTablePlayerID, setSelectedTablePlayerID] = useState('')
+  const selectedTablePlayer = publicGameState?.players.find((p) => p.id === selectedTablePlayerID) ?? null
 
   function resetGameState() {
     updateDeck(null)
@@ -1621,6 +1623,17 @@ function App() {
                   )}
                 </div>
               </div>
+
+              {selectedTablePlayer && publicGameState && (
+                <PlayerDetailsModal
+                  player={selectedTablePlayer}
+                  isCurrentTurn={selectedTablePlayer.id === currentTurnPlayerID}
+                  completedQuartetsCount={
+                    publicGameState.completed[selectedTablePlayer.id]?.length ?? 0
+                  }
+                  onClose={() => setSelectedTablePlayerID('')}
+                />
+              )}
 
               {previewCard && (
                 <div className="modal-backdrop" onClick={() => setPreviewCard(null)}>
