@@ -1589,7 +1589,10 @@ function App() {
                       })
                     }
                   }}
-                  onSubmit={requestCard}
+                  onSubmit={() => {
+                    requestCard()
+                    setIsRequestFlowOpen(false)
+                  }}
                   canSubmit={targetPlayerID !== '' && selectedCardID !== ''}
                 />
               )}
