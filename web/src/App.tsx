@@ -1593,7 +1593,7 @@ function App() {
 
                   {canOpenRequestFlow && (
                     <button
-                      className="button"
+                      className="button request-flow-open-button"
                       type="button"
                       onClick={() => {
                         console.log('open request flow')

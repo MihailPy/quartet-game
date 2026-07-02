@@ -1212,9 +1212,8 @@ code {
 }
 
 .bottom-hand-zone {
-  position: sticky;
-  bottom: 0;
-  z-index: 20;
+  position: relative;
+  z-index: auto:
   padding-top: 12px;
 }
 
@@ -1248,10 +1247,11 @@ code {
 .gameplay-main-zone {
   display: grid;
   gap: 16px;
+  z-index: 30;
 }
 
 .gameplay-hand-zone {
-  position: sticky;
+  position: relative;
   bottom: 0;
   z-index: 20;
 }
@@ -1383,4 +1383,9 @@ code {
 .request-flow-player-selected {
   border-color: #2563eb;
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18);
+}
+
+.request-flow-open-button {
+  position: relative;
+  z-index: 100;
 }
