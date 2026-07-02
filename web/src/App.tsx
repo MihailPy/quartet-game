@@ -112,6 +112,7 @@ function App() {
   const [selectedTablePlayerID, setSelectedTablePlayerID] = useState('')
   const selectedTablePlayer = publicGameState?.players.find((p) => p.id === selectedTablePlayerID) ?? null
   const [isHandOpen, setIsHandOpen] = useState(true)
+  const [isRequestFlowOpen, setIsRequestFlowOpen] = useState(false)
 
   function resetGameState() {
     updateDeck(null)
@@ -1608,6 +1609,7 @@ function App() {
                     completedQuartets={getCompletedQuartets()}
                     isStartingGame={isStartingGame}
                     latestEventText={latestGameEvent ? formatGameEvent(latestGameEvent) : ''}
+                    onOpenRequestFlow={() => setIsRequestFlowOpen(true)}
                   />
                 </div>
 
