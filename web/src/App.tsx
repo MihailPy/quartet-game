@@ -108,7 +108,6 @@ function App() {
   const hasGameStarted = publicGameState !== null
   const [isGameLogOpen, setIsGameLogOpen] = useState(false)
   const [gameEvents, setGameEvents] = useState<GameEvent[]>([])
-  const latestGameEvent = gameEvents.at(-1)
   const [previewCard, setPreviewCard] = useState<PrivateCard | null>(null)
   const [selectedTablePlayerID, setSelectedTablePlayerID] = useState('')
   const selectedTablePlayer = publicGameState?.players.find((p) => p.id === selectedTablePlayerID) ?? null
@@ -590,60 +589,6 @@ function App() {
     return payload.message || 'Не удалось запросить карту.'
   }
 
-  function canRequestCard(): boolean {
-    return Boolean(
-      player &&
-      publicGameState &&
-      !gameFinished &&
-      socketStatus === 'connected' &&
-      isCurrentPlayerConnected() &&
-      currentTurnPlayerID === player.id &&
-      targetPlayerID &&
-      selectedCardID &&
-      availableRequestCards.length > 0,
-    )
-  }
-
-  function getRequestButtonText(): string {
-    if (!player) {
-      return 'Сначала подключись'
-    }
-
-    if (!isCurrentPlayerConnected()) {
-      return 'Нет подключения'
-    }
-
-    if (socketStatus !== 'connected') {
-      return 'Нет подключения'
-    }
-
-    if (gameFinished) {
-      return 'Игра завершена'
-    }
-
-    if (!currentTurnPlayerID) {
-      return 'Ожидание хода'
-    }
-
-    if (currentTurnPlayerID !== player.id) {
-      return 'Сейчас не твой ход'
-    }
-
-    if (availableRequestCards.length === 0) {
-      return 'Нет доступных карт'
-    }
-
-    if (!targetPlayerID) {
-      return 'Выбери игрока'
-    }
-
-    if (!selectedCardID) {
-      return 'Выбери карту'
-    }
-
-    return 'Спросить карту'
-  }
-
   async function loadDeck(roomID: string) {
     const data = await loadDeckRequest(roomID)
 
@@ -768,39 +713,6 @@ function App() {
     ).length
 
     return selectedPlayersCount >= 2
-  }
-
-  function getAvailableRequestCardsByQuartet() {
-    return availableRequestCards.reduce<Record<string, RequestableCard[]>>(
-      (groups, card) => {
-        const key = card.quartet_id
-
-        if (!groups[key]) {
-          groups[key] = []
-        }
-
-        groups[key].push(card)
-
-        return groups
-      },
-      {},
-    )
-  }
-
-  function getCompletedQuartets() {
-    if (!publicGameState) {
-      return []
-    }
-
-    return Object.entries(publicGameState.completed).flatMap(
-      ([playerID, quartetIDs]) =>
-        quartetIDs.map((quartetID) => ({
-          playerID,
-          playerName: getPlayerName(playerID),
-          quartetID,
-          quartetTitle: getQuartetTitle(quartetID),
-        })),
-    )
   }
 
   function getJoinRoomErrorMessage(message: string): string {
@@ -1612,22 +1524,11 @@ function App() {
                     temporaryMessages={temporaryMessages}
                     gameFinished={gameFinished}
                     socketStatus={socketStatus}
-                    targetPlayerID={targetPlayerID}
-                    selectedCardID={selectedCardID}
-                    availableRequestCards={availableRequestCards}
-                    availableRequestCardsByQuartet={getAvailableRequestCardsByQuartet()}
-                    onTargetPlayerIDChange={setTargetPlayerID}
-                    onSelectedCardIDChange={setSelectedCardID}
-                    onRequestCard={requestCard}
                     onStartGame={startGame}
                     isRoomOwner={isRoomOwner()}
                     canStartGame={canStartGame()}
                     getPlayerName={getPlayerName}
-                    canRequestCard={canRequestCard}
-                    getRequestButtonText={getRequestButtonText}
-                    completedQuartets={getCompletedQuartets()}
                     isStartingGame={isStartingGame}
-                    latestEventText={latestGameEvent ? formatGameEvent(latestGameEvent) : ''}
                   />
                 </div>
 
