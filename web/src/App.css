@@ -1217,3 +1217,18 @@ code {
   justify-content: space-between;
 }
 
+.gameplay-layout {
+  display: grid;
+  gap: 16px;
+}
+
+.gameplay-main-zone {
+  display: grid;
+  gap: 16px;
+}
+
+.gameplay-hand-zone {
+  position: sticky;
+  bottom: 0;
+  z-index: 20;
+}

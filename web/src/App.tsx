@@ -1568,52 +1568,56 @@ function App() {
                 )}
               </div>
 
-              <div className="layout-center-column">
-                <GameplayTable
-                  gameState={publicGameState}
-                  currentPlayerID={currentTurnPlayerID}
-                  latestEventTexts={[...gameEvents]
-                    .slice(-2)
-                    .reverse()
-                    .map(formatGameEvent)}
-                />
+              <div className="gameplay-layout">
+                <div className='gamepley-main-zone'>
+                  <GameplayTable
+                    gameState={publicGameState}
+                    currentPlayerID={currentTurnPlayerID}
+                    latestEventTexts={[...gameEvents]
+                      .slice(-2)
+                      .reverse()
+                      .map(formatGameEvent)}
+                  />
 
-                <GamePanel
-                  room={room}
-                  player={player}
-                  publicGameState={publicGameState}
-                  currentTurnPlayerID={currentTurnPlayerID}
-                  temporaryMessages={temporaryMessages}
-                  gameFinished={gameFinished}
-                  socketStatus={socketStatus}
-                  targetPlayerID={targetPlayerID}
-                  selectedCardID={selectedCardID}
-                  availableRequestCards={availableRequestCards}
-                  availableRequestCardsByQuartet={getAvailableRequestCardsByQuartet()}
-                  onTargetPlayerIDChange={setTargetPlayerID}
-                  onSelectedCardIDChange={setSelectedCardID}
-                  onRequestCard={requestCard}
-                  onStartGame={startGame}
-                  isRoomOwner={isRoomOwner()}
-                  canStartGame={canStartGame()}
-                  getPlayerName={getPlayerName}
-                  canRequestCard={canRequestCard}
-                  getRequestButtonText={getRequestButtonText}
-                  completedQuartets={getCompletedQuartets()}
-                  isStartingGame={isStartingGame}
-                  latestEventText={latestGameEvent ? formatGameEvent(latestGameEvent) : ''}
-                />
+                  <GamePanel
+                    room={room}
+                    player={player}
+                    publicGameState={publicGameState}
+                    currentTurnPlayerID={currentTurnPlayerID}
+                    temporaryMessages={temporaryMessages}
+                    gameFinished={gameFinished}
+                    socketStatus={socketStatus}
+                    targetPlayerID={targetPlayerID}
+                    selectedCardID={selectedCardID}
+                    availableRequestCards={availableRequestCards}
+                    availableRequestCardsByQuartet={getAvailableRequestCardsByQuartet()}
+                    onTargetPlayerIDChange={setTargetPlayerID}
+                    onSelectedCardIDChange={setSelectedCardID}
+                    onRequestCard={requestCard}
+                    onStartGame={startGame}
+                    isRoomOwner={isRoomOwner()}
+                    canStartGame={canStartGame()}
+                    getPlayerName={getPlayerName}
+                    canRequestCard={canRequestCard}
+                    getRequestButtonText={getRequestButtonText}
+                    completedQuartets={getCompletedQuartets()}
+                    isStartingGame={isStartingGame}
+                    latestEventText={latestGameEvent ? formatGameEvent(latestGameEvent) : ''}
+                  />
+                </div>
 
-                {hasGameStarted && room && isGamePlaying && playerHand && (
-                  <div className='bottom-hand-zone'>
-                    <PlayerHandPanel
-                      player={player}
-                      playerHand={playerHand}
-                      getQuartetTitle={getQuartetTitle}
-                      onCardPreview={setPreviewCard}
-                    />
-                  </div>
-                )}
+                <div className='gameplay-hand-zone'>
+                  {hasGameStarted && room && isGamePlaying && playerHand && (
+                    <div className='bottom-hand-zone'>
+                      <PlayerHandPanel
+                        player={player}
+                        playerHand={playerHand}
+                        getQuartetTitle={getQuartetTitle}
+                        onCardPreview={setPreviewCard}
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
 
               {previewCard && (
