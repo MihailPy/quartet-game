@@ -1653,8 +1653,19 @@ function App() {
                     className="card-preview-modal"
                     onClick={(event) => event.stopPropagation()}
                   >
-                    <h2>{previewCard.title}</h2>
-                    <p className="form-hint">Квартет: {getQuartetTitle(previewCard.quartet_id)}</p>
+                    <div className="card-preview-art">
+                      <span>🂠</span>
+                    </div>
+
+                    <div className="card-preview-content">
+                      <p className="card-preview-kvartet">
+                        {getQuartetTitle(previewCard.quartet_id)}
+                      </p>
+
+                      <h2>{previewCard.title}</h2>
+
+                      <small>{previewCard.id}</small>
+                    </div>
 
                     <button className="button" type="button" onClick={() => setPreviewCard(null)}>
                       Закрыть
