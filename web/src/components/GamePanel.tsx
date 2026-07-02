@@ -36,7 +36,6 @@ type GamePanelProps = {
     quartetTitle: string
   }[]
   latestEventText?: string
-  onOpenRequestFlow?: () => void
 }
 
 function getSocketStatusLabel(status: string): string {
@@ -81,7 +80,6 @@ export function GamePanel({
   canRequestCard,
   getRequestButtonText,
   isStartingGame,
-  onOpenRequestFlow,
 }: GamePanelProps) {
 
   const requestTargetPlayers =
@@ -231,15 +229,6 @@ export function GamePanel({
                 })}
               </div>
             </div>
-          )}
-          {canRequestCard() && (
-            <button
-              className="button"
-              type="button"
-              onClick={onOpenRequestFlow}
-            >
-              Сделать запрос карты
-            </button>
           )}
           {player && publicGameState && !gameFinished && isCurrentPlayerTurn && (
             <div className="request-form">

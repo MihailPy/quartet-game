@@ -22,6 +22,7 @@ import {
   updateUserQuartetRequest,
 } from './api'
 import './App.css'
+import { RequestCardFlow } from './components/RequestCardFlow'
 import { PlayerDetailsModal } from './components/PlayerDetailsModal'
 import { AccountPanel } from './components/AccountPanel'
 import { EntryPanel } from './components/EntryPanel'
@@ -113,6 +114,11 @@ function App() {
   const selectedTablePlayer = publicGameState?.players.find((p) => p.id === selectedTablePlayerID) ?? null
   const [isHandOpen, setIsHandOpen] = useState(true)
   const [isRequestFlowOpen, setIsRequestFlowOpen] = useState(false)
+  const canOpenRequestFlow =
+    player !== null &&
+    publicGameState !== null &&
+    gameFinished === null &&
+    currentTurnPlayerID === player.id
 
   function resetGameState() {
     updateDeck(null)
@@ -1585,6 +1591,19 @@ function App() {
                     onPlayerClick={setSelectedTablePlayerID}
                   />
 
+                  {canOpenRequestFlow && (
+                    <button
+                      className="button"
+                      type="button"
+                      onClick={() => {
+                        console.log('open request flow')
+                        setIsRequestFlowOpen(true)
+                      }}
+                    >
+                      Открыть новый запрос карты
+                    </button>
+                  )}
+
                   <GamePanel
                     room={room}
                     player={player}
@@ -1609,7 +1628,6 @@ function App() {
                     completedQuartets={getCompletedQuartets()}
                     isStartingGame={isStartingGame}
                     latestEventText={latestGameEvent ? formatGameEvent(latestGameEvent) : ''}
-                    onOpenRequestFlow={() => setIsRequestFlowOpen(true)}
                   />
                 </div>
 
@@ -1646,6 +1664,16 @@ function App() {
                     publicGameState.completed[selectedTablePlayer.id]?.length ?? 0
                   }
                   onClose={() => setSelectedTablePlayerID('')}
+                />
+              )}
+
+              {isRequestFlowOpen && publicGameState && (
+                <RequestCardFlow
+                  players={publicGameState.players}
+                  currentPlayerID={player?.id ?? ''}
+                  selectedTargetPlayerID={targetPlayerID}
+                  onSelectTargetPlayer={setTargetPlayerID}
+                  onClose={() => setIsRequestFlowOpen(false)}
                 />
               )}
 
