@@ -48,30 +48,33 @@ export function RequestCardFlow({
           </button>
         </header>
 
-        <div className="request-flow-grid">
-          {targetPlayers.map((player) => (
-            <button
-              className={
-                player.id === selectedTargetPlayerID
-                  ? 'request-flow-player request-flow-player-selected'
-                  : 'request-flow-player'
-              }
-              key={player.id}
-              type="button"
-              onClick={() => onSelectTargetPlayer(player.id)}
-            >
-              <div className="player-seat-avatar">
-                {player.name.charAt(0).toUpperCase()}
-              </div>
+        <div className="request-flow-content">
+          <section className='request-flow-section'>
+            <h3>2. Выбери карту</h3>
+            {targetPlayers.map((player) => (
+              <button
+                className={
+                  player.id === selectedTargetPlayerID
+                    ? 'request-flow-player request-flow-player-selected'
+                    : 'request-flow-player'
+                }
+                key={player.id}
+                type="button"
+                onClick={() => onSelectTargetPlayer(player.id)}
+              >
+                <div className="player-seat-avatar">
+                  {player.name.charAt(0).toUpperCase()}
+                </div>
 
-              <strong>{player.name}</strong>
-              <span>{player.card_count} карт</span>
-            </button>
-          ))}
+                <strong>{player.name}</strong>
+                <span>{player.card_count} карт</span>
+              </button>
+            ))}
+          </section>
 
           {availableRequestCards.length > 0 && (
-            <section>
-              <h3>Выбери карту</h3>
+            <section className='request-flow-section'>
+              <h3>2. Выбери карту</h3>
 
               <div className="request-flow-cards-grid">
                 {availableRequestCards.map((card) => (
