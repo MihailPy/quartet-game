@@ -1213,7 +1213,7 @@ code {
 
 .bottom-hand-zone {
   position: relative;
-  z-index: auto:
+  z-index: auto;
   padding-top: 12px;
 }
 
@@ -1252,8 +1252,7 @@ code {
 
 .gameplay-hand-zone {
   position: relative;
-  bottom: 0;
-  z-index: 20;
+  z-index: auto;
 }
 
 .player-details-modal {
@@ -1534,4 +1533,11 @@ code {
   border-radius: 14px;
   background: #ffffff;
   border: 1px solid #e4e4e7;
+}
+
+@media (max-width: 720px) {
+  .gameplay-hand-zone {
+    position: relative;
+    z-index: auto;
+  }
 }
