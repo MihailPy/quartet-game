@@ -1488,4 +1488,24 @@ code {
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18);
 }
 
+.card-preview-modal {
+  width: min(420px, 92vw);
+  min-height: min(640px, 86vh);
+  gap: 18px;
+}
 
+.card-preview-art {
+  flex: 1;
+  min-height: 280px;
+}
+
+.card-preview-content h2 {
+  margin: 0;
+  font-size: 28px;
+}
+
+.card-preview-kvartet {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 12px;
+}
