@@ -312,12 +312,12 @@ code {
 }
 
 .cards-list > .card {
-  flex: 0 0 116px;
-  min-height: 150px;
+  flex: 0 0 112px;
+  min-height: 148px;
 }
 
 .cards-list > .card + .card {
-  margin-left: -34px;
+  margin-left: -36px;
 }
 
 .cards-list > .card:hover,
@@ -581,16 +581,15 @@ code {
 
 .hand-quartets-list {
   display: flex;
-  gap: 12px;
+  gap: 8px;
   overflow-x: auto;
-  padding: 0 16px 12px;
+  padding: 0 12px 12px;
 }
 
 .hand-quartet-group {
-  flex: 0 0 210px;
-  min-width: 210px;
+  flex: 0 0 190px;
+  min-width: 190px;
 }
-
 
 .hand-quartet-group h4 {
   margin: 0;
