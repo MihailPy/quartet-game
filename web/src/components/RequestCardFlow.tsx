@@ -1,4 +1,4 @@
-import type { PublicGamePlayer, RequestableCard } from '../types'
+import type { PublicGamePlayer, RequestableCard, PlayerHandPayload } from '../types'
 
 type RequestCardFlowProps = {
   players: PublicGamePlayer[]
@@ -12,6 +12,8 @@ type RequestCardFlowProps = {
   onPreviewCard: (cardID: string) => void
   onSubmit: () => void
   canSubmit: boolean
+  playerHand: PlayerHandPayload | null
+  getQuartetTitle: (quartetID: string) => string
 }
 
 export function RequestCardFlow({
@@ -26,6 +28,8 @@ export function RequestCardFlow({
   onPreviewCard,
   onSubmit,
   canSubmit,
+  playerHand,
+  getQuartetTitle,
 }: RequestCardFlowProps) {
   const targetPlayers = players.filter(
     (player) => player.id !== currentPlayerID && player.card_count > 0,
@@ -105,6 +109,23 @@ export function RequestCardFlow({
                   </div>
                 ))}
               </div>
+            </section>
+          )}
+
+          {playerHand && (
+            <section className="request-flow-section">
+              <details className="request-flow-hand-preview">
+                <summary>Моя рука ({playerHand.cards.length} карт)</summary>
+
+                <div className="request-flow-hand-cards">
+                  {playerHand.cards.map((card) => (
+                    <div className="request-flow-hand-card" key={card.id}>
+                      <strong>{card.title}</strong>
+                      <small>{getQuartetTitle(card.quartet_id)}</small>
+                    </div>
+                  ))}
+                </div>
+              </details>
             </section>
           )}
 

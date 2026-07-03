@@ -1509,3 +1509,29 @@ code {
   letter-spacing: 0.08em;
   font-size: 12px;
 }
+
+.request-flow-hand-preview {
+  padding: 12px;
+  border-radius: 16px;
+  background: #f8fafc;
+}
+
+.request-flow-hand-preview summary {
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.request-flow-hand-cards {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  overflow-x: auto;
+}
+
+.request-flow-hand-card {
+  flex: 0 0 120px;
+  padding: 10px;
+  border-radius: 14px;
+  background: #ffffff;
+  border: 1px solid #e4e4e7;
+}
