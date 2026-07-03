@@ -1454,3 +1454,29 @@ code {
   gap: 10px;
   margin-top: 24px;
 }
+
+@media (max-width: 720px) {
+  .request-flow-modal {
+    width: 100vw;
+    max-height: 100vh;
+    min-height: 100vh;
+    border-radius: 0;
+    padding: 20px 16px calc(20px + env(safe-area-inset-bottom));
+  }
+
+  .request-flow-header {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    padding-bottom: 12px;
+    background: #ffffff;
+  }
+
+  .request-flow-actions {
+    position: sticky;
+    bottom: 0;
+    padding-top: 12px;
+    padding-bottom: env(safe-area-inset-bottom);
+    background: #ffffff;
+  }
+}
