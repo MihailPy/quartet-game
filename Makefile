@@ -1,7 +1,7 @@
 APP_NAME=quartet-game
 MAIN_PATH=./cmd/api
 DATABASE_URL=postgres://quartet_user:quartet_password@localhost:5432/quartet_game?sslmode=disable
-ALLOWED_ORIGINS=http://192.168.1.4:5173,http://localhost:5173
+ALLOWED_ORIGINS=http://192.168.1.3:5173,http://localhost:5173
 
 .PHONY: run test fmt tidy build clean migrate-up migrate-down migrate-force
 

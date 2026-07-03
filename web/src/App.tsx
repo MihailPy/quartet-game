@@ -1594,6 +1594,8 @@ function App() {
                     setIsRequestFlowOpen(false)
                   }}
                   canSubmit={targetPlayerID !== '' && selectedCardID !== ''}
+                  playerHand={playerHand}
+                  getQuartetTitle={getQuartetTitle}
                 />
               )}
 

@@ -1,4 +1,4 @@
-import type { PublicGamePlayer, RequestableCard } from '../types'
+import type { PublicGamePlayer, RequestableCard, PlayerHandPayload } from '../types'
 
 type RequestCardFlowProps = {
   players: PublicGamePlayer[]
@@ -12,6 +12,8 @@ type RequestCardFlowProps = {
   onPreviewCard: (cardID: string) => void
   onSubmit: () => void
   canSubmit: boolean
+  playerHand: PlayerHandPayload | null
+  getQuartetTitle: (quartetID: string) => string
 }
 
 export function RequestCardFlow({
@@ -26,6 +28,8 @@ export function RequestCardFlow({
   onPreviewCard,
   onSubmit,
   canSubmit,
+  playerHand,
+  getQuartetTitle,
 }: RequestCardFlowProps) {
   const targetPlayers = players.filter(
     (player) => player.id !== currentPlayerID && player.card_count > 0,
@@ -48,30 +52,33 @@ export function RequestCardFlow({
           </button>
         </header>
 
-        <div className="request-flow-grid">
-          {targetPlayers.map((player) => (
-            <button
-              className={
-                player.id === selectedTargetPlayerID
-                  ? 'request-flow-player request-flow-player-selected'
-                  : 'request-flow-player'
-              }
-              key={player.id}
-              type="button"
-              onClick={() => onSelectTargetPlayer(player.id)}
-            >
-              <div className="player-seat-avatar">
-                {player.name.charAt(0).toUpperCase()}
-              </div>
+        <div className="request-flow-content">
+          <section className='request-flow-section'>
+            <h3>2. Выбери карту</h3>
+            {targetPlayers.map((player) => (
+              <button
+                className={
+                  player.id === selectedTargetPlayerID
+                    ? 'request-flow-player request-flow-player-selected'
+                    : 'request-flow-player'
+                }
+                key={player.id}
+                type="button"
+                onClick={() => onSelectTargetPlayer(player.id)}
+              >
+                <div className="player-seat-avatar">
+                  {player.name.charAt(0).toUpperCase()}
+                </div>
 
-              <strong>{player.name}</strong>
-              <span>{player.card_count} карт</span>
-            </button>
-          ))}
+                <strong>{player.name}</strong>
+                <span>{player.card_count} карт</span>
+              </button>
+            ))}
+          </section>
 
           {availableRequestCards.length > 0 && (
-            <section>
-              <h3>Выбери карту</h3>
+            <section className='request-flow-section'>
+              <h3>2. Выбери карту</h3>
 
               <div className="request-flow-cards-grid">
                 {availableRequestCards.map((card) => (
@@ -102,6 +109,23 @@ export function RequestCardFlow({
                   </div>
                 ))}
               </div>
+            </section>
+          )}
+
+          {playerHand && (
+            <section className="request-flow-section">
+              <details className="request-flow-hand-preview">
+                <summary>Моя рука ({playerHand.cards.length} карт)</summary>
+
+                <div className="request-flow-hand-cards">
+                  {playerHand.cards.map((card) => (
+                    <div className="request-flow-hand-card" key={card.id}>
+                      <strong>{card.title}</strong>
+                      <small>{getQuartetTitle(card.quartet_id)}</small>
+                    </div>
+                  ))}
+                </div>
+              </details>
             </section>
           )}
 
