@@ -1734,3 +1734,30 @@ code {
     margin-bottom: 10px;
   }
 }
+
+.card,
+.request-flow-player,
+.request-flow-card,
+.button,
+.secondary-button {
+  transition:
+    box-shadow 0.15s ease,
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+
+.request-flow-player:hover,
+.request-flow-card:hover,
+.card:hover {
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.10);
+}
+
+.player-seat {
+  transition:
+    filter 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.player-seat:hover {
+  filter: brightness(1.04);
+}
