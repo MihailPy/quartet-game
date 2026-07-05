@@ -306,7 +306,6 @@ code {
 .cards-list {
   display: flex;
   overflow-x: auto;
-  overflow-x: visible;
   padding: 8px 0 14px;
   scroll-snap-type: x proximity;
 }
@@ -1599,4 +1598,25 @@ code {
   .gameplay-mode {
     max-width: 100%;
   }
+}
+
+.gameplay-layout {
+  align-items: start;
+}
+
+.gameplay-main-zone {
+  min-width: 0;
+}
+
+.gameplay-hand-zone {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.player-hand-zone {
+  overflow: hidden;
+}
+
+.hand-quartets-list {
+  max-width: 100%;
 }
