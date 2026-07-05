@@ -1421,7 +1421,15 @@ function App() {
           </div>
         )}
 
-        <section className={isEntered ? 'game-layout' : 'game-layout entry-layout'}>
+        <section
+          className={
+            !isEntered
+              ? 'game-layout entry-layout'
+              : isGamePlaying
+                ? 'game-layout gameplay-mode'
+                : 'game-layout'
+          }
+        >
           {isSessionRestored && !isEntered && (
             currentView === 'account' ? (
               <AccountPanel

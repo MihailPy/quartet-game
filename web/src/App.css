@@ -1545,3 +1545,20 @@ code {
     z-index: auto;
   }
 }
+
+.gameplay-mode {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.gameplay-mode .layout-main-column,
+.gameplay-mode .layout-side-column {
+  display: none;
+}
+
+.gameplay-mode .layout-center-column {
+  width: 100%;
+}
