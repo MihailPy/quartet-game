@@ -1703,3 +1703,34 @@ code {
     height: 30px;
   }
 }
+
+.gameplay-layout {
+  gap: 20px;
+}
+
+.gameplay-main-zone {
+  gap: 20px;
+}
+
+.gameplay-hand-zone {
+  margin-top: 4px;
+}
+
+@media (max-width: 720px) {
+  .gameplay-layout {
+    gap: 14px;
+  }
+
+  .gameplay-main-zone {
+    gap: 14px;
+  }
+
+  .gameplay-hand-zone {
+    margin-top: 0;
+  }
+
+  .gameplay-table h2,
+  .player-hand-zone h2 {
+    margin-bottom: 10px;
+  }
+}
