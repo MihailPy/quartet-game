@@ -1568,3 +1568,35 @@ code {
 .gameplay-mode .layout-center-column {
   width: 100%;
 }
+
+@media (min-width: 1200px) {
+  .gameplay-mode {
+    max-width: 1280px;
+  }
+}
+
+@media (min-width: 721px) and (max-width: 1199px) {
+  .game-page {
+    width: min(100%, 960px);
+  }
+
+  .game-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .layout-main-column,
+  .layout-center-column,
+  .layout-side-column {
+    width: 100%;
+  }
+}
+
+@media (max-width: 720px) {
+  .game-page {
+    width: 100%;
+  }
+
+  .gameplay-mode {
+    max-width: 100%;
+  }
+}
