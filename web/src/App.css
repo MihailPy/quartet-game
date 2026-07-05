@@ -1651,3 +1651,19 @@ code {
     margin-bottom: 12px;
   }
 }
+
+@media (max-width: 720px) {
+  .gameplay-hand-zone.hand-collapsed {
+    margin-top: 8px;
+  }
+
+  .gameplay-hand-zone.hand-collapsed .hand-toggle-button {
+    border-radius: 18px;
+    box-shadow: 0 10px 28px rgba(15, 23, 42, 0.14);
+  }
+
+  .gameplay-hand-zone.hand-open .hand-toggle-button {
+    border-radius: 18px 18px 0 0;
+    border-bottom: 1px solid #e4e4e7;
+  }
+}
