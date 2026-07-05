@@ -20,7 +20,7 @@ body {
 }
 
 .game-page {
-  width: min(100%, 1180px);
+  width: min(100%, 1440px);
   margin: 0 auto;
 }
 
@@ -306,7 +306,6 @@ code {
 .cards-list {
   display: flex;
   overflow-x: auto;
-  overflow-x: visible;
   padding: 8px 0 14px;
   scroll-snap-type: x proximity;
 }
@@ -1544,4 +1543,221 @@ code {
     position: relative;
     z-index: auto;
   }
+}
+
+.gameplay-mode {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.gameplay-mode .layout-main-column {
+  display: none;
+}
+
+.gameplay-mode .layout-side-column {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 30;
+}
+
+.gameplay-mode .layout-center-column {
+  width: 100%;
+}
+
+@media (min-width: 1200px) {
+  .gameplay-mode {
+    max-width: 1280px;
+  }
+}
+
+@media (min-width: 721px) and (max-width: 1199px) {
+  .game-page {
+    width: min(100%, 960px);
+  }
+
+  .game-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .layout-main-column,
+  .layout-center-column,
+  .layout-side-column {
+    width: 100%;
+  }
+}
+
+@media (max-width: 720px) {
+  .game-page {
+    width: 100%;
+  }
+
+  .gameplay-mode {
+    max-width: 100%;
+  }
+}
+
+.gameplay-layout {
+  align-items: start;
+}
+
+.gameplay-main-zone {
+  min-width: 0;
+}
+
+.gameplay-hand-zone {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.player-hand-zone {
+  overflow: hidden;
+}
+
+.hand-quartets-list {
+  max-width: 100%;
+}
+
+@media (max-width: 720px) {
+  .player-hand-panel {
+    padding: 18px 16px;
+    border-radius: 20px 20px 0 0;
+  }
+
+  .hand-quartets-list {
+    gap: 12px;
+    padding-bottom: 12px;
+  }
+
+  .hand-quartet-group {
+    min-width: 180px;
+    flex: 0 0 180px;
+  }
+
+  .cards-list > .card {
+    flex: 0 0 92px;
+    min-height: 132px;
+  }
+
+  .cards-list > .card + .card {
+    margin-left: -24px;
+  }
+
+  .player-hand-panel h2 {
+    font-size: 32px;
+    margin-bottom: 12px;
+  }
+}
+
+@media (max-width: 720px) {
+  .gameplay-hand-zone.hand-collapsed {
+    margin-top: 8px;
+  }
+
+  .gameplay-hand-zone.hand-collapsed .hand-toggle-button {
+    border-radius: 18px;
+    box-shadow: 0 10px 28px rgba(15, 23, 42, 0.14);
+  }
+
+  .gameplay-hand-zone.hand-open .hand-toggle-button {
+    border-radius: 18px 18px 0 0;
+    border-bottom: 1px solid #e4e4e7;
+  }
+}
+
+@media (min-width: 1200px) {
+  .gameplay-table-center {
+    min-height: 360px;
+  }
+
+  .player-seats {
+    width: min(720px, 100%);
+    height: 340px;
+  }
+}
+
+@media (max-width: 720px) {
+  .gameplay-table {
+    min-height: auto;
+  }
+
+  .gameplay-table-center {
+    min-height: 260px;
+  }
+
+  .player-seats {
+    width: min(320px, 100%);
+    height: 220px;
+  }
+
+  .player-seat-avatar {
+    width: 36px;
+    height: 36px;
+  }
+
+  .player-card-back {
+    width: 20px;
+    height: 30px;
+  }
+}
+
+.gameplay-layout {
+  gap: 20px;
+}
+
+.gameplay-main-zone {
+  gap: 20px;
+}
+
+.gameplay-hand-zone {
+  margin-top: 4px;
+}
+
+@media (max-width: 720px) {
+  .gameplay-layout {
+    gap: 14px;
+  }
+
+  .gameplay-main-zone {
+    gap: 14px;
+  }
+
+  .gameplay-hand-zone {
+    margin-top: 0;
+  }
+
+  .gameplay-table h2,
+  .player-hand-zone h2 {
+    margin-bottom: 10px;
+  }
+}
+
+.card,
+.request-flow-player,
+.request-flow-card,
+.button,
+.secondary-button {
+  transition:
+    box-shadow 0.15s ease,
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+
+.request-flow-player:hover,
+.request-flow-card:hover,
+.card:hover {
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.10);
+}
+
+.player-seat {
+  transition:
+    filter 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.player-seat:hover {
+  filter: brightness(1.04);
 }
