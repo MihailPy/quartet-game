@@ -20,7 +20,7 @@ body {
 }
 
 .game-page {
-  width: min(100%, 1180px);
+  width: min(100%, 1440px);
   margin: 0 auto;
 }
 
@@ -1554,9 +1554,15 @@ code {
   margin: 0 auto;
 }
 
-.gameplay-mode .layout-main-column,
-.gameplay-mode .layout-side-column {
+.gameplay-mode .layout-main-column {
   display: none;
+}
+
+.gameplay-mode .layout-side-column {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 30;
 }
 
 .gameplay-mode .layout-center-column {
