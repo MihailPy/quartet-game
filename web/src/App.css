@@ -1667,3 +1667,39 @@ code {
     border-bottom: 1px solid #e4e4e7;
   }
 }
+
+@media (min-width: 1200px) {
+  .gameplay-table-center {
+    min-height: 360px;
+  }
+
+  .player-seats {
+    width: min(720px, 100%);
+    height: 340px;
+  }
+}
+
+@media (max-width: 720px) {
+  .gameplay-table {
+    min-height: auto;
+  }
+
+  .gameplay-table-center {
+    min-height: 260px;
+  }
+
+  .player-seats {
+    width: min(320px, 100%);
+    height: 220px;
+  }
+
+  .player-seat-avatar {
+    width: 36px;
+    height: 36px;
+  }
+
+  .player-card-back {
+    width: 20px;
+    height: 30px;
+  }
+}
