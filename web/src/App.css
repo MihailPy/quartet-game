@@ -1620,3 +1620,34 @@ code {
 .hand-quartets-list {
   max-width: 100%;
 }
+
+@media (max-width: 720px) {
+  .player-hand-panel {
+    padding: 18px 16px;
+    border-radius: 20px 20px 0 0;
+  }
+
+  .hand-quartets-list {
+    gap: 12px;
+    padding-bottom: 12px;
+  }
+
+  .hand-quartet-group {
+    min-width: 180px;
+    flex: 0 0 180px;
+  }
+
+  .cards-list > .card {
+    flex: 0 0 92px;
+    min-height: 132px;
+  }
+
+  .cards-list > .card + .card {
+    margin-left: -24px;
+  }
+
+  .player-hand-panel h2 {
+    font-size: 32px;
+    margin-bottom: 12px;
+  }
+}
