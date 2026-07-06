@@ -28,7 +28,7 @@ import { GamePanel } from './components/GamePanel'
 import { GameplayTable } from './components/GameplayTable'
 import { HistoryPanel } from './components/HistoryPanel'
 import { PlayerDetailsModal } from './components/PlayerDetailsModal'
-import { PlayerHandPanel } from './components/PlayerHandPanel'
+import { GameplayHandZone } from './components/GameplayHandZone'
 import { PlayerPanel } from './components/PlayerPanel'
 import { QuartetsPanel } from './components/QuartetsPanel'
 import { RequestCardFlow } from './components/RequestCardFlow'
@@ -1501,7 +1501,50 @@ function App() {
               )}
 
               <GameplayLayout>
-                ...
+                <div className="gameplay-main-zone">
+                  {publicGameState && (
+                    <GameplayTable
+                      gameState={publicGameState}
+                      currentTurnPlayerID={currentTurnPlayerID}
+                      latestEventTexts={gameEvents.slice(-2).map(formatGameEvent)}
+                      onPlayerClick={setSelectedTablePlayerID}
+                    />
+                  )}
+
+                  {canOpenRequestFlow && (
+                    <button
+                      className="button request-flow-open-button"
+                      type="button"
+                      onClick={() => setIsRequestFlowOpen(true)}
+                    >
+                      Открыть новый запрос карты
+                    </button>
+                  )}
+
+                  <GamePanel
+                    room={room}
+                    player={player}
+                    publicGameState={publicGameState}
+                    currentTurnPlayerID={currentTurnPlayerID}
+                    temporaryMessages={temporaryMessages}
+                    gameFinished={gameFinished}
+                    socketStatus={socketStatus}
+                    onStartGame={startGame}
+                    isRoomOwner={isRoomOwner()}
+                    canStartGame={canStartGame()}
+                    getPlayerName={getPlayerName}
+                    isStartingGame={isStartingGame}
+                  />
+                </div>
+
+                <GameplayHandZone
+                  isHandOpen={isHandOpen}
+                  player={player}
+                  playerHand={hasGameStarted && room && isGamePlaying ? playerHand : null}
+                  getQuartetTitle={getQuartetTitle}
+                  onToggleHand={() => setIsHandOpen((current) => !current)}
+                  onCardPreview={setPreviewCard}
+                />
               </GameplayLayout>
 
               {selectedTablePlayer && publicGameState && (
