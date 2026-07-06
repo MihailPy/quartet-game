@@ -452,6 +452,20 @@ function App() {
     )
   }
 
+  function previewRequestCard(cardID: string) {
+    const card = availableRequestCards.find((item) => item.id === cardID)
+
+    if (!card) {
+      return
+    }
+
+    setPreviewCard({
+      id: card.id,
+      title: card.title,
+      quartet_id: card.quartet_id,
+    })
+  }
+
   function getPlayerName(playerID: string): string {
     const currentRoom = roomRef.current
 
@@ -1568,17 +1582,7 @@ function App() {
                   availableRequestCards={availableRequestCards}
                   selectedCardID={selectedCardID}
                   onSelectCard={setSelectedCardID}
-                  onPreviewCard={(cardID) => {
-                    const card = availableRequestCards.find((item) => item.id === cardID)
-
-                    if (card) {
-                      setPreviewCard({
-                        id: card.id,
-                        title: card.title,
-                        quartet_id: card.quartet_id,
-                      })
-                    }
-                  }}
+                  onPreviewCard={previewRequestCard}
                   onSubmit={() => {
                     requestCard()
                     setIsRequestFlowOpen(false)
