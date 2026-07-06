@@ -22,16 +22,18 @@ import {
   updateUserQuartetRequest,
 } from './api'
 import './App.css'
-import { RequestCardFlow } from './components/RequestCardFlow'
-import { PlayerDetailsModal } from './components/PlayerDetailsModal'
 import { AccountPanel } from './components/AccountPanel'
+import { CardPreviewModal } from './components/CardPreviewModal'
 import { EntryPanel } from './components/EntryPanel'
 import { GamePanel } from './components/GamePanel'
+import { GameplayHandZone } from './components/GameplayHandZone'
+import { GameplayLayout } from './components/GameplayLayout'
 import { GameplayTable } from './components/GameplayTable'
 import { HistoryPanel } from './components/HistoryPanel'
-import { PlayerHandPanel } from './components/PlayerHandPanel'
+import { PlayerDetailsModal } from './components/PlayerDetailsModal'
 import { PlayerPanel } from './components/PlayerPanel'
 import { QuartetsPanel } from './components/QuartetsPanel'
+import { RequestCardFlow } from './components/RequestCardFlow'
 import { RoomPanel } from './components/RoomPanel'
 import { ToastContainer } from './components/ToastContainer'
 import {
@@ -41,6 +43,7 @@ import {
   savePlayer,
   saveRoomID,
 } from './session'
+import './styles/modals.css'
 import type {
   Deck,
   GameEvent,
@@ -64,6 +67,7 @@ import {
   buildRequestCardMessage,
   buildRoomWebSocketURL,
 } from './websocket'
+import { Panel } from './components/ui/Panel'
 
 type AppView = 'home' | 'account' | 'quartets' | 'history'
 
@@ -449,6 +453,20 @@ function App() {
     socketRef.current.send(
       JSON.stringify(buildRequestCardMessage(targetPlayerID, selectedCardID)),
     )
+  }
+
+  function previewRequestCard(cardID: string) {
+    const card = availableRequestCards.find((item) => item.id === cardID)
+
+    if (!card) {
+      return
+    }
+
+    setPreviewCard({
+      id: card.id,
+      title: card.title,
+      quartet_id: card.quartet_id,
+    })
   }
 
   function getPlayerName(playerID: string): string {
@@ -1416,9 +1434,9 @@ function App() {
         <ToastContainer toasts={toasts} onCloseToast={closeToast} />
 
         {!isSessionRestored && (
-          <div className="panel">
+          <Panel>
             <p>Восстанавливаем session...</p>
-          </div>
+          </Panel>
         )}
 
         <section
@@ -1499,26 +1517,22 @@ function App() {
                 </div>
               )}
 
-              <div className="gameplay-layout">
-                <div className='gameplay-main-zone'>
-                  <GameplayTable
-                    gameState={publicGameState}
-                    currentPlayerID={currentTurnPlayerID}
-                    latestEventTexts={[...gameEvents]
-                      .slice(-2)
-                      .reverse()
-                      .map(formatGameEvent)}
-                    onPlayerClick={setSelectedTablePlayerID}
-                  />
+              <GameplayLayout>
+                <div className="gameplay-main-zone">
+                  {publicGameState && (
+                    <GameplayTable
+                      gameState={publicGameState}
+                      currentTurnPlayerID={currentTurnPlayerID}
+                      latestEventTexts={gameEvents.slice(-2).map(formatGameEvent)}
+                      onPlayerClick={setSelectedTablePlayerID}
+                    />
+                  )}
 
                   {canOpenRequestFlow && (
                     <button
                       className="button request-flow-open-button"
                       type="button"
-                      onClick={() => {
-                        console.log('open request flow')
-                        setIsRequestFlowOpen(true)
-                      }}
+                      onClick={() => setIsRequestFlowOpen(true)}
                     >
                       Открыть новый запрос карты
                     </button>
@@ -1540,30 +1554,15 @@ function App() {
                   />
                 </div>
 
-                <div className={`gameplay-hand-zone ${isHandOpen ? 'hand-open' : 'hand-collapsed'}`}>
-                  {hasGameStarted && room && isGamePlaying && playerHand && (
-                    <>
-                      <button
-                        className="hand-toggle-button"
-                        type="button"
-                        onClick={() => setIsHandOpen((current) => !current)}
-                      >
-                        Моя рука ({playerHand.cards.length} карт)
-                        <span>{isHandOpen ? 'Свернуть' : 'Открыть'}</span>
-                      </button>
-
-                      {isHandOpen && (
-                        <PlayerHandPanel
-                          player={player}
-                          playerHand={playerHand}
-                          getQuartetTitle={getQuartetTitle}
-                          onCardPreview={setPreviewCard}
-                        />
-                      )}
-                    </>
-                  )}
-                </div>
-              </div>
+                <GameplayHandZone
+                  isHandOpen={isHandOpen}
+                  player={player}
+                  playerHand={hasGameStarted && room && isGamePlaying ? playerHand : null}
+                  getQuartetTitle={getQuartetTitle}
+                  onToggleHand={() => setIsHandOpen((current) => !current)}
+                  onCardPreview={setPreviewCard}
+                />
+              </GameplayLayout>
 
               {selectedTablePlayer && publicGameState && (
                 <PlayerDetailsModal
@@ -1586,17 +1585,7 @@ function App() {
                   availableRequestCards={availableRequestCards}
                   selectedCardID={selectedCardID}
                   onSelectCard={setSelectedCardID}
-                  onPreviewCard={(cardID) => {
-                    const card = availableRequestCards.find((item) => item.id === cardID)
-
-                    if (card) {
-                      setPreviewCard({
-                        id: card.id,
-                        title: card.title,
-                        quartet_id: card.quartet_id,
-                      })
-                    }
-                  }}
+                  onPreviewCard={previewRequestCard}
                   onSubmit={() => {
                     requestCard()
                     setIsRequestFlowOpen(false)
@@ -1608,30 +1597,11 @@ function App() {
               )}
 
               {previewCard && (
-                <div className="modal-backdrop" onClick={() => setPreviewCard(null)}>
-                  <div
-                    className="card-preview-modal"
-                    onClick={(event) => event.stopPropagation()}
-                  >
-                    <div className="card-preview-art">
-                      <span>🂠</span>
-                    </div>
-
-                    <div className="card-preview-content">
-                      <p className="card-preview-kvartet">
-                        {getQuartetTitle(previewCard.quartet_id)}
-                      </p>
-
-                      <h2>{previewCard.title}</h2>
-
-                      <small>{previewCard.id}</small>
-                    </div>
-
-                    <button className="button" type="button" onClick={() => setPreviewCard(null)}>
-                      Закрыть
-                    </button>
-                  </div>
-                </div>
+                <CardPreviewModal
+                  card={previewCard}
+                  getQuartetTitle={getQuartetTitle}
+                  onClose={() => setPreviewCard(null)}
+                />
               )}
 
               <div className="layout-side-column">
@@ -1687,7 +1657,7 @@ function App() {
                 )}
 
                 {isGameLogOpen && (
-                  <div className="panel">
+                  <Panel>
                     <h2>Журнал игры</h2>
 
                     {gameEvents.length === 0 ? (
@@ -1707,7 +1677,7 @@ function App() {
                         ))}
                       </div>
                     )}
-                  </div>
+                  </Panel>
                 )}
               </div>
             </>
