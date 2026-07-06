@@ -23,18 +23,19 @@ import {
 } from './api'
 import './App.css'
 import { AccountPanel } from './components/AccountPanel'
+import { CardPreviewModal } from './components/CardPreviewModal'
 import { EntryPanel } from './components/EntryPanel'
 import { GamePanel } from './components/GamePanel'
+import { GameplayHandZone } from './components/GameplayHandZone'
+import { GameplayLayout } from './components/GameplayLayout'
 import { GameplayTable } from './components/GameplayTable'
 import { HistoryPanel } from './components/HistoryPanel'
 import { PlayerDetailsModal } from './components/PlayerDetailsModal'
-import { GameplayHandZone } from './components/GameplayHandZone'
 import { PlayerPanel } from './components/PlayerPanel'
 import { QuartetsPanel } from './components/QuartetsPanel'
 import { RequestCardFlow } from './components/RequestCardFlow'
 import { RoomPanel } from './components/RoomPanel'
 import { ToastContainer } from './components/ToastContainer'
-import { GameplayLayout } from './components/GameplayLayout'
 import {
   clearSession,
   loadPlayer,
@@ -1594,30 +1595,11 @@ function App() {
               )}
 
               {previewCard && (
-                <div className="modal-backdrop" onClick={() => setPreviewCard(null)}>
-                  <div
-                    className="card-preview-modal"
-                    onClick={(event) => event.stopPropagation()}
-                  >
-                    <div className="card-preview-art">
-                      <span>🂠</span>
-                    </div>
-
-                    <div className="card-preview-content">
-                      <p className="card-preview-kvartet">
-                        {getQuartetTitle(previewCard.quartet_id)}
-                      </p>
-
-                      <h2>{previewCard.title}</h2>
-
-                      <small>{previewCard.id}</small>
-                    </div>
-
-                    <button className="button" type="button" onClick={() => setPreviewCard(null)}>
-                      Закрыть
-                    </button>
-                  </div>
-                </div>
+                <CardPreviewModal
+                  card={previewCard}
+                  getQuartetTitle={getQuartetTitle}
+                  onClose={() => setPreviewCard(null)}
+                />
               )}
 
               <div className="layout-side-column">
