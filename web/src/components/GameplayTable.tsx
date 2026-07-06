@@ -2,14 +2,14 @@ import type { PublicGameState } from '../types'
 
 type GameplayTableProps = {
   gameState: PublicGameState | null
-  currentPlayerID: string
+  currentTurnPlayerID: string
   latestEventTexts: string[]
   onPlayerClick?: (playerID: string) => void
 }
 
 export function GameplayTable({
   gameState,
-  currentPlayerID,
+  currentTurnPlayerID: currentPlayerID,
   latestEventTexts,
   onPlayerClick,
 }: GameplayTableProps) {
