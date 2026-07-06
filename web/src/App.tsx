@@ -67,6 +67,7 @@ import {
   buildRequestCardMessage,
   buildRoomWebSocketURL,
 } from './websocket'
+import { Panel } from './components/ui/Panel'
 
 type AppView = 'home' | 'account' | 'quartets' | 'history'
 
@@ -1433,9 +1434,9 @@ function App() {
         <ToastContainer toasts={toasts} onCloseToast={closeToast} />
 
         {!isSessionRestored && (
-          <div className="panel">
+          <Panel>
             <p>Восстанавливаем session...</p>
-          </div>
+          </Panel>
         )}
 
         <section
@@ -1656,7 +1657,7 @@ function App() {
                 )}
 
                 {isGameLogOpen && (
-                  <div className="panel">
+                  <Panel>
                     <h2>Журнал игры</h2>
 
                     {gameEvents.length === 0 ? (
@@ -1676,7 +1677,7 @@ function App() {
                         ))}
                       </div>
                     )}
-                  </div>
+                  </Panel>
                 )}
               </div>
             </>
