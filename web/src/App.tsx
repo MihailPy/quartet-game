@@ -22,18 +22,19 @@ import {
   updateUserQuartetRequest,
 } from './api'
 import './App.css'
-import { RequestCardFlow } from './components/RequestCardFlow'
-import { PlayerDetailsModal } from './components/PlayerDetailsModal'
 import { AccountPanel } from './components/AccountPanel'
 import { EntryPanel } from './components/EntryPanel'
 import { GamePanel } from './components/GamePanel'
 import { GameplayTable } from './components/GameplayTable'
 import { HistoryPanel } from './components/HistoryPanel'
+import { PlayerDetailsModal } from './components/PlayerDetailsModal'
 import { PlayerHandPanel } from './components/PlayerHandPanel'
 import { PlayerPanel } from './components/PlayerPanel'
 import { QuartetsPanel } from './components/QuartetsPanel'
+import { RequestCardFlow } from './components/RequestCardFlow'
 import { RoomPanel } from './components/RoomPanel'
 import { ToastContainer } from './components/ToastContainer'
+import { GameplayLayout } from './components/GameplayLayout'
 import {
   clearSession,
   loadPlayer,
@@ -1499,71 +1500,9 @@ function App() {
                 </div>
               )}
 
-              <div className="gameplay-layout">
-                <div className='gameplay-main-zone'>
-                  <GameplayTable
-                    gameState={publicGameState}
-                    currentPlayerID={currentTurnPlayerID}
-                    latestEventTexts={[...gameEvents]
-                      .slice(-2)
-                      .reverse()
-                      .map(formatGameEvent)}
-                    onPlayerClick={setSelectedTablePlayerID}
-                  />
-
-                  {canOpenRequestFlow && (
-                    <button
-                      className="button request-flow-open-button"
-                      type="button"
-                      onClick={() => {
-                        console.log('open request flow')
-                        setIsRequestFlowOpen(true)
-                      }}
-                    >
-                      Открыть новый запрос карты
-                    </button>
-                  )}
-
-                  <GamePanel
-                    room={room}
-                    player={player}
-                    publicGameState={publicGameState}
-                    currentTurnPlayerID={currentTurnPlayerID}
-                    temporaryMessages={temporaryMessages}
-                    gameFinished={gameFinished}
-                    socketStatus={socketStatus}
-                    onStartGame={startGame}
-                    isRoomOwner={isRoomOwner()}
-                    canStartGame={canStartGame()}
-                    getPlayerName={getPlayerName}
-                    isStartingGame={isStartingGame}
-                  />
-                </div>
-
-                <div className={`gameplay-hand-zone ${isHandOpen ? 'hand-open' : 'hand-collapsed'}`}>
-                  {hasGameStarted && room && isGamePlaying && playerHand && (
-                    <>
-                      <button
-                        className="hand-toggle-button"
-                        type="button"
-                        onClick={() => setIsHandOpen((current) => !current)}
-                      >
-                        Моя рука ({playerHand.cards.length} карт)
-                        <span>{isHandOpen ? 'Свернуть' : 'Открыть'}</span>
-                      </button>
-
-                      {isHandOpen && (
-                        <PlayerHandPanel
-                          player={player}
-                          playerHand={playerHand}
-                          getQuartetTitle={getQuartetTitle}
-                          onCardPreview={setPreviewCard}
-                        />
-                      )}
-                    </>
-                  )}
-                </div>
-              </div>
+              <GameplayLayout>
+                ...
+              </GameplayLayout>
 
               {selectedTablePlayer && publicGameState && (
                 <PlayerDetailsModal
