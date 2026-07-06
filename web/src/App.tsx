@@ -43,6 +43,7 @@ import {
   savePlayer,
   saveRoomID,
 } from './session'
+import './styles/modals.css'
 import type {
   Deck,
   GameEvent,
