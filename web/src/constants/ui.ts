@@ -15,3 +15,5 @@ export const CARD_UI = {
   mobileHandCardWidth: 92,
   cardAspectRatio: '5 / 7',
 } as const
+
+export const CARD_IMAGES_PATH = '/card-images/'

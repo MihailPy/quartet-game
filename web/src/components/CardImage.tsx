@@ -1,3 +1,5 @@
+import { getCardImageURL } from "../utils/cardImages"
+
 type CardImageProps = {
   imageUrl?: string
   title: string
@@ -8,7 +10,7 @@ export function CardImage({ imageUrl, title, className = '' }: CardImageProps) {
   return (
     <div className={`card-image ${className}`.trim()}>
       {imageUrl ? (
-        <img src={imageUrl} alt={title} />
+        <img src={getCardImageURL(imageUrl)} alt={title} />
       ) : (
         <span>🂠</span>
       )}
