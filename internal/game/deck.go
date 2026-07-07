@@ -11,9 +11,10 @@ type Card struct {
 	ID        CardID
 	QuartetID QuartetID
 	Title     string
+	ImageURL  string
 }
 
-func NewCard(id CardID, quartetID QuartetID, title string) (Card, error) {
+func NewCard(id CardID, quartetID QuartetID, title string, imageURL string) (Card, error) {
 	if id == "" {
 		return Card{}, ErrInvalidCard
 	}
@@ -30,6 +31,7 @@ func NewCard(id CardID, quartetID QuartetID, title string) (Card, error) {
 		ID:        id,
 		QuartetID: quartetID,
 		Title:     title,
+		ImageURL:  imageURL,
 	}, nil
 }
 

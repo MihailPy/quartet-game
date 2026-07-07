@@ -18,7 +18,11 @@ export function CardPreviewModal({
         onClick={(event) => event.stopPropagation()}
       >
         <div className="card-preview-art">
-          <span>🂠</span>
+          {card.image_url ? (
+            <img src={card.image_url} alt={card.title} />
+          ) : (
+            <span>🂠</span>
+          )}
         </div>
 
         <div className="card-preview-content">

@@ -466,6 +466,7 @@ function App() {
       id: card.id,
       title: card.title,
       quartet_id: card.quartet_id,
+      image_url: card.image_url,
     })
   }
 
