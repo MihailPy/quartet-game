@@ -11,6 +11,7 @@ type Card struct {
 	ID        CardID
 	QuartetID QuartetID
 	Title     string
+	ImageURL  string
 }
 
 func NewCard(id CardID, quartetID QuartetID, title string) (Card, error) {

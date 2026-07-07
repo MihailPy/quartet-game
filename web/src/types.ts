@@ -18,6 +18,7 @@ export type Card = {
   ID: string
   QuartetID: string
   Title: string
+  ImageURL: string
 }
 
 export type Deck = {
@@ -64,6 +65,7 @@ export type PrivateCard = {
   id: string
   quartet_id: string
   title: string
+  image_url?: string
 }
 
 export type GameFinishedPayload = {
@@ -82,6 +84,7 @@ export type RequestableCard = {
   title: string
   quartet_id: string
   quartet_title: string
+  image_url?: string
 }
 
 export type StartGameResponse = {
