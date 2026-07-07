@@ -1,4 +1,5 @@
 import type { Player, PlayerHandPayload, PrivateCard } from '../types'
+import { CardImage } from './CardImage'
 
 type PlayerHandPanelProps = {
   player: Player | null
@@ -65,13 +66,7 @@ export function PlayerHandPanel({
                     type="button"
                     onClick={() => onCardPreview?.(card)}
                   >
-                    <div className="card-image-slot">
-                      {card.image_url ? (
-                        <img src={card.image_url} alt={card.title} />
-                      ) : (
-                        <span>🂠</span>
-                      )}
-                    </div>
+                    <CardImage imageUrl={card.image_url} title={card.title} />
 
                     <strong>{card.title}</strong>
                     <small>{card.id}</small>
