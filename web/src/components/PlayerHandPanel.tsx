@@ -65,6 +65,14 @@ export function PlayerHandPanel({
                     type="button"
                     onClick={() => onCardPreview?.(card)}
                   >
+                    <div className="card-image-slot">
+                      {card.image_url ? (
+                        <img src={card.image_url} alt={card.title} />
+                      ) : (
+                        <span>🂠</span>
+                      )}
+                    </div>
+
                     <strong>{card.title}</strong>
                     <small>{card.id}</small>
                   </button>
