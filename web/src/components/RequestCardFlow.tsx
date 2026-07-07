@@ -54,7 +54,7 @@ export function RequestCardFlow({
 
         <div className="request-flow-content">
           <section className='request-flow-section'>
-            <h3>2. Выбери карту</h3>
+            <h3>1. Выбери игрока</h3>
             {targetPlayers.map((player) => (
               <button
                 className={
@@ -95,6 +95,13 @@ export function RequestCardFlow({
                       type="button"
                       onClick={() => onSelectCard(card.id)}
                     >
+                      <div className="request-flow-card-image">
+                        {card.image_url ? (
+                          <img src={card.image_url} alt={card.title} />
+                        ) : (
+                          <span>🂠</span>
+                        )}
+                      </div>
                       <strong>{card.title}</strong>
                       <small>{card.quartet_title}</small>
                     </button>
