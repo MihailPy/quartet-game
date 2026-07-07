@@ -72,6 +72,7 @@ type CardState struct {
 	ID        string `json:"id"`
 	QuartetID string `json:"quartet_id"`
 	Title     string `json:"title"`
+	ImageURL  string `json:"image_url,omitempty"`
 }
 
 type GameFinishedPayload struct {
@@ -352,6 +353,7 @@ func buildPlayerHandPayload(state game.GameState, playerID game.PlayerID) Player
 			ID:        string(card.ID),
 			QuartetID: string(card.QuartetID),
 			Title:     card.Title,
+			ImageURL:  card.ImageURL,
 		})
 	}
 
