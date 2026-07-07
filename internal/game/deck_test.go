@@ -3,7 +3,7 @@ package game
 import "testing"
 
 func TestNewCard(t *testing.T) {
-	card, err := NewCard("card_1", "quartet_1", "Boeing 747")
+	card, err := NewCard("card_1", "quartet_1", "Boeing 747", "")
 	if err != nil {
 		t.Fatalf("expected no error, got %v", err)
 	}
@@ -50,7 +50,7 @@ func TestNewCardInvalid(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := NewCard(tt.id, tt.quartetID, tt.title)
+			_, err := NewCard(tt.id, tt.quartetID, tt.title, "")
 			if err == nil {
 				t.Fatal("expected error, got nil")
 			}
