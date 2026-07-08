@@ -1,4 +1,5 @@
 import type { Quartet } from '../types'
+import { CardImage } from './CardImage'
 
 type QuartetsPanelProps = {
   userQuartets: Quartet[]
@@ -77,7 +78,14 @@ export function QuartetsPanel({
             <div className="quartet-cards-preview">
               {quartet.Cards.map((card) => (
                 <div key={card.ID} className="quartet-card-preview">
-                  <strong>{card.Title}</strong>
+                  <CardImage
+                    imageUrl={card.ImageURL}
+                    title={card.Title}
+                  />
+
+                  <span className="quartet-card-title">
+                    {card.Title}
+                  </span>
                 </div>
               ))}
             </div>

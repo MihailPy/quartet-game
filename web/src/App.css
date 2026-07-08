@@ -1542,14 +1542,20 @@ code {
 }
 
 .quartet-cards-preview {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 8px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
 }
 
 .quartet-card-preview {
-  padding: 6px 10px;
-  border-radius: 8px;
-  background: #f4f4f5;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.quartet-card-title {
+  text-align: center;
+  font-size: 14px;
+  font-weight: 500;
 }
