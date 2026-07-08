@@ -93,10 +93,17 @@ export function QuartetsPanel({
         </button>
       </div>
 
+      <p className="form-hint">
+        Здесь можно редактировать названия карт и изображения пользовательских квартетов.
+      </p>
+
       <h2>Мои квартеты</h2>
 
       {userQuartets.length === 0 ? (
-        <p className="form-hint">Пока нет пользовательских квартетов.</p>
+        <div className="quartets-empty-state">
+          <h3>Пока нет пользовательских квартетов</h3>
+          <p>Создай первый квартет выше. Он появится в этом списке.</p>
+        </div>
       ) : (
         userQuartets.map((quartet) => (
           <div key={quartet.ID} className="player-row">

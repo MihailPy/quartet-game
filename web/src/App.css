@@ -1568,3 +1568,19 @@ code {
 .quartet-card-form-image {
   width: 72px;
 }
+
+.quartets-empty-state {
+  padding: 18px;
+  border: 1px dashed #d4d4d8;
+  border-radius: 14px;
+  background: #fafafa;
+}
+
+.quartets-empty-state h3 {
+  margin: 0 0 6px;
+}
+
+.quartets-empty-state p {
+  margin: 0;
+  color: #71717a;
+}
