@@ -1564,3 +1564,7 @@ code {
   display: grid;
   gap: 8px;
 }
+
+.quartet-card-form-image {
+  width: 72px;
+}

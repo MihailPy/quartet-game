@@ -52,6 +52,12 @@ export function QuartetsPanel({
 
         {quartetCards.map((card, index) => (
           <div key={index} className="quartet-card-form-row">
+            <CardImage
+              imageUrl={quartetCardImages[index]}
+              title={card || `Карта ${index + 1}`}
+              className="quartet-card-form-image"
+            />
+
             <input
               className="input"
               type="text"
