@@ -518,6 +518,7 @@ function App() {
         title: card.Title,
         quartet_id: card.QuartetID,
         quartet_title: quartet.Title,
+        image_url: card.ImageURL,
       })),
     )
   }
