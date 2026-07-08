@@ -39,14 +39,19 @@ type QuartetHandler struct {
 }
 
 type CreateUserQuartetRequest struct {
-	OwnerUserID user.UserID `json:"owner_user_id"`
-	Title       string      `json:"title"`
-	Cards       []string    `json:"cards"`
+	OwnerUserID user.UserID              `json:"owner_user_id"`
+	Title       string                   `json:"title"`
+	Cards       []UserQuartetCardRequest `json:"cards"`
 }
 
 type UpdateUserQuartetRequest struct {
-	Title string   `json:"title"`
-	Cards []string `json:"cards"`
+	Title string                   `json:"title"`
+	Cards []UserQuartetCardRequest `json:"cards"`
+}
+
+type UserQuartetCardRequest struct {
+	Title    string `json:"title"`
+	ImageURL string `json:"image_url"`
 }
 
 func NewQuartetHandler(repository QuartetRepository) *QuartetHandler {
@@ -76,8 +81,8 @@ func (h *QuartetHandler) CreateUserQuartet(w http.ResponseWriter, r *http.Reques
 
 	cards := make([]game.Card, 0, 4)
 
-	for _, cardTitle := range request.Cards {
-		if cardTitle == "" {
+	for _, requestCard := range request.Cards {
+		if requestCard.Title == "" {
 			writeError(w, http.StatusBadRequest, "invalid card title")
 			return
 		}
@@ -85,7 +90,8 @@ func (h *QuartetHandler) CreateUserQuartet(w http.ResponseWriter, r *http.Reques
 		cards = append(cards, game.Card{
 			ID:        game.CardID(generateID()),
 			QuartetID: quartetID,
-			Title:     cardTitle,
+			Title:     requestCard.Title,
+			ImageURL:  requestCard.ImageURL,
 		})
 	}
 
@@ -183,11 +189,12 @@ func (h *QuartetHandler) UpdateUserQuartet(
 
 	cards := make([]game.Card, 0, 4)
 
-	for _, title := range request.Cards {
+	for _, requestCard := range request.Cards {
 		cards = append(cards, game.Card{
 			ID:        game.CardID(generateID()),
 			QuartetID: quartetID,
-			Title:     title,
+			Title:     requestCard.Title,
+			ImageURL:  requestCard.ImageURL,
 		})
 	}
 

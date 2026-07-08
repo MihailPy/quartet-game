@@ -867,6 +867,10 @@ function App() {
 
     const trimmedTitle = quartetTitle.trim()
     const trimmedCards = quartetCards.map((card) => card.trim())
+    const cardsPayload = trimmedCards.map((title, index) => ({
+      title,
+      image_url: quartetCardImages[index].trim(),
+    }))
 
     if (!trimmedTitle) {
       setError('Введите название квартета.')
@@ -894,7 +898,7 @@ function App() {
       const createdQuartet = await createUserQuartetRequest(
         user.id,
         trimmedTitle,
-        trimmedCards,
+        cardsPayload,
       )
 
       setUserQuartets((current) => [...current, createdQuartet])
@@ -982,6 +986,10 @@ function App() {
 
     const trimmedTitle = quartetTitle.trim()
     const trimmedCards = quartetCards.map((card) => card.trim())
+    const cardsPayload = trimmedCards.map((title, index) => ({
+      title,
+      image_url: quartetCardImages[index].trim(),
+    }))
 
     if (!trimmedTitle) {
       setError('Введите название квартета.')
@@ -1010,7 +1018,7 @@ function App() {
         user.id,
         editingQuartetID,
         trimmedTitle,
-        trimmedCards,
+        cardsPayload
       )
 
       await loadUserQuartets(user.id)

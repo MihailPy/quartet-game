@@ -295,10 +295,15 @@ export async function loginUserRequest(
   return (await response.json()) as CreateUserResponse
 }
 
+type UserQuartetCardRequest = {
+  title: string
+  image_url: string
+}
+
 export async function createUserQuartetRequest(
   ownerUserID: string,
   title: string,
-  cards: string[],
+  cards: UserQuartetCardRequest[],
 ): Promise<Quartet> {
   const response = await fetch(`${API_URL}/quartets`, {
     method: 'POST',
@@ -368,7 +373,7 @@ export async function updateUserQuartetRequest(
   userID: string,
   quartetID: string,
   title: string,
-  cards: string[],
+  cards: UserQuartetCardRequest[],
 ): Promise<void> {
   const response = await fetch(`${API_URL}/users/${userID}/quartets/${quartetID}`, {
     method: 'PATCH',
