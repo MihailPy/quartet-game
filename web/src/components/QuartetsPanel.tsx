@@ -31,7 +31,12 @@ export function QuartetsPanel({
   return (
     <div className="panel">
       <div className="form-block">
-        <h3>Создать квартет</h3>
+        <h3>{editingQuartetID ? 'Редактировать квартет' : 'Создать квартет'}</h3>
+        <p className="form-hint">
+          {editingQuartetID
+            ? 'Измени название квартета или названия карт.'
+            : 'Добавь название квартета и 4 карты.'}
+        </p>
 
         <input
           className="input"
