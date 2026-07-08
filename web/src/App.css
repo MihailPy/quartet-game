@@ -1540,3 +1540,16 @@ code {
   height: 100%;
   object-fit: cover;
 }
+
+.quartet-cards-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.quartet-card-preview {
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: #f4f4f5;
+}

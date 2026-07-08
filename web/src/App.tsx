@@ -44,7 +44,6 @@ import {
   savePlayer,
   saveRoomID,
 } from './session'
-import './styles/deck-editor.css'
 import './styles/modals.css'
 import type {
   Deck,

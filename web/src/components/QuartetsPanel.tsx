@@ -73,6 +73,15 @@ export function QuartetsPanel({
           <div key={quartet.ID} className="player-row">
             <span>{quartet.Title}</span>
             <span>{quartet.Cards.length} карт</span>
+
+            <div className="quartet-cards-preview">
+              {quartet.Cards.map((card) => (
+                <div key={card.ID} className="quartet-card-preview">
+                  <strong>{card.Title}</strong>
+                </div>
+              ))}
+            </div>
+
             <button
               className="button secondary-button"
               type="button"
