@@ -28,7 +28,8 @@ func (r *DeckRepository) FindByID(ctx context.Context, deckID game.DeckID) (game
 			q.id,
 			q.title,
 			c.id,
-			c.title
+			c.title,
+			c.image_url
 		FROM decks d
 		JOIN quartets q ON q.deck_id = d.id
 		JOIN cards c ON c.quartet_id = q.id
@@ -51,6 +52,7 @@ func (r *DeckRepository) FindByID(ctx context.Context, deckID game.DeckID) (game
 			dbQuartetTitle string
 			dbCardID       string
 			dbCardTitle    string
+			dbCardImageURL string
 		)
 
 		if err := rows.Scan(
@@ -60,6 +62,7 @@ func (r *DeckRepository) FindByID(ctx context.Context, deckID game.DeckID) (game
 			&dbQuartetTitle,
 			&dbCardID,
 			&dbCardTitle,
+			&dbCardImageURL,
 		); err != nil {
 			return game.Deck{}, err
 		}
@@ -80,6 +83,7 @@ func (r *DeckRepository) FindByID(ctx context.Context, deckID game.DeckID) (game
 			ID:        game.CardID(dbCardID),
 			QuartetID: quartetID,
 			Title:     dbCardTitle,
+			ImageURL:  dbCardImageURL,
 		})
 	}
 

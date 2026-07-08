@@ -36,6 +36,7 @@ import { QuartetsPanel } from './components/QuartetsPanel'
 import { RequestCardFlow } from './components/RequestCardFlow'
 import { RoomPanel } from './components/RoomPanel'
 import { ToastContainer } from './components/ToastContainer'
+import { Panel } from './components/ui/Panel'
 import {
   clearSession,
   loadPlayer,
@@ -67,7 +68,6 @@ import {
   buildRequestCardMessage,
   buildRoomWebSocketURL,
 } from './websocket'
-import { Panel } from './components/ui/Panel'
 
 type AppView = 'home' | 'account' | 'quartets' | 'history'
 
@@ -104,6 +104,7 @@ function App() {
   const [userQuartets, setUserQuartets] = useState<Quartet[]>([])
   const [quartetTitle, setQuartetTitle] = useState('')
   const [quartetCards, setQuartetCards] = useState(['', '', '', ''])
+  const [quartetCardImages, setQuartetCardImages] = useState(['', '', '', ''])
   const [currentView, setCurrentView] = useState<AppView>('home')
   const [accountPlayerName, setAccountPlayerName] = useState('')
   const [nextPlayerName, setNextPlayerName] = useState('')
@@ -517,6 +518,7 @@ function App() {
         title: card.Title,
         quartet_id: card.QuartetID,
         quartet_title: quartet.Title,
+        image_url: card.ImageURL,
       })),
     )
   }
@@ -866,6 +868,10 @@ function App() {
 
     const trimmedTitle = quartetTitle.trim()
     const trimmedCards = quartetCards.map((card) => card.trim())
+    const cardsPayload = trimmedCards.map((title, index) => ({
+      title,
+      image_url: quartetCardImages[index].trim(),
+    }))
 
     if (!trimmedTitle) {
       setError('Введите название квартета.')
@@ -893,12 +899,13 @@ function App() {
       const createdQuartet = await createUserQuartetRequest(
         user.id,
         trimmedTitle,
-        trimmedCards,
+        cardsPayload,
       )
 
       setUserQuartets((current) => [...current, createdQuartet])
       setQuartetTitle('')
       setQuartetCards(['', '', '', ''])
+      setQuartetCardImages(['', '', '', ''])
 
       showToast('Квартет создан.', 'success')
     } catch (err) {
@@ -970,6 +977,7 @@ function App() {
     setEditingQuartetID(quartet.ID)
     setQuartetTitle(quartet.Title)
     setQuartetCards(quartet.Cards.map((card) => card.Title))
+    setQuartetCardImages(quartet.Cards.map((card) => card.ImageURL ?? ''))
   }
 
   async function saveQuartetChanges() {
@@ -979,6 +987,10 @@ function App() {
 
     const trimmedTitle = quartetTitle.trim()
     const trimmedCards = quartetCards.map((card) => card.trim())
+    const cardsPayload = trimmedCards.map((title, index) => ({
+      title,
+      image_url: quartetCardImages[index].trim(),
+    }))
 
     if (!trimmedTitle) {
       setError('Введите название квартета.')
@@ -1007,7 +1019,7 @@ function App() {
         user.id,
         editingQuartetID,
         trimmedTitle,
-        trimmedCards,
+        cardsPayload
       )
 
       await loadUserQuartets(user.id)
@@ -1477,6 +1489,8 @@ function App() {
                 editingQuartetID={editingQuartetID}
                 onStartEditQuartet={startEditQuartet}
                 onSaveQuartetChanges={saveQuartetChanges}
+                quartetCardImages={quartetCardImages}
+                onQuartetCardImagesChange={setQuartetCardImages}
                 onBack={() => setCurrentView('home')}
               />
             ) : currentView === 'history' ? (

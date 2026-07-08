@@ -1,0 +1,2 @@
+ALTER TABLE cards
+ADD COLUMN image_url TEXT NOT NULL DEFAULT '';

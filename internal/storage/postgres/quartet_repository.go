@@ -50,12 +50,13 @@ func (r *QuartetRepository) CreateUserQuartet(
 		_, err = tx.ExecContext(
 			ctx,
 			`
-			INSERT INTO cards (id, quartet_id, title)
-			VALUES ($1, $2, $3)
+			INSERT INTO cards (id, quartet_id, title, image_url)
+			VALUES ($1, $2, $3, $4)
 			`,
 			card.ID,
 			card.QuartetID,
 			card.Title,
+			card.ImageURL,
 		)
 		if err != nil {
 			return err
@@ -126,7 +127,7 @@ func (r *QuartetRepository) ListUserQuartets(
 		cardRows, err := r.db.QueryContext(
 			ctx,
 			`
-			SELECT id, quartet_id, title
+			SELECT id, quartet_id, title, image_url
 			FROM cards
 			WHERE quartet_id = $1
 			ORDER BY title
@@ -146,6 +147,7 @@ func (r *QuartetRepository) ListUserQuartets(
 				&card.ID,
 				&card.QuartetID,
 				&card.Title,
+				&card.ImageURL,
 			); err != nil {
 				cardRows.Close()
 				return nil, err
@@ -259,12 +261,13 @@ func (r *QuartetRepository) UpdateUserQuartet(
 		_, err = tx.ExecContext(
 			ctx,
 			`
-			INSERT INTO cards (id, quartet_id, title)
-			VALUES ($1, $2, $3)
+			INSERT INTO cards (id, quartet_id, title, image_url)
+			VALUES ($1, $2, $3, $4)
 			`,
 			card.ID,
 			card.QuartetID,
 			card.Title,
+			card.ImageURL,
 		)
 		if err != nil {
 			return err

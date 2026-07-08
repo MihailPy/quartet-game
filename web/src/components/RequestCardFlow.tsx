@@ -1,4 +1,5 @@
 import type { PublicGamePlayer, RequestableCard, PlayerHandPayload } from '../types'
+import { CardImage } from './CardImage'
 
 type RequestCardFlowProps = {
   players: PublicGamePlayer[]
@@ -95,13 +96,12 @@ export function RequestCardFlow({
                       type="button"
                       onClick={() => onSelectCard(card.id)}
                     >
-                      <div className="request-flow-card-image">
-                        {card.image_url ? (
-                          <img src={card.image_url} alt={card.title} />
-                        ) : (
-                          <span>🂠</span>
-                        )}
-                      </div>
+                      <CardImage
+                        imageUrl={card.image_url}
+                        title={card.title}
+                        className="request-flow-card-image"
+                      />
+
                       <strong>{card.title}</strong>
                       <small>{card.quartet_title}</small>
                     </button>
