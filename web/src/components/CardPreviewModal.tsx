@@ -1,4 +1,5 @@
 import type { PrivateCard } from '../types'
+import { CardImage } from './CardImage'
 
 type CardPreviewModalProps = {
   card: PrivateCard
@@ -18,11 +19,10 @@ export function CardPreviewModal({
         onClick={(event) => event.stopPropagation()}
       >
         <div className="card-preview-art">
-          {card.image_url ? (
-            <img src={card.image_url} alt={card.title} />
-          ) : (
-            <span>🂠</span>
-          )}
+          <CardImage
+            imageUrl={card.image_url}
+            title={card.title}
+          />
         </div>
 
         <div className="card-preview-content">
