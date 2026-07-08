@@ -36,6 +36,7 @@ import { QuartetsPanel } from './components/QuartetsPanel'
 import { RequestCardFlow } from './components/RequestCardFlow'
 import { RoomPanel } from './components/RoomPanel'
 import { ToastContainer } from './components/ToastContainer'
+import { Panel } from './components/ui/Panel'
 import {
   clearSession,
   loadPlayer,
@@ -43,6 +44,7 @@ import {
   savePlayer,
   saveRoomID,
 } from './session'
+import './styles/deck-editor.css'
 import './styles/modals.css'
 import type {
   Deck,
@@ -67,7 +69,6 @@ import {
   buildRequestCardMessage,
   buildRoomWebSocketURL,
 } from './websocket'
-import { Panel } from './components/ui/Panel'
 
 type AppView = 'home' | 'account' | 'quartets' | 'history'
 
