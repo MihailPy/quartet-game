@@ -12,6 +12,8 @@ type QuartetsPanelProps = {
   editingQuartetID: string | null
   onStartEditQuartet: (quartet: Quartet) => void
   onSaveQuartetChanges: () => void
+  quartetCardImages: string[]
+  onQuartetCardImagesChange: (images: string[]) => void
   onBack: () => void
 }
 
@@ -26,6 +28,8 @@ export function QuartetsPanel({
   editingQuartetID,
   onStartEditQuartet,
   onSaveQuartetChanges,
+  quartetCardImages,
+  onQuartetCardImagesChange,
   onBack,
 }: QuartetsPanelProps) {
   return (
@@ -47,18 +51,31 @@ export function QuartetsPanel({
         />
 
         {quartetCards.map((card, index) => (
-          <input
-            key={index}
-            className="input"
-            type="text"
-            value={card}
-            onChange={(event) => {
-              const nextCards = [...quartetCards]
-              nextCards[index] = event.target.value
-              onQuartetCardsChange(nextCards)
-            }}
-            placeholder={`Карта ${index + 1}`}
-          />
+          <div key={index} className="quartet-card-form-row">
+            <input
+              className="input"
+              type="text"
+              value={card}
+              onChange={(event) => {
+                const nextCards = [...quartetCards]
+                nextCards[index] = event.target.value
+                onQuartetCardsChange(nextCards)
+              }}
+              placeholder={`Карта ${index + 1}`}
+            />
+
+            <input
+              className="input"
+              type="text"
+              value={quartetCardImages[index]}
+              onChange={(event) => {
+                const nextImages = [...quartetCardImages]
+                nextImages[index] = event.target.value
+                onQuartetCardImagesChange(nextImages)
+              }}
+              placeholder={`Изображение карты ${index + 1}`}
+            />
+          </div>
         ))}
 
         <button

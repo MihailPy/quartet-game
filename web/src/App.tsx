@@ -104,6 +104,7 @@ function App() {
   const [userQuartets, setUserQuartets] = useState<Quartet[]>([])
   const [quartetTitle, setQuartetTitle] = useState('')
   const [quartetCards, setQuartetCards] = useState(['', '', '', ''])
+  const [quartetCardImages, setQuartetCardImages] = useState(['', '', '', ''])
   const [currentView, setCurrentView] = useState<AppView>('home')
   const [accountPlayerName, setAccountPlayerName] = useState('')
   const [nextPlayerName, setNextPlayerName] = useState('')
@@ -899,6 +900,7 @@ function App() {
       setUserQuartets((current) => [...current, createdQuartet])
       setQuartetTitle('')
       setQuartetCards(['', '', '', ''])
+      setQuartetCardImages(['', '', '', ''])
 
       showToast('Квартет создан.', 'success')
     } catch (err) {
@@ -970,6 +972,7 @@ function App() {
     setEditingQuartetID(quartet.ID)
     setQuartetTitle(quartet.Title)
     setQuartetCards(quartet.Cards.map((card) => card.Title))
+    setQuartetCardImages(quartet.Cards.map((card) => card.ImageURL ?? ''))
   }
 
   async function saveQuartetChanges() {
@@ -1477,6 +1480,8 @@ function App() {
                 editingQuartetID={editingQuartetID}
                 onStartEditQuartet={startEditQuartet}
                 onSaveQuartetChanges={saveQuartetChanges}
+                quartetCardImages={quartetCardImages}
+                onQuartetCardImagesChange={setQuartetCardImages}
                 onBack={() => setCurrentView('home')}
               />
             ) : currentView === 'history' ? (

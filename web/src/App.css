@@ -1559,3 +1559,8 @@ code {
   font-size: 14px;
   font-weight: 500;
 }
+
+.quartet-card-form-row {
+  display: grid;
+  gap: 8px;
+}
