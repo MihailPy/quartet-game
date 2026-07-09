@@ -17,3 +17,5 @@ export const CARD_UI = {
 } as const
 
 export const CARD_IMAGES_PATH = '/card-images/'
+
+export const DEFAULT_CARD_IMAGE = 'placeholders/default-card.svg'

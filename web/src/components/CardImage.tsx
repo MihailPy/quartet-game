@@ -1,4 +1,5 @@
-import { getCardImageURL } from "../utils/cardImages"
+import { DEFAULT_CARD_IMAGE } from '../constants/ui'
+import { getCardImageURL } from '../utils/cardImages'
 
 type CardImageProps = {
   imageUrl?: string
@@ -7,13 +8,11 @@ type CardImageProps = {
 }
 
 export function CardImage({ imageUrl, title, className = '' }: CardImageProps) {
+  const resolvedImageURL = getCardImageURL(imageUrl || DEFAULT_CARD_IMAGE)
+
   return (
     <div className={`card-image ${className}`.trim()}>
-      {imageUrl ? (
-        <img src={getCardImageURL(imageUrl)} alt={title} />
-      ) : (
-        <span>🂠</span>
-      )}
+      <img src={resolvedImageURL} alt={title} />
     </div>
   )
 }
