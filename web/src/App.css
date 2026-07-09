@@ -1569,6 +1569,14 @@ code {
   width: 72px;
 }
 
+.request-flow-card-image {
+  width: 100%;
+}
+
+.card-preview-art .card-image {
+  max-width: 290px;
+}
+
 .quartets-empty-state {
   padding: 18px;
   border: 1px dashed #d4d4d8;
