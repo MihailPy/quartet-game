@@ -15,10 +15,10 @@ type GamePanelProps = {
   gameFinished: GameFinishedPayload | null
   socketStatus: string
   onStartGame: () => void
-  isRoomOwner: boolean
   canStartGame: boolean
   getPlayerName: (playerID: string) => string
   isStartingGame: boolean
+  startGameHint: string
 }
 
 function getSocketStatusLabel(status: string): string {
@@ -50,10 +50,10 @@ export function GamePanel({
   gameFinished,
   socketStatus,
   onStartGame,
-  isRoomOwner,
   canStartGame,
   getPlayerName,
   isStartingGame,
+  startGameHint,
 }: GamePanelProps) {
 
   const isCurrentPlayerTurn = player !== null && currentTurnPlayerID === player.id
@@ -95,25 +95,7 @@ export function GamePanel({
                 : 'Старт игры недоступен'}
           </button>
 
-          {!isRoomOwner && (
-            <p className="form-hint">
-              Стартовать может только владелец комнаты.
-            </p>
-          )}
-
-          {isRoomOwner && room.players.length < 2 && (
-            <p className="form-hint">
-              Для старта нужно минимум два игрока.
-            </p>
-          )}
-
-          {isRoomOwner &&
-            room.players.length >= 2 &&
-            !room.players.every((roomPlayer) => roomPlayer.is_ready) && (
-              <p className="form-hint">
-                Для старта все игроки должны быть готовы.
-              </p>
-            )}
+          <p className="form-hint">{startGameHint}</p>
         </div>
       )}
 
