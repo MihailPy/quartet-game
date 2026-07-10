@@ -1125,6 +1125,38 @@ function App() {
     })
   }
 
+  function getStartGameHint(): string {
+    if (!room || !player) {
+      return 'Комната не загружена.'
+    }
+
+    if (!isCurrentPlayerConnected()) {
+      return 'Ты отключён от комнаты. Дождись восстановления подключения.'
+    }
+
+    if (!isRoomOwner()) {
+      return 'Начать игру может только владелец комнаты.'
+    }
+
+    const selectedPlayersCount = room.players.filter(
+      (roomPlayer) => room.selected_player_ids?.[roomPlayer.id],
+    ).length
+
+    const selectedQuartetsCount = Object.values(
+      room.selected_quartet_ids ?? {},
+    ).filter(Boolean).length
+
+    if (selectedPlayersCount < 2) {
+      return 'Выбери минимум двух игроков.'
+    }
+
+    if (selectedQuartetsCount === 0) {
+      return 'Выбери минимум один квартет.'
+    }
+
+    return 'Можно начинать игру.'
+  }
+
   useEffect(() => {
     if (!room || !player) return
 
@@ -1562,10 +1594,10 @@ function App() {
                     gameFinished={gameFinished}
                     socketStatus={socketStatus}
                     onStartGame={startGame}
-                    isRoomOwner={isRoomOwner()}
                     canStartGame={canStartGame()}
                     getPlayerName={getPlayerName}
                     isStartingGame={isStartingGame}
+                    startGameHint={getStartGameHint()}
                   />
                 </div>
 

@@ -15,10 +15,10 @@ type GamePanelProps = {
   gameFinished: GameFinishedPayload | null
   socketStatus: string
   onStartGame: () => void
-  isRoomOwner: boolean
   canStartGame: boolean
   getPlayerName: (playerID: string) => string
   isStartingGame: boolean
+  startGameHint: string
 }
 
 function getSocketStatusLabel(status: string): string {
@@ -50,10 +50,10 @@ export function GamePanel({
   gameFinished,
   socketStatus,
   onStartGame,
-  isRoomOwner,
   canStartGame,
   getPlayerName,
   isStartingGame,
+  startGameHint,
 }: GamePanelProps) {
 
   const isCurrentPlayerTurn = player !== null && currentTurnPlayerID === player.id
@@ -72,6 +72,12 @@ export function GamePanel({
     gameFinished?.scores
       .slice()
       .sort((firstScore, secondScore) => secondScore.score - firstScore.score) ?? []
+  const currentPlayerScore = sortedFinalScores.find(
+    (score) => score.player_id === player?.id,
+  )
+
+  const isCurrentPlayerWinner =
+    player !== null && gameFinished?.winners.includes(player.id) === true
 
   return (
     <div className="panel">
@@ -95,37 +101,26 @@ export function GamePanel({
                 : 'Старт игры недоступен'}
           </button>
 
-          {!isRoomOwner && (
-            <p className="form-hint">
-              Стартовать может только владелец комнаты.
-            </p>
-          )}
-
-          {isRoomOwner && room.players.length < 2 && (
-            <p className="form-hint">
-              Для старта нужно минимум два игрока.
-            </p>
-          )}
-
-          {isRoomOwner &&
-            room.players.length >= 2 &&
-            !room.players.every((roomPlayer) => roomPlayer.is_ready) && (
-              <p className="form-hint">
-                Для старта все игроки должны быть готовы.
-              </p>
-            )}
+          <p className="form-hint">{startGameHint}</p>
         </div>
       )}
 
       {!publicGameState && room?.status !== 'playing' && (
-        <p>Игра ещё не началась.</p>
+        <div className="game-empty-state">
+          <strong>Игра ещё не началась</strong>
+          <p className="form-hint">
+            Выберите игроков и квартеты, затем запустите партию.
+          </p>
+        </div>
       )}
 
       {!publicGameState && room?.status === 'playing' && (
-        <p className="form-hint">
-          Игра была начата, но состояние игры не восстановлено. Возможно,
-          backend был перезапущен.
-        </p>
+        <div className="game-empty-state game-empty-state-warning">
+          <strong>Состояние игры не загружено</strong>
+          <p className="form-hint">
+            Игра была начата, но состояние не удалось восстановить. Возможно, backend был перезапущен.
+          </p>
+        </div>
       )}
 
       {publicGameState && (
@@ -167,6 +162,15 @@ export function GamePanel({
                 <span>{winnerNames}</span>
               </div>
 
+              {currentPlayerScore && (
+                <div className={isCurrentPlayerWinner ? 'player-result-box player-result-box-winner' : 'player-result-box'}>
+                  <strong>
+                    {isCurrentPlayerWinner ? 'Ты победил' : 'Твой результат'}
+                  </strong>
+                  <span>{currentPlayerScore.score} квартетов</span>
+                </div>
+              )}
+
               <div className="scores-list">
                 <strong>Итоговый счёт</strong>
 
@@ -187,6 +191,10 @@ export function GamePanel({
                   )
                 })}
               </div>
+
+              <p className="form-hint">
+                Чтобы сыграть ещё раз, выйди из комнаты и создай новую партию.
+              </p>
             </div>
           )}
         </div>

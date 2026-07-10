@@ -22,13 +22,26 @@ export function RoomPanel({
   const totalPlayersCount = room?.players.length ?? 0
   const selectedPlayersCount =
     room?.players.filter((roomPlayer) => room.selected_player_ids?.[roomPlayer.id]).length ?? 0
+  const selectedQuartetsCount =
+    Object.values(room?.selected_quartet_ids ?? {}).filter(Boolean).length
+  const hasEnoughPlayers = selectedPlayersCount >= 2
+  const hasSelectedQuartets = selectedQuartetsCount > 0
+  const isRoomReadyToStart = hasEnoughPlayers && hasSelectedQuartets
+  const totalQuartetsCount = availableQuartets.length
 
   const isCurrentPlayerOwner =
     Boolean(room && currentPlayerID && room.owner_player_id === currentPlayerID)
 
   return (
     <div className="panel">
-      <h2>Комната</h2>
+      <div className="room-waiting-header">
+        <div>
+          <h2>Комната ожидания</h2>
+          <p className="form-hint">
+            Выбери игроков и квартеты, затем начни игру.
+          </p>
+        </div>
+      </div>
 
       {!room && <p>Комната не загружена.</p>}
 
@@ -50,6 +63,12 @@ export function RoomPanel({
             </div>
           </div>
 
+          <div className="room-waiting-summary">
+            <span>Игроков: {totalPlayersCount}</span>
+            <span>Выбрано игроков: {selectedPlayersCount}</span>
+            <span>Выбрано квартетов: {selectedQuartetsCount}</span>
+          </div>
+
           <button className="button secondary-button" onClick={onLeaveRoom}>
             Выйти из комнаты
           </button>
@@ -58,72 +77,101 @@ export function RoomPanel({
             <strong>Статус:</strong> {room.status}
           </p>
 
-          <h3>Игроки</h3>
+          <div className="room-section-header">
+            <div>
+              <h3>Игроки</h3>
+              <p className="form-hint">
+                Выбранные игроки будут участвовать в партии.
+              </p>
+            </div>
+          </div>
 
           {room.players.length === 0 && <p>Пока игроков нет.</p>}
 
-          {room.players.map((roomPlayer) => {
-            const isSelected = room.selected_player_ids?.[roomPlayer.id] === true
+          <div className='player-select-list'>
+            {room.players.map((roomPlayer) => {
+              const isSelected = room.selected_player_ids?.[roomPlayer.id] === true
 
-            return (
-              <div className="player-row" key={roomPlayer.id}>
-                <span>
-                  {isCurrentPlayerOwner && room.status !== 'playing' && (
-                    <input
-                      type="checkbox"
-                      checked={isSelected}
-                      onChange={() => onToggleSelectedPlayer(roomPlayer.id)}
-                      aria-label={`Выбрать игрока ${roomPlayer.name}`}
-                    />
-                  )}
+              return (
+                <label
+                  className={
+                    isSelected
+                      ? 'player-select-row player-select-row-selected'
+                      : 'player-select-row'
+                  }
+                  key={roomPlayer.id}
+                >
+                  <span className="player-select-main">
+                    {isCurrentPlayerOwner && room.status !== 'playing' && (
+                      <input
+                        className="player-select-checkbox"
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => onToggleSelectedPlayer(roomPlayer.id)}
+                        aria-label={`Выбрать игрока ${roomPlayer.name}`}
+                      />
+                    )}
 
-                  {roomPlayer.name}
-                  {roomPlayer.id === currentPlayerID ? ' (ты)' : ''}
-                  {roomPlayer.id === room.owner_player_id ? ' 👑' : ''}
-                </span>
+                    <span className="player-select-title">
+                      <strong>{roomPlayer.name}</strong>
 
-                <div className="player-badges">
-                  <span className={roomPlayer.is_connected ? 'connected-badge' : 'disconnected-badge'}>
-                    {roomPlayer.is_connected ? 'онлайн' : 'офлайн'}
+                      <span className="player-inline-labels">
+                        {roomPlayer.id === currentPlayerID && (
+                          <span className="player-inline-label">ты</span>
+                        )}
+
+                        {roomPlayer.id === room.owner_player_id && (
+                          <span className="player-inline-label">владелец</span>
+                        )}
+                      </span>
+                    </span>
                   </span>
 
-                  <span className={isSelected ? 'ready-badge' : 'not-ready-badge'}>
-                    {isSelected ? 'выбран' : 'не выбран'}
+                  <span className="player-select-badges">
+                    <span className={roomPlayer.is_connected ? 'connected-badge' : 'disconnected-badge'}>
+                      {roomPlayer.is_connected ? 'онлайн' : 'офлайн'}
+                    </span>
+
+                    <span className={isSelected ? 'ready-badge' : 'not-ready-badge'}>
+                      {isSelected ? 'выбран' : 'не выбран'}
+                    </span>
                   </span>
-                </div>
-              </div>
-            )
-          })}
+                </label>
+              )
+            })}
+          </div>
 
           {room.status !== 'playing' && (
-            <div className="waiting-box">
-              <strong>Ожидание старта</strong>
+            <div className={isRoomReadyToStart ? 'waiting-box waiting-box-ready' : 'waiting-box'}>
+              <strong>
+                {isRoomReadyToStart ? 'Комната готова к старту' : 'Ожидание старта'}
+              </strong>
 
               <p>
                 Выбраны {selectedPlayersCount} из {totalPlayersCount} игроков.
               </p>
 
-              {isCurrentPlayerOwner && (
+              {!hasEnoughPlayers && (
                 <p className="form-hint">
-                  Владелец комнаты выбирает участников партии.
+                  Нужно выбрать минимум двух игроков.
                 </p>
               )}
 
-              {!isCurrentPlayerOwner && (
+              {!hasSelectedQuartets && (
                 <p className="form-hint">
-                  Владелец комнаты выбирает, кто будет участвовать в партии.
+                  Нужно выбрать минимум один квартет.
                 </p>
               )}
 
-              {selectedPlayersCount < 2 && (
+              {isRoomReadyToStart && isCurrentPlayerOwner && (
                 <p className="form-hint">
-                  Для игры нужно выбрать минимум двух игроков.
+                  Можно начинать игру.
                 </p>
               )}
 
-              {selectedPlayersCount >= 2 && (
+              {isRoomReadyToStart && !isCurrentPlayerOwner && (
                 <p className="form-hint">
-                  Владелец комнаты может начать игру.
+                  Ожидаем, когда владелец комнаты начнёт игру.
                 </p>
               )}
             </div>
@@ -131,38 +179,64 @@ export function RoomPanel({
 
           {room.status !== 'playing' && (
             <div className="quartet-selection-box">
-              <h3>Квартеты для игры</h3>
+              <div className="room-section-header">
+                <div>
+                  <h3>Квартеты для игры</h3>
+                  <p className="form-hint">
+                    Выбранные квартеты попадут в колоду этой партии.
+                  </p>
+                </div>
+
+                <span className="room-section-counter">
+                  {selectedQuartetsCount} / {totalQuartetsCount}
+                </span>
+              </div>
 
               {availableQuartets.length === 0 && (
-                <p className="form-hint">Доступные квартеты не загружены.</p>
+                <div className="room-empty-state">
+                  <strong>Квартеты не найдены</strong>
+                  <p className="form-hint">
+                    Создай свои квартеты в редакторе или проверь подключение к серверу.
+                  </p>
+                </div>
               )}
 
-              {availableQuartets.map((quartet) => {
-                const isSelected = room.selected_quartet_ids?.[quartet.ID] === true
+              <div className='quartet-select-list'>
+                {availableQuartets.map((quartet) => {
+                  const isSelected = room.selected_quartet_ids?.[quartet.ID] === true
 
-                return (
-                  <label className="player-row" key={quartet.ID}>
-                    <span>
-                      {isCurrentPlayerOwner && (
-                        <input
-                          type="checkbox"
-                          checked={isSelected}
-                          onChange={() => onToggleSelectedQuartet(quartet.ID)}
-                          aria-label={`Выбрать квартет ${quartet.Title}`}
-                        />
-                      )}
+                  return (
+                    <label
+                      className={
+                        isSelected
+                          ? 'quartet-select-row quartet-select-row-selected'
+                          : 'quartet-select-row'
+                      }
+                      key={quartet.ID}
+                    >
+                      <span className="quartet-select-main">
+                        {isCurrentPlayerOwner && (
+                          <input
+                            className="quartet-select-checkbox"
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => onToggleSelectedQuartet(quartet.ID)}
+                            aria-label={`Выбрать квартет ${quartet.Title}`}
+                          />
+                        )}
 
-                      {quartet.Title}
-                    </span>
+                        <span className="quartet-select-title">
+                          {quartet.Title}
+                        </span>
+                      </span>
 
-                    <div className="player-badges">
                       <span className={isSelected ? 'ready-badge' : 'not-ready-badge'}>
                         {isSelected ? 'выбран' : 'не выбран'}
                       </span>
-                    </div>
-                  </label>
-                )
-              })}
+                    </label>
+                  )
+                })}
+              </div>
             </div>
           )}
         </div>
