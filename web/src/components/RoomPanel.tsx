@@ -24,6 +24,7 @@ export function RoomPanel({
     room?.players.filter((roomPlayer) => room.selected_player_ids?.[roomPlayer.id]).length ?? 0
   const selectedQuartetsCount =
     Object.values(room?.selected_quartet_ids ?? {}).filter(Boolean).length
+  const totalQuartetsCount = availableQuartets.length
 
   const isCurrentPlayerOwner =
     Boolean(room && currentPlayerID && room.owner_player_id === currentPlayerID)
@@ -164,20 +165,44 @@ export function RoomPanel({
 
           {room.status !== 'playing' && (
             <div className="quartet-selection-box">
-              <h3>Квартеты для игры</h3>
+              <div className="room-section-header">
+                <div>
+                  <h3>Квартеты для игры</h3>
+                  <p className="form-hint">
+                    Выбранные квартеты попадут в колоду этой партии.
+                  </p>
+                </div>
+
+                <span className="room-section-counter">
+                  {selectedQuartetsCount} / {totalQuartetsCount}
+                </span>
+              </div>
 
               {availableQuartets.length === 0 && (
-                <p className="form-hint">Доступные квартеты не загружены.</p>
+                <div className="room-empty-state">
+                  <strong>Квартеты не найдены</strong>
+                  <p className="form-hint">
+                    Создай свои квартеты в редакторе или проверь подключение к серверу.
+                  </p>
+                </div>
               )}
 
               {availableQuartets.map((quartet) => {
                 const isSelected = room.selected_quartet_ids?.[quartet.ID] === true
 
                 return (
-                  <label className="player-row" key={quartet.ID}>
-                    <span>
+                  <label
+                    className={
+                      isSelected
+                        ? 'quartet-select-row quartet-select-row-selected'
+                        : 'quartet-select-row'
+                    }
+                    key={quartet.ID}
+                  >
+                    <span className="quartet-select-main">
                       {isCurrentPlayerOwner && (
                         <input
+                          className="quartet-select-checkbox"
                           type="checkbox"
                           checked={isSelected}
                           onChange={() => onToggleSelectedQuartet(quartet.ID)}
@@ -185,14 +210,14 @@ export function RoomPanel({
                         />
                       )}
 
-                      {quartet.Title}
+                      <span className="quartet-select-title">
+                        {quartet.Title}
+                      </span>
                     </span>
 
-                    <div className="player-badges">
-                      <span className={isSelected ? 'ready-badge' : 'not-ready-badge'}>
-                        {isSelected ? 'выбран' : 'не выбран'}
-                      </span>
-                    </div>
+                    <span className={isSelected ? 'ready-badge' : 'not-ready-badge'}>
+                      {isSelected ? 'выбран' : 'не выбран'}
+                    </span>
                   </label>
                 )
               })}
