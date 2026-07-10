@@ -22,13 +22,22 @@ export function RoomPanel({
   const totalPlayersCount = room?.players.length ?? 0
   const selectedPlayersCount =
     room?.players.filter((roomPlayer) => room.selected_player_ids?.[roomPlayer.id]).length ?? 0
+  const selectedQuartetsCount =
+    Object.values(room?.selected_quartet_ids ?? {}).filter(Boolean).length
 
   const isCurrentPlayerOwner =
     Boolean(room && currentPlayerID && room.owner_player_id === currentPlayerID)
 
   return (
     <div className="panel">
-      <h2>Комната</h2>
+      <div className="room-waiting-header">
+        <div>
+          <h2>Комната ожидания</h2>
+          <p className="form-hint">
+            Выбери игроков и квартеты, затем начни игру.
+          </p>
+        </div>
+      </div>
 
       {!room && <p>Комната не загружена.</p>}
 
@@ -48,6 +57,12 @@ export function RoomPanel({
                 Копировать
               </button>
             </div>
+          </div>
+
+          <div className="room-waiting-summary">
+            <span>Игроков: {totalPlayersCount}</span>
+            <span>Выбрано игроков: {selectedPlayersCount}</span>
+            <span>Выбрано квартетов: {selectedQuartetsCount}</span>
           </div>
 
           <button className="button secondary-button" onClick={onLeaveRoom}>

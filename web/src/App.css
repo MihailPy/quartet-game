@@ -1592,3 +1592,27 @@ code {
   margin: 0;
   color: #71717a;
 }
+
+.room-waiting-header {
+  display: grid;
+  gap: 6px;
+}
+
+.room-waiting-header h2 {
+  margin: 0;
+}
+
+.room-waiting-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.room-waiting-summary span {
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #f4f4f5;
+  color: #3f3f46;
+  font-size: 14px;
+  font-weight: 700;
+}
