@@ -471,6 +471,28 @@ code {
   gap: 12px;
 }
 
+.game-empty-state {
+  display: grid;
+  gap: 6px;
+  padding: 14px;
+  border: 1px dashed #d4d4d8;
+  border-radius: 14px;
+  background: #fafafa;
+}
+
+.game-empty-state strong {
+  color: #3f3f46;
+}
+
+.game-empty-state-warning {
+  border-color: #fde68a;
+  background: #fffbeb;
+}
+
+.game-empty-state-warning strong {
+  color: #92400e;
+}
+
 .player-row-active {
   padding-left: 8px;
   border-left: 4px solid #2563eb;

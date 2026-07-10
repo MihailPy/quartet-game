@@ -100,14 +100,21 @@ export function GamePanel({
       )}
 
       {!publicGameState && room?.status !== 'playing' && (
-        <p>Игра ещё не началась.</p>
+        <div className="game-empty-state">
+          <strong>Игра ещё не началась</strong>
+          <p className="form-hint">
+            Выберите игроков и квартеты, затем запустите партию.
+          </p>
+        </div>
       )}
 
       {!publicGameState && room?.status === 'playing' && (
-        <p className="form-hint">
-          Игра была начата, но состояние игры не восстановлено. Возможно,
-          backend был перезапущен.
-        </p>
+        <div className="game-empty-state game-empty-state-warning">
+          <strong>Состояние игры не загружено</strong>
+          <p className="form-hint">
+            Игра была начата, но состояние не удалось восстановить. Возможно, backend был перезапущен.
+          </p>
+        </div>
       )}
 
       {publicGameState && (
