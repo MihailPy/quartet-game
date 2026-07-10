@@ -1804,3 +1804,12 @@ code {
   display: grid;
   gap: 8px;
 }
+
+.waiting-box-ready {
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+}
+
+.waiting-box-ready strong {
+  color: #166534;
+}

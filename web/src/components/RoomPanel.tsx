@@ -24,6 +24,9 @@ export function RoomPanel({
     room?.players.filter((roomPlayer) => room.selected_player_ids?.[roomPlayer.id]).length ?? 0
   const selectedQuartetsCount =
     Object.values(room?.selected_quartet_ids ?? {}).filter(Boolean).length
+  const hasEnoughPlayers = selectedPlayersCount >= 2
+  const hasSelectedQuartets = selectedQuartetsCount > 0
+  const isRoomReadyToStart = hasEnoughPlayers && hasSelectedQuartets
   const totalQuartetsCount = availableQuartets.length
 
   const isCurrentPlayerOwner =
@@ -139,34 +142,36 @@ export function RoomPanel({
           </div>
 
           {room.status !== 'playing' && (
-            <div className="waiting-box">
-              <strong>Ожидание старта</strong>
+            <div className={isRoomReadyToStart ? 'waiting-box waiting-box-ready' : 'waiting-box'}>
+              <strong>
+                {isRoomReadyToStart ? 'Комната готова к старту' : 'Ожидание старта'}
+              </strong>
 
               <p>
                 Выбраны {selectedPlayersCount} из {totalPlayersCount} игроков.
               </p>
 
-              {isCurrentPlayerOwner && (
+              {!hasEnoughPlayers && (
                 <p className="form-hint">
-                  Владелец комнаты выбирает участников партии.
+                  Нужно выбрать минимум двух игроков.
                 </p>
               )}
 
-              {!isCurrentPlayerOwner && (
+              {!hasSelectedQuartets && (
                 <p className="form-hint">
-                  Владелец комнаты выбирает, кто будет участвовать в партии.
+                  Нужно выбрать минимум один квартет.
                 </p>
               )}
 
-              {selectedPlayersCount < 2 && (
+              {isRoomReadyToStart && isCurrentPlayerOwner && (
                 <p className="form-hint">
-                  Для игры нужно выбрать минимум двух игроков.
+                  Можно начинать игру.
                 </p>
               )}
 
-              {selectedPlayersCount >= 2 && (
+              {isRoomReadyToStart && !isCurrentPlayerOwner && (
                 <p className="form-hint">
-                  Владелец комнаты может начать игру.
+                  Ожидаем, когда владелец комнаты начнёт игру.
                 </p>
               )}
             </div>
