@@ -72,6 +72,12 @@ export function GamePanel({
     gameFinished?.scores
       .slice()
       .sort((firstScore, secondScore) => secondScore.score - firstScore.score) ?? []
+  const currentPlayerScore = sortedFinalScores.find(
+    (score) => score.player_id === player?.id,
+  )
+
+  const isCurrentPlayerWinner =
+    player !== null && gameFinished?.winners.includes(player.id) === true
 
   return (
     <div className="panel">
@@ -156,6 +162,15 @@ export function GamePanel({
                 <span>{winnerNames}</span>
               </div>
 
+              {currentPlayerScore && (
+                <div className={isCurrentPlayerWinner ? 'player-result-box player-result-box-winner' : 'player-result-box'}>
+                  <strong>
+                    {isCurrentPlayerWinner ? 'Ты победил' : 'Твой результат'}
+                  </strong>
+                  <span>{currentPlayerScore.score} квартетов</span>
+                </div>
+              )}
+
               <div className="scores-list">
                 <strong>Итоговый счёт</strong>
 
@@ -176,6 +191,10 @@ export function GamePanel({
                   )
                 })}
               </div>
+
+              <p className="form-hint">
+                Чтобы сыграть ещё раз, выйди из комнаты и создай новую партию.
+              </p>
             </div>
           )}
         </div>
