@@ -433,10 +433,42 @@ code {
   margin: 0 0 10px;
 }
 
-.turn-player-name {
-  margin: 8px 0 0;
-  color: #2563eb;
-  font-weight: 600;
+.turn-banner {
+  display: grid;
+  gap: 6px;
+  margin-top: 12px;
+  padding: 14px;
+  border: 1px solid #bfdbfe;
+  border-radius: 16px;
+  background: #eff6ff;
+}
+
+.turn-banner strong {
+  color: #1e3a8a;
+  font-size: 18px;
+  line-height: 1.2;
+}
+
+.turn-banner .form-hint {
+  color: #1d4ed8;
+}
+
+.turn-banner.my-turn {
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+}
+
+.turn-banner.my-turn strong {
+  color: #166534;
+}
+
+.turn-banner.my-turn .form-hint {
+  color: #15803d;
+}
+
+.game-info {
+  display: grid;
+  gap: 12px;
 }
 
 .player-row-active {
