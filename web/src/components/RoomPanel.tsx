@@ -85,56 +85,58 @@ export function RoomPanel({
 
           {room.players.length === 0 && <p>Пока игроков нет.</p>}
 
-          {room.players.map((roomPlayer) => {
-            const isSelected = room.selected_player_ids?.[roomPlayer.id] === true
+          <div className='player-select-list'>
+            {room.players.map((roomPlayer) => {
+              const isSelected = room.selected_player_ids?.[roomPlayer.id] === true
 
-            return (
-              <label
-                className={
-                  isSelected
-                    ? 'player-select-row player-select-row-selected'
-                    : 'player-select-row'
-                }
-                key={roomPlayer.id}
-              >
-                <span className="player-select-main">
-                  {isCurrentPlayerOwner && room.status !== 'playing' && (
-                    <input
-                      className="player-select-checkbox"
-                      type="checkbox"
-                      checked={isSelected}
-                      onChange={() => onToggleSelectedPlayer(roomPlayer.id)}
-                      aria-label={`Выбрать игрока ${roomPlayer.name}`}
-                    />
-                  )}
+              return (
+                <label
+                  className={
+                    isSelected
+                      ? 'player-select-row player-select-row-selected'
+                      : 'player-select-row'
+                  }
+                  key={roomPlayer.id}
+                >
+                  <span className="player-select-main">
+                    {isCurrentPlayerOwner && room.status !== 'playing' && (
+                      <input
+                        className="player-select-checkbox"
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => onToggleSelectedPlayer(roomPlayer.id)}
+                        aria-label={`Выбрать игрока ${roomPlayer.name}`}
+                      />
+                    )}
 
-                  <span className="player-select-title">
-                    <strong>{roomPlayer.name}</strong>
+                    <span className="player-select-title">
+                      <strong>{roomPlayer.name}</strong>
 
-                    <span className="player-inline-labels">
-                      {roomPlayer.id === currentPlayerID && (
-                        <span className="player-inline-label">ты</span>
-                      )}
+                      <span className="player-inline-labels">
+                        {roomPlayer.id === currentPlayerID && (
+                          <span className="player-inline-label">ты</span>
+                        )}
 
-                      {roomPlayer.id === room.owner_player_id && (
-                        <span className="player-inline-label">владелец</span>
-                      )}
+                        {roomPlayer.id === room.owner_player_id && (
+                          <span className="player-inline-label">владелец</span>
+                        )}
+                      </span>
                     </span>
                   </span>
-                </span>
 
-                <span className="player-select-badges">
-                  <span className={roomPlayer.is_connected ? 'connected-badge' : 'disconnected-badge'}>
-                    {roomPlayer.is_connected ? 'онлайн' : 'офлайн'}
-                  </span>
+                  <span className="player-select-badges">
+                    <span className={roomPlayer.is_connected ? 'connected-badge' : 'disconnected-badge'}>
+                      {roomPlayer.is_connected ? 'онлайн' : 'офлайн'}
+                    </span>
 
-                  <span className={isSelected ? 'ready-badge' : 'not-ready-badge'}>
-                    {isSelected ? 'выбран' : 'не выбран'}
+                    <span className={isSelected ? 'ready-badge' : 'not-ready-badge'}>
+                      {isSelected ? 'выбран' : 'не выбран'}
+                    </span>
                   </span>
-                </span>
-              </label>
-            )
-          })}
+                </label>
+              )
+            })}
+          </div>
 
           {room.status !== 'playing' && (
             <div className="waiting-box">
@@ -194,40 +196,42 @@ export function RoomPanel({
                 </div>
               )}
 
-              {availableQuartets.map((quartet) => {
-                const isSelected = room.selected_quartet_ids?.[quartet.ID] === true
+              <div className='quartet-select-list'>
+                {availableQuartets.map((quartet) => {
+                  const isSelected = room.selected_quartet_ids?.[quartet.ID] === true
 
-                return (
-                  <label
-                    className={
-                      isSelected
-                        ? 'quartet-select-row quartet-select-row-selected'
-                        : 'quartet-select-row'
-                    }
-                    key={quartet.ID}
-                  >
-                    <span className="quartet-select-main">
-                      {isCurrentPlayerOwner && (
-                        <input
-                          className="quartet-select-checkbox"
-                          type="checkbox"
-                          checked={isSelected}
-                          onChange={() => onToggleSelectedQuartet(quartet.ID)}
-                          aria-label={`Выбрать квартет ${quartet.Title}`}
-                        />
-                      )}
+                  return (
+                    <label
+                      className={
+                        isSelected
+                          ? 'quartet-select-row quartet-select-row-selected'
+                          : 'quartet-select-row'
+                      }
+                      key={quartet.ID}
+                    >
+                      <span className="quartet-select-main">
+                        {isCurrentPlayerOwner && (
+                          <input
+                            className="quartet-select-checkbox"
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => onToggleSelectedQuartet(quartet.ID)}
+                            aria-label={`Выбрать квартет ${quartet.Title}`}
+                          />
+                        )}
 
-                      <span className="quartet-select-title">
-                        {quartet.Title}
+                        <span className="quartet-select-title">
+                          {quartet.Title}
+                        </span>
                       </span>
-                    </span>
 
-                    <span className={isSelected ? 'ready-badge' : 'not-ready-badge'}>
-                      {isSelected ? 'выбран' : 'не выбран'}
-                    </span>
-                  </label>
-                )
-              })}
+                      <span className={isSelected ? 'ready-badge' : 'not-ready-badge'}>
+                        {isSelected ? 'выбран' : 'не выбран'}
+                      </span>
+                    </label>
+                  )
+                })}
+              </div>
             </div>
           )}
         </div>
