@@ -89,13 +89,18 @@ export function RoomPanel({
             const isSelected = room.selected_player_ids?.[roomPlayer.id] === true
 
             return (
-              <div
-                className={isSelected ? 'player-row player-row-selected' : 'player-row'}
+              <label
+                className={
+                  isSelected
+                    ? 'player-select-row player-select-row-selected'
+                    : 'player-select-row'
+                }
                 key={roomPlayer.id}
               >
-                <span>
+                <span className="player-select-main">
                   {isCurrentPlayerOwner && room.status !== 'playing' && (
                     <input
+                      className="player-select-checkbox"
                       type="checkbox"
                       checked={isSelected}
                       onChange={() => onToggleSelectedPlayer(roomPlayer.id)}
@@ -103,20 +108,22 @@ export function RoomPanel({
                     />
                   )}
 
-                  <strong>{roomPlayer.name}</strong>
+                  <span className="player-select-title">
+                    <strong>{roomPlayer.name}</strong>
 
-                  <div className="player-inline-labels">
-                    {roomPlayer.id === currentPlayerID && (
-                      <span className="player-inline-label">ты</span>
-                    )}
+                    <span className="player-inline-labels">
+                      {roomPlayer.id === currentPlayerID && (
+                        <span className="player-inline-label">ты</span>
+                      )}
 
-                    {roomPlayer.id === room.owner_player_id && (
-                      <span className="player-inline-label">владелец</span>
-                    )}
-                  </div>
+                      {roomPlayer.id === room.owner_player_id && (
+                        <span className="player-inline-label">владелец</span>
+                      )}
+                    </span>
+                  </span>
                 </span>
 
-                <div className="player-badges">
+                <span className="player-select-badges">
                   <span className={roomPlayer.is_connected ? 'connected-badge' : 'disconnected-badge'}>
                     {roomPlayer.is_connected ? 'онлайн' : 'офлайн'}
                   </span>
@@ -124,8 +131,8 @@ export function RoomPanel({
                   <span className={isSelected ? 'ready-badge' : 'not-ready-badge'}>
                     {isSelected ? 'выбран' : 'не выбран'}
                   </span>
-                </div>
-              </div>
+                </span>
+              </label>
             )
           })}
 
