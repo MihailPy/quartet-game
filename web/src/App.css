@@ -1616,3 +1616,39 @@ code {
   font-size: 14px;
   font-weight: 700;
 }
+
+.room-section-header {
+  display: grid;
+  gap: 4px;
+}
+
+.room-section-header h3 {
+  margin: 0;
+}
+
+.player-row-selected {
+  padding-inline: 8px;
+  border-radius: 12px;
+  background: #f0fdf4;
+  border-bottom-color: transparent;
+}
+
+.player-inline-labels {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+.player-inline-label {
+  display: inline-flex;
+  align-items: center;
+  min-height: 20px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #3730a3;
+  font-size: 11px;
+  font-weight: 800;
+}

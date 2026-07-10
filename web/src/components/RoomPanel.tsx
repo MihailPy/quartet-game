@@ -73,7 +73,14 @@ export function RoomPanel({
             <strong>Статус:</strong> {room.status}
           </p>
 
-          <h3>Игроки</h3>
+          <div className="room-section-header">
+            <div>
+              <h3>Игроки</h3>
+              <p className="form-hint">
+                Выбранные игроки будут участвовать в партии.
+              </p>
+            </div>
+          </div>
 
           {room.players.length === 0 && <p>Пока игроков нет.</p>}
 
@@ -81,7 +88,10 @@ export function RoomPanel({
             const isSelected = room.selected_player_ids?.[roomPlayer.id] === true
 
             return (
-              <div className="player-row" key={roomPlayer.id}>
+              <div
+                className={isSelected ? 'player-row player-row-selected' : 'player-row'}
+                key={roomPlayer.id}
+              >
                 <span>
                   {isCurrentPlayerOwner && room.status !== 'playing' && (
                     <input
@@ -92,9 +102,17 @@ export function RoomPanel({
                     />
                   )}
 
-                  {roomPlayer.name}
-                  {roomPlayer.id === currentPlayerID ? ' (ты)' : ''}
-                  {roomPlayer.id === room.owner_player_id ? ' 👑' : ''}
+                  <strong>{roomPlayer.name}</strong>
+
+                  <div className="player-inline-labels">
+                    {roomPlayer.id === currentPlayerID && (
+                      <span className="player-inline-label">ты</span>
+                    )}
+
+                    {roomPlayer.id === room.owner_player_id && (
+                      <span className="player-inline-label">владелец</span>
+                    )}
+                  </div>
                 </span>
 
                 <div className="player-badges">
