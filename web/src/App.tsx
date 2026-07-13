@@ -1550,66 +1550,135 @@ function App() {
 
           {isSessionRestored && isEntered && (
             <>
-              {room && !isGamePlaying && (
-                <div className="layout-main-column">
-                  <RoomPanel
-                    room={room}
-                    currentPlayerID={player?.id ?? null}
-                    onLeaveRoom={leaveRoom}
-                    onCopyRoomID={copyRoomID}
-                    onToggleSelectedPlayer={toggleSelectedPlayer}
-                    availableQuartets={availableQuartets}
-                    onToggleSelectedQuartet={toggleSelectedQuartet}
-                  />
-                </div>
+              {room && room.status !== 'playing' && (
+                <>
+                  <div className="layout-main-column">
+                    <RoomPanel
+                      room={room}
+                      currentPlayerID={player?.id ?? null}
+                      onLeaveRoom={leaveRoom}
+                      onCopyRoomID={copyRoomID}
+                      onToggleSelectedPlayer={toggleSelectedPlayer}
+                      availableQuartets={availableQuartets}
+                      onToggleSelectedQuartet={toggleSelectedQuartet}
+                    />
+                  </div>
+
+                  <div className="layout-center-column">
+                    <GamePanel
+                      room={room}
+                      player={player}
+                      publicGameState={publicGameState}
+                      currentTurnPlayerID={currentTurnPlayerID}
+                      temporaryMessages={temporaryMessages}
+                      gameFinished={gameFinished}
+                      socketStatus={socketStatus}
+                      onStartGame={startGame}
+                      canStartGame={canStartGame()}
+                      getPlayerName={getPlayerName}
+                      isStartingGame={isStartingGame}
+                      startGameHint={getStartGameHint()}
+                    />
+                  </div>
+                </>
               )}
 
-              <GameplayLayout>
-                <div className="gameplay-main-zone">
-                  {publicGameState && (
-                    <GameplayTable
-                      gameState={publicGameState}
-                      currentTurnPlayerID={currentTurnPlayerID}
-                      latestEventTexts={gameEvents.slice(-2).map(formatGameEvent)}
-                      onPlayerClick={setSelectedTablePlayerID}
-                    />
-                  )}
+              {room && room.status === 'playing' && (
+                <div className="active-game-shell">
+                  <div className="active-game-toolbar">
+                    <div className="active-game-room-info">
+                      <span className="active-game-room-label">Комната</span>
+                      <code className="active-game-room-id">{room.id}</code>
 
-                  {canOpenRequestFlow && (
+                      <button
+                        className="secondary-button active-game-copy-button"
+                        type="button"
+                        onClick={copyRoomID}
+                      >
+                        Копировать ID
+                      </button>
+                    </div>
+
+                    <div className={gameFinished ? 'active-game-status active-game-status-finished' : 'active-game-status'}>
+                      <span className="active-game-status-label">Статус</span>
+                      <strong>{gameFinished ? 'Игра завершена' : 'Игра идёт'}</strong>
+                    </div>
+
                     <button
-                      className="button request-flow-open-button"
+                      className="secondary-button active-game-leave-button"
                       type="button"
-                      onClick={() => setIsRequestFlowOpen(true)}
+                      onClick={leaveRoom}
                     >
-                      Открыть новый запрос карты
+                      Выйти
                     </button>
-                  )}
+                  </div>
 
-                  <GamePanel
-                    room={room}
-                    player={player}
-                    publicGameState={publicGameState}
-                    currentTurnPlayerID={currentTurnPlayerID}
-                    temporaryMessages={temporaryMessages}
-                    gameFinished={gameFinished}
-                    socketStatus={socketStatus}
-                    onStartGame={startGame}
-                    canStartGame={canStartGame()}
-                    getPlayerName={getPlayerName}
-                    isStartingGame={isStartingGame}
-                    startGameHint={getStartGameHint()}
-                  />
+                  <GameplayLayout>
+                    <div className="gameplay-main-zone">
+                      {publicGameState && (
+                        <GameplayTable
+                          gameState={publicGameState}
+                          currentTurnPlayerID={currentTurnPlayerID}
+                          latestEventTexts={gameEvents.slice(-2).map(formatGameEvent)}
+                          onPlayerClick={setSelectedTablePlayerID}
+                        />
+                      )}
+
+                      {canOpenRequestFlow && (
+                        <div className="request-flow-action-box">
+                          <div>
+                            <strong>Твой ход</strong>
+                            <p className="form-hint">
+                              Выбери игрока и карту, которую хочешь запросить.
+                            </p>
+                          </div>
+
+                          <button
+                            className="button request-flow-open-button"
+                            type="button"
+                            onClick={() => setIsRequestFlowOpen(true)}
+                          >
+                            Запросить карту
+                          </button>
+                        </div>
+                      )}
+
+                      {publicGameState && !canOpenRequestFlow && !gameFinished && (
+                        <div className="request-flow-waiting-box">
+                          <strong>Ожидание хода</strong>
+                          <p className="form-hint">
+                            Запрос карты станет доступен, когда ход перейдёт к тебе.
+                          </p>
+                        </div>
+                      )}
+
+                      <GamePanel
+                        room={room}
+                        player={player}
+                        publicGameState={publicGameState}
+                        currentTurnPlayerID={currentTurnPlayerID}
+                        temporaryMessages={temporaryMessages}
+                        gameFinished={gameFinished}
+                        socketStatus={socketStatus}
+                        onStartGame={startGame}
+                        canStartGame={canStartGame()}
+                        getPlayerName={getPlayerName}
+                        isStartingGame={isStartingGame}
+                        startGameHint={getStartGameHint()}
+                      />
+                    </div>
+
+                    <GameplayHandZone
+                      isHandOpen={isHandOpen}
+                      player={player}
+                      playerHand={hasGameStarted && room && isGamePlaying ? playerHand : null}
+                      getQuartetTitle={getQuartetTitle}
+                      onToggleHand={() => setIsHandOpen((current) => !current)}
+                      onCardPreview={setPreviewCard}
+                    />
+                  </GameplayLayout>
                 </div>
-
-                <GameplayHandZone
-                  isHandOpen={isHandOpen}
-                  player={player}
-                  playerHand={hasGameStarted && room && isGamePlaying ? playerHand : null}
-                  getQuartetTitle={getQuartetTitle}
-                  onToggleHand={() => setIsHandOpen((current) => !current)}
-                  onCardPreview={setPreviewCard}
-                />
-              </GameplayLayout>
+              )}
 
               {selectedTablePlayer && publicGameState && (
                 <PlayerDetailsModal
