@@ -1399,6 +1399,17 @@ code {
   width: 100%;
 }
 
+.active-game-shell {
+  grid-column: 1 / -1;
+  width: min(100%, 1280px);
+  margin: 0 auto;
+}
+
+.active-game-shell .gameplay-layout {
+  display: grid;
+  gap: 18px;
+}
+
 @media (min-width: 1200px) {
   .gameplay-mode {
     max-width: 1280px;
