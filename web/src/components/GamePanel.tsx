@@ -81,7 +81,7 @@ export function GamePanel({
 
   return (
     <div className="panel">
-      <h2>Игра</h2>
+      <h2>{room?.status === 'playing' ? 'Партия' : 'Игра'}</h2>
 
       <div className={`connection-status connection-status-${socketStatus}`}>
         Соединение: {getSocketStatusLabel(socketStatus)}
@@ -137,7 +137,7 @@ export function GamePanel({
 
               <p className="form-hint">
                 {isCurrentPlayerTurn
-                  ? 'Выберите игрока и карту, чтобы сделать запрос.'
+                  ? 'Сейчас можно сделать запрос карты.'
                   : 'Ожидайте действия другого игрока.'}
               </p>
             </div>
