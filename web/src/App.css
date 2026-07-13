@@ -1423,6 +1423,67 @@ code {
   min-height: clamp(360px, 46vh, 620px);
 }
 
+.active-game-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 10px 12px;
+  border: 1px solid #e4e4e7;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.active-game-room-info {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: 8px;
+}
+
+.active-game-room-label {
+  color: #71717a;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.active-game-room-id {
+  display: block;
+  min-width: 0;
+  padding: 5px 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.active-game-copy-button,
+.active-game-leave-button {
+  width: auto;
+  white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+  .active-game-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .active-game-room-info {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .active-game-copy-button {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .active-game-leave-button {
+    width: 100%;
+  }
+}
+
 @media (min-width: 1200px) {
   .gameplay-mode {
     max-width: 1280px;

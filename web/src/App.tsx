@@ -1585,6 +1585,29 @@ function App() {
 
               {room && room.status === 'playing' && (
                 <div className="active-game-shell">
+                  <div className="active-game-toolbar">
+                    <div className="active-game-room-info">
+                      <span className="active-game-room-label">Комната</span>
+                      <code className="active-game-room-id">{room.id}</code>
+
+                      <button
+                        className="secondary-button active-game-copy-button"
+                        type="button"
+                        onClick={copyRoomID}
+                      >
+                        Копировать ID
+                      </button>
+                    </div>
+
+                    <button
+                      className="secondary-button active-game-leave-button"
+                      type="button"
+                      onClick={leaveRoom}
+                    >
+                      Выйти
+                    </button>
+                  </div>
+
                   <GameplayLayout>
                     <div className="gameplay-main-zone">
                       {publicGameState && (
