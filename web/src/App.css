@@ -1193,8 +1193,8 @@ code {
 
 .player-seats {
   position: relative;
-  width: min(520px, 100%);
-  height: 280px;
+  width: min(760px, 100%);
+  height: clamp(300px, 38vh, 460px);
 }
 
 .player-seat {
@@ -1276,7 +1276,7 @@ code {
 
 .table-center-content {
   position: absolute;
-  inset: 96px 120px;
+  inset: 110px 140px;
   display: grid;
   place-items: center;
   gap: 8px;
@@ -1401,13 +1401,26 @@ code {
 
 .active-game-shell {
   grid-column: 1 / -1;
-  width: min(100%, 1280px);
+  width: min(100%, 1320px);
   margin: 0 auto;
 }
 
 .active-game-shell .gameplay-layout {
   display: grid;
   gap: 18px;
+  width: 100%;
+}
+
+.active-game-shell .gameplay-main-zone {
+  width: 100%;
+}
+
+.active-game-shell .gameplay-table {
+  width: 100%;
+}
+
+.active-game-shell .gameplay-table-center {
+  min-height: clamp(360px, 46vh, 620px);
 }
 
 @media (min-width: 1200px) {
@@ -1905,4 +1918,19 @@ code {
 
 .waiting-box-ready strong {
   color: #166534;
+}
+
+@media (max-width: 720px) {
+  .active-game-shell .gameplay-table-center {
+    min-height: 360px;
+  }
+
+  .player-seats {
+    width: 100%;
+    height: 320px;
+  }
+
+  .table-center-content {
+    inset: 96px 80px;
+  }
 }
