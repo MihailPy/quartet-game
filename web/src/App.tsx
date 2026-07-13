@@ -1599,6 +1599,11 @@ function App() {
                       </button>
                     </div>
 
+                    <div className={gameFinished ? 'active-game-status active-game-status-finished' : 'active-game-status'}>
+                      <span className="active-game-status-label">Статус</span>
+                      <strong>{gameFinished ? 'Игра завершена' : 'Игра идёт'}</strong>
+                    </div>
+
                     <button
                       className="secondary-button active-game-leave-button"
                       type="button"
