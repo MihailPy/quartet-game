@@ -1654,27 +1654,95 @@ code {
 }
 
 @media (max-width: 720px) {
+  .active-game-shell {
+    width: 100%;
+  }
+
+  .active-game-shell .gameplay-layout {
+    gap: 14px;
+  }
+
   .gameplay-table {
     min-height: auto;
   }
 
+  .gameplay-table h2 {
+    margin-bottom: 12px;
+    font-size: 26px;
+    line-height: 1.15;
+  }
+
+  .gameplay-latest-events {
+    margin-bottom: 12px;
+  }
+
+  .gameplay-latest-event {
+    margin-bottom: 8px;
+    overflow-wrap: anywhere;
+  }
+
   .gameplay-table-center {
-    min-height: 260px;
+    min-height: 380px;
+    padding: 16px;
   }
 
   .player-seats {
-    width: min(320px, 100%);
-    height: 220px;
+    width: min(100%, 340px);
+    height: 340px;
+  }
+
+  .table-center-content {
+    inset: 132px 64px;
+    pointer-events: none;
+  }
+
+  .table-turn-status {
+    font-size: 15px;
+    line-height: 1.25;
+  }
+
+  .table-completed-quartets {
+    max-width: 100%;
+  }
+
+  .completed-quartet-chip {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    font-size: 12px;
+  }
+
+  .player-seat {
+    min-width: 72px;
+    max-width: 104px;
   }
 
   .player-seat-avatar {
-    width: 36px;
-    height: 36px;
+    width: 38px;
+    height: 38px;
+  }
+
+  .player-card-backs {
+    padding-left: 18px;
   }
 
   .player-card-back {
     width: 20px;
     height: 30px;
+  }
+
+  .request-flow-action-box,
+  .request-flow-waiting-box {
+    padding: 14px;
+  }
+
+  .request-flow-cards-grid {
+    grid-template-columns: repeat(auto-fill, minmax(118px, 118px));
+    overflow-x: auto;
+    justify-content: start;
+  }
+
+  .request-flow-card {
+    width: 118px;
   }
 }
 
@@ -2096,4 +2164,106 @@ code {
   .request-flow-open-button {
     width: 100%;
   }
+}
+
+/* Stage 46 final mobile/table polish */
+
+.gameplay-table-center {
+  position: relative;
+  overflow: hidden;
+}
+
+.player-seats {
+  margin: 0 auto;
+}
+
+.player-seats-count-2 .player-seat-0 {
+  top: 8%;
+  left: 50%;
+  right: auto;
+  bottom: auto;
+  transform: translateX(-50%);
+}
+
+.player-seats-count-2 .player-seat-1 {
+  right: auto;
+  top: auto;
+  bottom: 8%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.player-seats-count-3 .player-seat-0 {
+  top: 6%;
+  left: 50%;
+  right: auto;
+  bottom: auto;
+  transform: translateX(-50%);
+}
+
+.player-seats-count-3 .player-seat-1 {
+  right: 5%;
+  top: 58%;
+  bottom: auto;
+  left: auto;
+  transform: translateY(-50%);
+}
+
+.player-seats-count-3 .player-seat-2 {
+  left: 5%;
+  top: 58%;
+  right: auto;
+  bottom: auto;
+  transform: translateY(-50%);
+}
+
+.player-seats-count-4 .player-seat-0 {
+  top: 4%;
+  left: 50%;
+  right: auto;
+  bottom: auto;
+  transform: translateX(-50%);
+}
+
+.player-seats-count-4 .player-seat-1 {
+  right: 3%;
+  top: 50%;
+  bottom: auto;
+  left: auto;
+  transform: translateY(-50%);
+}
+
+.player-seats-count-4 .player-seat-2 {
+  bottom: 4%;
+  left: 50%;
+  right: auto;
+  top: auto;
+  transform: translateX(-50%);
+}
+
+.player-seats-count-4 .player-seat-3 {
+  left: 3%;
+  top: 50%;
+  right: auto;
+  bottom: auto;
+  transform: translateY(-50%);
+}
+
+.request-flow-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(132px, 132px));
+  justify-content: start;
+  gap: 12px;
+}
+
+.request-flow-card {
+  width: 132px;
+}
+
+.request-flow-card-main {
+  width: 100%;
+}
+
+.request-flow-card-image {
+  width: 100%;
 }
