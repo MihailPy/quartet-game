@@ -1625,13 +1625,31 @@ function App() {
                       )}
 
                       {canOpenRequestFlow && (
-                        <button
-                          className="button request-flow-open-button"
-                          type="button"
-                          onClick={() => setIsRequestFlowOpen(true)}
-                        >
-                          Открыть новый запрос карты
-                        </button>
+                        <div className="request-flow-action-box">
+                          <div>
+                            <strong>Твой ход</strong>
+                            <p className="form-hint">
+                              Выбери игрока и карту, которую хочешь запросить.
+                            </p>
+                          </div>
+
+                          <button
+                            className="button request-flow-open-button"
+                            type="button"
+                            onClick={() => setIsRequestFlowOpen(true)}
+                          >
+                            Запросить карту
+                          </button>
+                        </div>
+                      )}
+
+                      {publicGameState && !canOpenRequestFlow && !gameFinished && (
+                        <div className="request-flow-waiting-box">
+                          <strong>Ожидание хода</strong>
+                          <p className="form-hint">
+                            Запрос карты станет доступен, когда ход перейдёт к тебе.
+                          </p>
+                        </div>
                       )}
 
                       <GamePanel
