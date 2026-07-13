@@ -1550,7 +1550,7 @@ function App() {
 
           {isSessionRestored && isEntered && (
             <>
-              {room && !isGamePlaying && (
+              {room && room.status !== 'playing' && (
                 <div className="layout-main-column">
                   <RoomPanel
                     room={room}
