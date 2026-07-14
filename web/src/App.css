@@ -2561,3 +2561,40 @@ code {
     font-size: 11px;
   }
 }
+
+.table-core {
+  gap: 8px;
+}
+
+.table-core-meta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.table-core-meta span {
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #f4f4f5;
+  color: #52525b;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+@media (max-width: 720px) {
+  .table-core {
+    gap: 6px;
+  }
+
+  .table-core-meta {
+    gap: 4px;
+  }
+
+  .table-core-meta span {
+    padding: 4px 6px;
+    font-size: 11px;
+  }
+}

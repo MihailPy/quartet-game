@@ -28,6 +28,8 @@ export function GameplayTable({
       })),
   )
 
+  const completedQuartetsCount = completedQuartets.length
+
   const currentPlayerName =
     gameState.players.find((player) => player.id === currentPlayerID)?.name ??
     'неизвестно'
@@ -51,6 +53,11 @@ export function GameplayTable({
           <div className="table-core">
             <span className="table-core-label">Текущий ход</span>
             <strong>{currentPlayerName}</strong>
+
+            <div className="table-core-meta">
+              <span>{gameState.players.length} игроков</span>
+              <span>{completedQuartetsCount} квартетов</span>
+            </div>
           </div>
 
           {completedQuartets.length > 0 && (
