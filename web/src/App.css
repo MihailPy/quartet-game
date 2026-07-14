@@ -1302,12 +1302,7 @@ code {
 }
 
 .table-center-content {
-  position: absolute;
-  inset: 110px 140px;
-  display: grid;
-  place-items: center;
-  gap: 8px;
-  text-align: center;
+  display: none;
 }
 
 .completed-quartet-chip {
@@ -1689,11 +1684,6 @@ code {
   .player-seats {
     width: min(100%, 340px);
     height: 340px;
-  }
-
-  .table-center-content {
-    inset: 132px 64px;
-    pointer-events: none;
   }
 
   .table-turn-status {
@@ -2266,4 +2256,73 @@ code {
 
 .request-flow-card-image {
   width: 100%;
+}
+
+.table-surface {
+  position: absolute;
+  inset: 18%;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at center, rgba(255, 255, 255, 0.92), rgba(241, 245, 249, 0.78));
+}
+
+.table-core {
+  display: grid;
+  place-items: center;
+  gap: 4px;
+  min-width: 180px;
+  padding: 16px 20px;
+  border-radius: 999px;
+  background: #ffffff;
+  border: 1px solid #e4e4e7;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+  text-align: center;
+}
+
+.table-core-label {
+  color: #71717a;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.table-core strong {
+  color: #18181b;
+  font-size: 18px;
+}
+
+.player-seat-name {
+  display: block;
+  max-width: 120px;
+  margin: 4px auto 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+}
+
+@media (max-width: 720px) {
+  .table-surface {
+    inset: 22% 12%;
+    border-radius: 28px;
+  }
+
+  .table-core {
+    min-width: 140px;
+    padding: 12px 14px;
+  }
+
+  .table-core strong {
+    font-size: 15px;
+  }
+
+  .player-seat-name {
+    max-width: 88px;
+    font-size: 12px;
+  }
 }

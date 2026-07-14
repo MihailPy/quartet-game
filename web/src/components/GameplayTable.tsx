@@ -46,10 +46,11 @@ export function GameplayTable({
         </div>
       )}
 
-      <div className="gameplay-table-center">
-        <div className="table-center-content">
-          <div className="table-turn-status">
-            Ход игрока: {currentPlayerName}
+      <div className={`gameplay-table-center table-player-count-${gameState.players.length}`}>
+        <div className="table-surface">
+          <div className="table-core">
+            <span className="table-core-label">Текущий ход</span>
+            <strong>{currentPlayerName}</strong>
           </div>
 
           {completedQuartets.length > 0 && (
@@ -82,6 +83,8 @@ export function GameplayTable({
               <div className="player-seat-avatar">
                 {player.name.charAt(0).toUpperCase()}
               </div>
+
+              <strong className="player-seat-name">{player.name}</strong>
 
               <div className="player-card-backs" aria-label={`${player.card_count} карт`}>
                 {Array.from({ length: Math.min(player.card_count, 6) }).map((_, cardIndex) => (
