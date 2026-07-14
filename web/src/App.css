@@ -2167,38 +2167,6 @@ code {
   margin: 0 auto;
 }
 
-.player-seats-count-4 .player-seat-0 {
-  top: 4%;
-  left: 50%;
-  right: auto;
-  bottom: auto;
-  transform: translateX(-50%);
-}
-
-.player-seats-count-4 .player-seat-1 {
-  right: 3%;
-  top: 50%;
-  bottom: auto;
-  left: auto;
-  transform: translateY(-50%);
-}
-
-.player-seats-count-4 .player-seat-2 {
-  bottom: 4%;
-  left: 50%;
-  right: auto;
-  top: auto;
-  transform: translateX(-50%);
-}
-
-.player-seats-count-4 .player-seat-3 {
-  left: 3%;
-  top: 50%;
-  right: auto;
-  bottom: auto;
-  transform: translateY(-50%);
-}
-
 .request-flow-cards-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(132px, 132px));
@@ -2443,5 +2411,108 @@ code {
 
   .table-player-count-3 .table-surface {
     inset: 31% 8% 28%;
+  }
+}
+
+/* Stage 47 — 4 player table seating */
+
+.player-seats-count-4 {
+  width: min(820px, 100%);
+  height: clamp(420px, 50vh, 580px);
+}
+
+.player-seats-count-4 .player-seat {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  min-width: 132px;
+  padding: 10px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+}
+
+.player-seats-count-4 .player-seat-0 {
+  top: 2%;
+  left: 50%;
+  right: auto;
+  bottom: auto;
+  transform: translateX(-50%);
+}
+
+.player-seats-count-4 .player-seat-1 {
+  right: 2%;
+  top: 50%;
+  bottom: auto;
+  left: auto;
+  transform: translateY(-50%);
+}
+
+.player-seats-count-4 .player-seat-2 {
+  bottom: 2%;
+  left: 50%;
+  right: auto;
+  top: auto;
+  transform: translateX(-50%);
+}
+
+.player-seats-count-4 .player-seat-3 {
+  left: 2%;
+  top: 50%;
+  right: auto;
+  bottom: auto;
+  transform: translateY(-50%);
+}
+
+.player-seats-count-4 .player-seat-current {
+  border-color: rgba(37, 99, 235, 0.5);
+  background: #eff6ff;
+}
+
+.table-player-count-4 .table-surface {
+  inset: 24% 18%;
+}
+
+.table-player-count-4 .table-core {
+  min-width: 190px;
+}
+
+@media (max-width: 720px) {
+  .player-seats-count-4 {
+    width: min(100%, 350px);
+    height: 430px;
+  }
+
+  .player-seats-count-4 .player-seat {
+    min-width: 96px;
+    max-width: 108px;
+    padding: 8px;
+  }
+
+  .player-seats-count-4 .player-seat-0 {
+    top: 2%;
+  }
+
+  .player-seats-count-4 .player-seat-1 {
+    right: 0;
+    top: 50%;
+  }
+
+  .player-seats-count-4 .player-seat-2 {
+    bottom: 2%;
+  }
+
+  .player-seats-count-4 .player-seat-3 {
+    left: 0;
+    top: 50%;
+  }
+
+  .table-player-count-4 .table-surface {
+    inset: 30% 20%;
+  }
+
+  .table-player-count-4 .table-core {
+    min-width: 120px;
   }
 }
