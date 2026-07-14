@@ -2167,30 +2167,6 @@ code {
   margin: 0 auto;
 }
 
-.player-seats-count-3 .player-seat-0 {
-  top: 6%;
-  left: 50%;
-  right: auto;
-  bottom: auto;
-  transform: translateX(-50%);
-}
-
-.player-seats-count-3 .player-seat-1 {
-  right: 5%;
-  top: 58%;
-  bottom: auto;
-  left: auto;
-  transform: translateY(-50%);
-}
-
-.player-seats-count-3 .player-seat-2 {
-  left: 5%;
-  top: 58%;
-  right: auto;
-  bottom: auto;
-  transform: translateY(-50%);
-}
-
 .player-seats-count-4 .player-seat-0 {
   top: 4%;
   left: 50%;
@@ -2380,5 +2356,92 @@ code {
 
   .table-player-count-2 .table-surface {
     inset: 30% 8%;
+  }
+}
+
+/* Stage 47 — 3 player table seating */
+
+.player-seats-count-3 {
+  width: min(780px, 100%);
+  height: clamp(380px, 46vh, 540px);
+}
+
+.player-seats-count-3 .player-seat {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  min-width: 132px;
+  padding: 10px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+}
+
+.player-seats-count-3 .player-seat-0 {
+  top: 3%;
+  left: 50%;
+  right: auto;
+  bottom: auto;
+  transform: translateX(-50%);
+}
+
+.player-seats-count-3 .player-seat-1 {
+  right: 6%;
+  top: auto;
+  bottom: 6%;
+  left: auto;
+  transform: none;
+}
+
+.player-seats-count-3 .player-seat-2 {
+  left: 6%;
+  top: auto;
+  bottom: 6%;
+  right: auto;
+  transform: none;
+}
+
+.player-seats-count-3 .player-seat-current {
+  border-color: rgba(37, 99, 235, 0.5);
+  background: #eff6ff;
+}
+
+.table-player-count-3 .table-surface {
+  inset: 24% 16% 26%;
+}
+
+.table-player-count-3 .table-core {
+  min-width: 190px;
+}
+
+@media (max-width: 720px) {
+  .player-seats-count-3 {
+    width: min(100%, 340px);
+    height: 400px;
+  }
+
+  .player-seats-count-3 .player-seat {
+    min-width: 104px;
+    max-width: 112px;
+    padding: 8px;
+  }
+
+  .player-seats-count-3 .player-seat-0 {
+    top: 2%;
+  }
+
+  .player-seats-count-3 .player-seat-1 {
+    right: 0;
+    bottom: 4%;
+  }
+
+  .player-seats-count-3 .player-seat-2 {
+    left: 0;
+    bottom: 4%;
+  }
+
+  .table-player-count-3 .table-surface {
+    inset: 31% 8% 28%;
   }
 }
