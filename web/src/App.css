@@ -2167,22 +2167,6 @@ code {
   margin: 0 auto;
 }
 
-.player-seats-count-2 .player-seat-0 {
-  top: 8%;
-  left: 50%;
-  right: auto;
-  bottom: auto;
-  transform: translateX(-50%);
-}
-
-.player-seats-count-2 .player-seat-1 {
-  right: auto;
-  top: auto;
-  bottom: 8%;
-  left: 50%;
-  transform: translateX(-50%);
-}
-
 .player-seats-count-3 .player-seat-0 {
   top: 6%;
   left: 50%;
@@ -2324,5 +2308,77 @@ code {
   .player-seat-name {
     max-width: 88px;
     font-size: 12px;
+  }
+}
+
+/* Stage 47 — 2 player table seating */
+
+.player-seats-count-2 {
+  width: min(720px, 100%);
+  height: clamp(360px, 44vh, 520px);
+}
+
+.player-seats-count-2 .player-seat {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  min-width: 132px;
+  padding: 10px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+}
+
+.player-seats-count-2 .player-seat-0 {
+  top: 4%;
+  left: 50%;
+  right: auto;
+  bottom: auto;
+  transform: translateX(-50%);
+}
+
+.player-seats-count-2 .player-seat-1 {
+  bottom: 4%;
+  left: 50%;
+  right: auto;
+  top: auto;
+  transform: translateX(-50%);
+}
+
+.player-seats-count-2 .player-seat-current {
+  border-color: rgba(37, 99, 235, 0.5);
+  background: #eff6ff;
+}
+
+.table-player-count-2 .table-surface {
+  inset: 24% 18%;
+}
+
+.table-player-count-2 .table-core {
+  min-width: 190px;
+}
+
+@media (max-width: 720px) {
+  .player-seats-count-2 {
+    width: min(100%, 320px);
+    height: 380px;
+  }
+
+  .player-seats-count-2 .player-seat {
+    min-width: 112px;
+    padding: 8px;
+  }
+
+  .player-seats-count-2 .player-seat-0 {
+    top: 2%;
+  }
+
+  .player-seats-count-2 .player-seat-1 {
+    bottom: 2%;
+  }
+
+  .table-player-count-2 .table-surface {
+    inset: 30% 8%;
   }
 }
