@@ -2516,3 +2516,48 @@ code {
     min-width: 120px;
   }
 }
+
+.player-seat-hand {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+}
+
+.player-seat-hand .player-card-backs {
+  min-height: 30px;
+  margin-top: 0;
+  padding-left: 20px;
+}
+
+.player-seat-hand .player-card-back {
+  width: 22px;
+  height: 30px;
+}
+
+.player-seat-card-count {
+  color: #52525b;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+  .player-seat-hand {
+    gap: 3px;
+  }
+
+  .player-seat-hand .player-card-backs {
+    min-height: 26px;
+    padding-left: 16px;
+  }
+
+  .player-seat-hand .player-card-back {
+    width: 18px;
+    height: 26px;
+  }
+
+  .player-seat-card-count {
+    font-size: 11px;
+  }
+}

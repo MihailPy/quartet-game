@@ -86,14 +86,16 @@ export function GameplayTable({
 
               <strong className="player-seat-name">{player.name}</strong>
 
-              <div className="player-card-backs" aria-label={`${player.card_count} карт`}>
-                {Array.from({ length: Math.min(player.card_count, 6) }).map((_, cardIndex) => (
-                  <span className="player-card-back" key={cardIndex} />
-                ))}
+              <div className="player-seat-hand" aria-label={`${player.card_count} карт`}>
+                <div className="player-card-backs">
+                  {Array.from({ length: Math.min(player.card_count, 4) }).map((_, cardIndex) => (
+                    <span className="player-card-back" key={cardIndex} />
+                  ))}
+                </div>
 
-                {player.card_count > 6 && (
-                  <span className="player-card-count">+{player.card_count - 6}</span>
-                )}
+                <span className="player-seat-card-count">
+                  {player.card_count} карт
+                </span>
               </div>
             </button>
           ))}
