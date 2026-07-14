@@ -2598,3 +2598,39 @@ code {
     font-size: 11px;
   }
 }
+
+.table-surface {
+  gap: 10px;
+}
+
+.table-event-strip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: min(100%, 360px);
+}
+
+.table-event-chip {
+  max-width: 100%;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(219, 234, 254, 0.9);
+  color: #1e3a8a;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.25;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 720px) {
+  .table-event-strip {
+    width: min(100%, 220px);
+  }
+
+  .table-event-chip {
+    padding: 5px 8px;
+    font-size: 11px;
+  }
+}

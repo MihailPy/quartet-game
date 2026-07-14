@@ -38,16 +38,6 @@ export function GameplayTable({
     <section className="panel gameplay-table">
       <h2>Игровой стол</h2>
 
-      {latestEventTexts.length > 0 && (
-        <div className="gameplay-latest-events">
-          {latestEventTexts.map((eventText) => (
-            <div className="gameplay-latest-event" key={eventText}>
-              {eventText}
-            </div>
-          ))}
-        </div>
-      )}
-
       <div className={`gameplay-table-center table-player-count-${gameState.players.length}`}>
         <div className="table-surface">
           <div className="table-core">
@@ -59,6 +49,16 @@ export function GameplayTable({
               <span>{completedQuartetsCount} квартетов</span>
             </div>
           </div>
+
+          {latestEventTexts.length > 0 && (
+            <div className="table-event-strip">
+              {latestEventTexts.map((eventText) => (
+                <span className="table-event-chip" key={eventText}>
+                  {eventText}
+                </span>
+              ))}
+            </div>
+          )}
 
           {completedQuartets.length > 0 && (
             <div className="table-completed-quartets">
