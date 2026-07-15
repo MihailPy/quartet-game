@@ -2707,3 +2707,200 @@ code {
     width: 100%;
   }
 }
+
+.request-flow-modal {
+  width: min(960px, calc(100vw - 32px));
+  max-height: min(840px, calc(100vh - 32px));
+  overflow: hidden;
+  border-radius: 28px;
+}
+
+.request-flow-hero {
+  align-items: flex-start;
+  padding: 20px;
+  border-bottom: 1px solid #e4e4e7;
+  background:
+    radial-gradient(circle at top left, rgba(37, 99, 235, 0.1), transparent 18rem),
+    #ffffff;
+}
+
+.request-flow-kicker {
+  display: block;
+  margin-bottom: 4px;
+  color: #2563eb;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.request-flow-hero h2 {
+  margin: 0 0 6px;
+  font-size: 30px;
+  line-height: 1.05;
+}
+
+.request-flow-close-button {
+  flex: 0 0 auto;
+}
+
+.request-flow-content {
+  max-height: calc(100vh - 170px);
+  overflow: auto;
+  padding: 18px 20px 20px;
+}
+
+.request-flow-section {
+  display: grid;
+  gap: 12px;
+}
+
+.request-flow-section + .request-flow-section {
+  margin-top: 18px;
+}
+
+.request-flow-section h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: #27272a;
+  font-size: 16px;
+}
+
+.request-flow-section h3 span {
+  display: inline-grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #3730a3;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+@media (max-width: 720px) {
+  .request-flow-modal {
+    width: 100vw;
+    height: 100dvh;
+    max-height: none;
+    border-radius: 0;
+  }
+
+  .request-flow-hero {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 18px 18px 14px;
+  }
+
+  .request-flow-hero h2 {
+    font-size: 34px;
+    line-height: 1.05;
+  }
+
+  .request-flow-hero .form-hint {
+    max-width: 34ch;
+    font-size: 15px;
+    line-height: 1.35;
+  }
+
+  .request-flow-close-button {
+    width: 100%;
+    min-height: 46px;
+    order: -1;
+  }
+
+  .request-flow-content {
+    max-height: calc(100dvh - 190px);
+    padding: 16px 18px 28px;
+  }
+
+  .request-flow-section h3 {
+    font-size: 22px;
+  }
+
+  .request-flow-section h3 span {
+    width: 32px;
+    height: 32px;
+  }
+
+  .request-flow-player {
+    min-height: auto;
+    padding: 18px;
+  }
+}
+
+/* Stage 47 request flow mobile hard override */
+
+@media (max-width: 720px) {
+  .request-flow-modal {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100dvh;
+    max-height: none;
+    border-radius: 0;
+    overflow: hidden;
+  }
+
+  .request-flow-header.request-flow-hero {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    min-height: 0;
+    padding: 16px;
+    border-bottom: 1px solid #e4e4e7;
+  }
+
+  .request-flow-header.request-flow-hero > div {
+    display: grid;
+    gap: 6px;
+    order: 2;
+  }
+
+  .request-flow-close-button {
+    order: 1;
+    width: 100%;
+    min-height: 44px;
+  }
+
+  .request-flow-kicker {
+    margin: 0;
+    font-size: 11px;
+  }
+
+  .request-flow-hero h2 {
+    margin: 0;
+    font-size: 28px;
+    line-height: 1.05;
+  }
+
+  .request-flow-hero .form-hint {
+    max-width: none;
+    font-size: 14px;
+    line-height: 1.35;
+  }
+
+  .request-flow-content {
+    height: calc(100dvh - 164px);
+    max-height: none;
+    overflow-y: auto;
+    padding: 16px;
+  }
+
+  .request-flow-section {
+    gap: 12px;
+  }
+
+  .request-flow-section + .request-flow-section {
+    margin-top: 18px;
+  }
+
+  .request-flow-player {
+    min-height: 120px;
+    padding: 16px;
+  }
+}

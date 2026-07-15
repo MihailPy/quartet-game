@@ -42,20 +42,27 @@ export function RequestCardFlow({
         className="request-flow-modal"
         onClick={(event) => event.stopPropagation()}
       >
-        <header className="request-flow-header">
+        <header className="request-flow-header request-flow-hero">
           <div>
+            <span className="request-flow-kicker">Ход игрока</span>
             <h2>Запрос карты</h2>
-            <p className="form-hint">Выбери игрока, у которого хочешь спросить карту.</p>
+            <p className="form-hint">
+              Сначала выбери соперника, затем карту, которую хочешь получить.
+            </p>
           </div>
 
-          <button className="secondary-button" type="button" onClick={onClose}>
+          <button className="secondary-button request-flow-close-button" type="button" onClick={onClose}>
             Закрыть
           </button>
         </header>
 
         <div className="request-flow-content">
           <section className='request-flow-section'>
-            <h3>1. Выбери игрока</h3>
+            <h3>
+              <span>1</span>
+              Выбери соперника
+            </h3>
+
             {targetPlayers.map((player) => (
               <button
                 className={
@@ -79,7 +86,10 @@ export function RequestCardFlow({
 
           {availableRequestCards.length > 0 && (
             <section className='request-flow-section'>
-              <h3>2. Выбери карту</h3>
+              <h3>
+                <span>2</span>
+                Выбери карту
+              </h3>
 
               <div className="request-flow-cards-grid">
                 {availableRequestCards.map((card) => (
