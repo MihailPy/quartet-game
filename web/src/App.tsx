@@ -1625,16 +1625,17 @@ function App() {
                       )}
 
                       {canOpenRequestFlow && (
-                        <div className="request-flow-action-box">
-                          <div>
-                            <strong>Твой ход</strong>
+                        <div className="turn-action-panel">
+                          <div className="turn-action-copy">
+                            <span className="turn-action-kicker">Твой ход</span>
+                            <strong>Сделай запрос карты</strong>
                             <p className="form-hint">
-                              Выбери игрока и карту, которую хочешь запросить.
+                              Выбери соперника и карту, которую хочешь получить.
                             </p>
                           </div>
 
                           <button
-                            className="button request-flow-open-button"
+                            className="button turn-action-button"
                             type="button"
                             onClick={() => setIsRequestFlowOpen(true)}
                           >
@@ -1644,11 +1645,14 @@ function App() {
                       )}
 
                       {publicGameState && !canOpenRequestFlow && !gameFinished && (
-                        <div className="request-flow-waiting-box">
-                          <strong>Ожидание хода</strong>
-                          <p className="form-hint">
-                            Запрос карты станет доступен, когда ход перейдёт к тебе.
-                          </p>
+                        <div className="turn-action-panel turn-action-panel-waiting">
+                          <div className="turn-action-copy">
+                            <span className="turn-action-kicker">Ожидание</span>
+                            <strong>Сейчас ход другого игрока</strong>
+                            <p className="form-hint">
+                              Запрос карты станет доступен, когда ход перейдёт к тебе.
+                            </p>
+                          </div>
                         </div>
                       )}
 

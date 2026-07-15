@@ -1302,12 +1302,7 @@ code {
 }
 
 .table-center-content {
-  position: absolute;
-  inset: 110px 140px;
-  display: grid;
-  place-items: center;
-  gap: 8px;
-  text-align: center;
+  display: none;
 }
 
 .completed-quartet-chip {
@@ -1689,11 +1684,6 @@ code {
   .player-seats {
     width: min(100%, 340px);
     height: 340px;
-  }
-
-  .table-center-content {
-    inset: 132px 64px;
-    pointer-events: none;
   }
 
   .table-turn-status {
@@ -2177,78 +2167,6 @@ code {
   margin: 0 auto;
 }
 
-.player-seats-count-2 .player-seat-0 {
-  top: 8%;
-  left: 50%;
-  right: auto;
-  bottom: auto;
-  transform: translateX(-50%);
-}
-
-.player-seats-count-2 .player-seat-1 {
-  right: auto;
-  top: auto;
-  bottom: 8%;
-  left: 50%;
-  transform: translateX(-50%);
-}
-
-.player-seats-count-3 .player-seat-0 {
-  top: 6%;
-  left: 50%;
-  right: auto;
-  bottom: auto;
-  transform: translateX(-50%);
-}
-
-.player-seats-count-3 .player-seat-1 {
-  right: 5%;
-  top: 58%;
-  bottom: auto;
-  left: auto;
-  transform: translateY(-50%);
-}
-
-.player-seats-count-3 .player-seat-2 {
-  left: 5%;
-  top: 58%;
-  right: auto;
-  bottom: auto;
-  transform: translateY(-50%);
-}
-
-.player-seats-count-4 .player-seat-0 {
-  top: 4%;
-  left: 50%;
-  right: auto;
-  bottom: auto;
-  transform: translateX(-50%);
-}
-
-.player-seats-count-4 .player-seat-1 {
-  right: 3%;
-  top: 50%;
-  bottom: auto;
-  left: auto;
-  transform: translateY(-50%);
-}
-
-.player-seats-count-4 .player-seat-2 {
-  bottom: 4%;
-  left: 50%;
-  right: auto;
-  top: auto;
-  transform: translateX(-50%);
-}
-
-.player-seats-count-4 .player-seat-3 {
-  left: 3%;
-  top: 50%;
-  right: auto;
-  bottom: auto;
-  transform: translateY(-50%);
-}
-
 .request-flow-cards-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(132px, 132px));
@@ -2267,3 +2185,1515 @@ code {
 .request-flow-card-image {
   width: 100%;
 }
+
+.table-surface {
+  position: absolute;
+  inset: 18%;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at center, rgba(255, 255, 255, 0.92), rgba(241, 245, 249, 0.78));
+}
+
+.table-core {
+  display: grid;
+  place-items: center;
+  gap: 4px;
+  min-width: 180px;
+  padding: 16px 20px;
+  border-radius: 999px;
+  background: #ffffff;
+  border: 1px solid #e4e4e7;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+  text-align: center;
+}
+
+.table-core-label {
+  color: #71717a;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.table-core strong {
+  color: #18181b;
+  font-size: 18px;
+}
+
+.player-seat-name {
+  display: block;
+  max-width: 120px;
+  margin: 4px auto 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+}
+
+@media (max-width: 720px) {
+  .table-surface {
+    inset: 22% 12%;
+    border-radius: 28px;
+  }
+
+  .table-core {
+    min-width: 140px;
+    padding: 12px 14px;
+  }
+
+  .table-core strong {
+    font-size: 15px;
+  }
+
+  .player-seat-name {
+    max-width: 88px;
+    font-size: 12px;
+  }
+}
+
+/* Stage 47 — 2 player table seating */
+
+.player-seats-count-2 {
+  width: min(720px, 100%);
+  height: clamp(360px, 44vh, 520px);
+}
+
+.player-seats-count-2 .player-seat {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  min-width: 132px;
+  padding: 10px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+}
+
+.player-seats-count-2 .player-seat-0 {
+  top: 4%;
+  left: 50%;
+  right: auto;
+  bottom: auto;
+  transform: translateX(-50%);
+}
+
+.player-seats-count-2 .player-seat-1 {
+  bottom: 4%;
+  left: 50%;
+  right: auto;
+  top: auto;
+  transform: translateX(-50%);
+}
+
+.player-seats-count-2 .player-seat-current {
+  border-color: rgba(37, 99, 235, 0.5);
+  background: #eff6ff;
+}
+
+.table-player-count-2 .table-surface {
+  inset: 24% 18%;
+}
+
+.table-player-count-2 .table-core {
+  min-width: 190px;
+}
+
+@media (max-width: 720px) {
+  .player-seats-count-2 {
+    width: min(100%, 320px);
+    height: 380px;
+  }
+
+  .player-seats-count-2 .player-seat {
+    min-width: 112px;
+    padding: 8px;
+  }
+
+  .player-seats-count-2 .player-seat-0 {
+    top: 2%;
+  }
+
+  .player-seats-count-2 .player-seat-1 {
+    bottom: 2%;
+  }
+
+  .table-player-count-2 .table-surface {
+    inset: 30% 8%;
+  }
+}
+
+/* Stage 47 — 3 player table seating */
+
+.player-seats-count-3 {
+  width: min(780px, 100%);
+  height: clamp(380px, 46vh, 540px);
+}
+
+.player-seats-count-3 .player-seat {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  min-width: 132px;
+  padding: 10px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+}
+
+.player-seats-count-3 .player-seat-0 {
+  top: 3%;
+  left: 50%;
+  right: auto;
+  bottom: auto;
+  transform: translateX(-50%);
+}
+
+.player-seats-count-3 .player-seat-1 {
+  right: 6%;
+  top: auto;
+  bottom: 6%;
+  left: auto;
+  transform: none;
+}
+
+.player-seats-count-3 .player-seat-2 {
+  left: 6%;
+  top: auto;
+  bottom: 6%;
+  right: auto;
+  transform: none;
+}
+
+.player-seats-count-3 .player-seat-current {
+  border-color: rgba(37, 99, 235, 0.5);
+  background: #eff6ff;
+}
+
+.table-player-count-3 .table-surface {
+  inset: 24% 16% 26%;
+}
+
+.table-player-count-3 .table-core {
+  min-width: 190px;
+}
+
+@media (max-width: 720px) {
+  .player-seats-count-3 {
+    width: min(100%, 340px);
+    height: 400px;
+  }
+
+  .player-seats-count-3 .player-seat {
+    min-width: 104px;
+    max-width: 112px;
+    padding: 8px;
+  }
+
+  .player-seats-count-3 .player-seat-0 {
+    top: 2%;
+  }
+
+  .player-seats-count-3 .player-seat-1 {
+    right: 0;
+    bottom: 4%;
+  }
+
+  .player-seats-count-3 .player-seat-2 {
+    left: 0;
+    bottom: 4%;
+  }
+
+  .table-player-count-3 .table-surface {
+    inset: 31% 8% 28%;
+  }
+}
+
+/* Stage 47 — 4 player table seating */
+
+.player-seats-count-4 {
+  width: min(820px, 100%);
+  height: clamp(420px, 50vh, 580px);
+}
+
+.player-seats-count-4 .player-seat {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  min-width: 132px;
+  padding: 10px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+}
+
+.player-seats-count-4 .player-seat-0 {
+  top: 2%;
+  left: 50%;
+  right: auto;
+  bottom: auto;
+  transform: translateX(-50%);
+}
+
+.player-seats-count-4 .player-seat-1 {
+  right: 2%;
+  top: 50%;
+  bottom: auto;
+  left: auto;
+  transform: translateY(-50%);
+}
+
+.player-seats-count-4 .player-seat-2 {
+  bottom: 2%;
+  left: 50%;
+  right: auto;
+  top: auto;
+  transform: translateX(-50%);
+}
+
+.player-seats-count-4 .player-seat-3 {
+  left: 2%;
+  top: 50%;
+  right: auto;
+  bottom: auto;
+  transform: translateY(-50%);
+}
+
+.player-seats-count-4 .player-seat-current {
+  border-color: rgba(37, 99, 235, 0.5);
+  background: #eff6ff;
+}
+
+.table-player-count-4 .table-surface {
+  inset: 24% 18%;
+}
+
+.table-player-count-4 .table-core {
+  min-width: 190px;
+}
+
+@media (max-width: 720px) {
+  .player-seats-count-4 {
+    width: min(100%, 350px);
+    height: 430px;
+  }
+
+  .player-seats-count-4 .player-seat {
+    min-width: 96px;
+    max-width: 108px;
+    padding: 8px;
+  }
+
+  .player-seats-count-4 .player-seat-0 {
+    top: 2%;
+  }
+
+  .player-seats-count-4 .player-seat-1 {
+    right: 0;
+    top: 50%;
+  }
+
+  .player-seats-count-4 .player-seat-2 {
+    bottom: 2%;
+  }
+
+  .player-seats-count-4 .player-seat-3 {
+    left: 0;
+    top: 50%;
+  }
+
+  .table-player-count-4 .table-surface {
+    inset: 30% 20%;
+  }
+
+  .table-player-count-4 .table-core {
+    min-width: 120px;
+  }
+}
+
+.player-seat-hand {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+}
+
+.player-seat-hand .player-card-backs {
+  min-height: 30px;
+  margin-top: 0;
+  padding-left: 20px;
+}
+
+.player-seat-hand .player-card-back {
+  width: 22px;
+  height: 30px;
+}
+
+.player-seat-card-count {
+  color: #52525b;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+  .player-seat-hand {
+    gap: 3px;
+  }
+
+  .player-seat-hand .player-card-backs {
+    min-height: 26px;
+    padding-left: 16px;
+  }
+
+  .player-seat-hand .player-card-back {
+    width: 18px;
+    height: 26px;
+  }
+
+  .player-seat-card-count {
+    font-size: 11px;
+  }
+}
+
+.table-core {
+  gap: 8px;
+}
+
+.table-core-meta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.table-core-meta span {
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #f4f4f5;
+  color: #52525b;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+@media (max-width: 720px) {
+  .table-core {
+    gap: 6px;
+  }
+
+  .table-core-meta {
+    gap: 4px;
+  }
+
+  .table-core-meta span {
+    padding: 4px 6px;
+    font-size: 11px;
+  }
+}
+
+.table-surface {
+  gap: 10px;
+}
+
+.table-event-strip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: min(100%, 360px);
+}
+
+.table-event-chip {
+  max-width: 100%;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(219, 234, 254, 0.9);
+  color: #1e3a8a;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.25;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 720px) {
+  .table-event-strip {
+    width: min(100%, 220px);
+  }
+
+  .table-event-chip {
+    padding: 5px 8px;
+    font-size: 11px;
+  }
+}
+
+.turn-action-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid #bbf7d0;
+  border-radius: 22px;
+  background:
+    linear-gradient(135deg, rgba(240, 253, 244, 0.96), rgba(220, 252, 231, 0.82));
+  box-shadow: 0 16px 34px rgba(22, 101, 52, 0.1);
+}
+
+.turn-action-panel-waiting {
+  grid-template-columns: 1fr;
+  border-color: #e4e4e7;
+  background:
+    linear-gradient(135deg, rgba(250, 250, 250, 0.96), rgba(244, 244, 245, 0.86));
+  box-shadow: none;
+}
+
+.turn-action-copy {
+  display: grid;
+  gap: 4px;
+}
+
+.turn-action-kicker {
+  color: #15803d;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.turn-action-panel-waiting .turn-action-kicker {
+  color: #71717a;
+}
+
+.turn-action-copy strong {
+  color: #14532d;
+  font-size: 20px;
+  line-height: 1.15;
+}
+
+.turn-action-panel-waiting .turn-action-copy strong {
+  color: #3f3f46;
+}
+
+.turn-action-button {
+  width: auto;
+  min-width: 180px;
+  min-height: 48px;
+  border-radius: 999px;
+  font-weight: 900;
+}
+
+@media (max-width: 720px) {
+  .turn-action-panel {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 14px;
+    border-radius: 18px;
+  }
+
+  .turn-action-copy strong {
+    font-size: 18px;
+  }
+
+  .turn-action-button {
+    width: 100%;
+  }
+}
+
+.request-flow-modal {
+  width: min(960px, calc(100vw - 32px));
+  max-height: min(840px, calc(100vh - 32px));
+  overflow: hidden;
+  border-radius: 28px;
+}
+
+.request-flow-hero {
+  align-items: flex-start;
+  padding: 20px;
+  border-bottom: 1px solid #e4e4e7;
+  background:
+    radial-gradient(circle at top left, rgba(37, 99, 235, 0.1), transparent 18rem),
+    #ffffff;
+}
+
+.request-flow-kicker {
+  display: block;
+  margin-bottom: 4px;
+  color: #2563eb;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.request-flow-hero h2 {
+  margin: 0 0 6px;
+  font-size: 30px;
+  line-height: 1.05;
+}
+
+.request-flow-close-button {
+  flex: 0 0 auto;
+}
+
+.request-flow-content {
+  max-height: calc(100vh - 170px);
+  overflow: auto;
+  padding: 18px 20px 20px;
+}
+
+.request-flow-section {
+  display: grid;
+  gap: 12px;
+}
+
+.request-flow-section + .request-flow-section {
+  margin-top: 18px;
+}
+
+.request-flow-section h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: #27272a;
+  font-size: 16px;
+}
+
+.request-flow-section h3 span {
+  display: inline-grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #3730a3;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+@media (max-width: 720px) {
+  .request-flow-modal {
+    width: 100vw;
+    height: 100dvh;
+    max-height: none;
+    border-radius: 0;
+  }
+
+  .request-flow-hero {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 18px 18px 14px;
+  }
+
+  .request-flow-hero h2 {
+    font-size: 34px;
+    line-height: 1.05;
+  }
+
+  .request-flow-hero .form-hint {
+    max-width: 34ch;
+    font-size: 15px;
+    line-height: 1.35;
+  }
+
+  .request-flow-close-button {
+    width: 100%;
+    min-height: 46px;
+    order: -1;
+  }
+
+  .request-flow-content {
+    max-height: calc(100dvh - 190px);
+    padding: 16px 18px 28px;
+  }
+
+  .request-flow-section h3 {
+    font-size: 22px;
+  }
+
+  .request-flow-section h3 span {
+    width: 32px;
+    height: 32px;
+  }
+
+  .request-flow-player {
+    min-height: auto;
+    padding: 18px;
+  }
+}
+
+/* Stage 47 request flow mobile hard override */
+
+@media (max-width: 720px) {
+  .request-flow-modal {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100dvh;
+    max-height: none;
+    border-radius: 0;
+    overflow: hidden;
+  }
+
+  .request-flow-header.request-flow-hero {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    min-height: 0;
+    padding: 16px;
+    border-bottom: 1px solid #e4e4e7;
+  }
+
+  .request-flow-header.request-flow-hero > div {
+    display: grid;
+    gap: 6px;
+    order: 2;
+  }
+
+  .request-flow-close-button {
+    order: 1;
+    width: 100%;
+    min-height: 44px;
+  }
+
+  .request-flow-kicker {
+    margin: 0;
+    font-size: 11px;
+  }
+
+  .request-flow-hero h2 {
+    margin: 0;
+    font-size: 28px;
+    line-height: 1.05;
+  }
+
+  .request-flow-hero .form-hint {
+    max-width: none;
+    font-size: 14px;
+    line-height: 1.35;
+  }
+
+  .request-flow-content {
+    height: calc(100dvh - 164px);
+    max-height: none;
+    overflow-y: auto;
+    padding: 16px;
+  }
+
+  .request-flow-section {
+    gap: 12px;
+  }
+
+  .request-flow-section + .request-flow-section {
+    margin-top: 18px;
+  }
+
+  .request-flow-player {
+    min-height: 120px;
+    padding: 16px;
+  }
+}
+
+.request-flow-modal {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+}
+
+.request-flow-content {
+  min-height: 0;
+  padding-bottom: 18px;
+}
+
+.request-flow-sticky-footer {
+  position: sticky;
+  bottom: 0;
+  z-index: 4;
+  display: grid;
+  gap: 10px;
+  padding: 12px 20px 16px;
+  border-top: 1px solid #e4e4e7;
+  background:
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.82), #ffffff 28%);
+}
+
+.request-flow-submit-button {
+  width: 100%;
+  min-height: 46px;
+}
+
+.request-flow-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 126px);
+  justify-content: start;
+  align-items: start;
+  gap: 12px;
+  max-width: 560px;
+}
+
+.request-flow-card {
+  width: 126px;
+  min-width: 126px;
+  max-width: 126px;
+}
+
+.request-flow-card-main {
+  width: 126px;
+  min-width: 126px;
+  max-width: 126px;
+  padding: 10px;
+}
+
+.request-flow-card-image {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+}
+
+.request-flow-card-main strong {
+  min-height: 30px;
+  overflow-wrap: anywhere;
+  font-size: 12px;
+  line-height: 1.15;
+}
+
+.request-flow-card-main small {
+  min-height: 24px;
+  overflow-wrap: anywhere;
+  font-size: 10px;
+  line-height: 1.15;
+}
+
+.request-flow-card > .secondary-button {
+  width: 100%;
+}
+
+.request-flow-hand-preview {
+  border-radius: 14px;
+  background: #f8fafc;
+}
+
+.request-flow-hand-preview summary {
+  cursor: pointer;
+  padding: 10px 12px;
+  font-weight: 800;
+}
+
+.request-flow-hand-cards {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 0 12px 12px;
+}
+
+.request-flow-hand-card {
+  flex: 0 0 120px;
+  display: grid;
+  gap: 4px;
+  padding: 10px;
+  border: 1px solid #e4e4e7;
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+@media (max-width: 720px) {
+  .request-flow-modal {
+    width: 100vw;
+    height: 100dvh;
+    max-height: none;
+    border-radius: 0;
+  }
+
+  .request-flow-content {
+    height: auto;
+    max-height: none;
+    overflow-y: auto;
+    padding: 14px 16px;
+  }
+
+  .request-flow-cards-grid {
+    grid-template-columns: repeat(auto-fill, 112px);
+    gap: 10px;
+    max-width: 100%;
+  }
+
+  .request-flow-card,
+  .request-flow-card-main {
+    width: 112px;
+    min-width: 112px;
+    max-width: 112px;
+  }
+
+  .request-flow-sticky-footer {
+    padding: 10px 16px 14px;
+  }
+
+  .request-flow-hand-card {
+    flex-basis: 108px;
+  }
+}
+
+/* Stage 47 — request cards mobile horizontal strip */
+
+.request-flow-card-main {
+  overflow: hidden;
+}
+
+.request-flow-card-main strong,
+.request-flow-card-main small {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.request-flow-card-main strong {
+  white-space: nowrap;
+}
+
+.request-flow-card-main small {
+  white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+  .request-flow-cards-grid {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 12px;
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 4px 0 12px;
+    scroll-snap-type: x proximity;
+  }
+
+  .request-flow-card {
+    flex: 0 0 132px;
+    width: 132px;
+    min-width: 132px;
+    max-width: 132px;
+    scroll-snap-align: start;
+  }
+
+  .request-flow-card-main {
+    width: 132px;
+    min-width: 132px;
+    max-width: 132px;
+  }
+
+  .request-flow-card-image {
+    width: 100%;
+    aspect-ratio: 3 / 4;
+  }
+
+  .request-flow-card-main strong {
+    min-height: 18px;
+    font-size: 13px;
+    line-height: 1.25;
+  }
+
+  .request-flow-card-main small {
+    min-height: 16px;
+    font-size: 11px;
+    line-height: 1.25;
+  }
+
+  .request-flow-card > .secondary-button {
+    min-height: 40px;
+  }
+}
+
+@media (max-width: 720px) {
+  .request-flow-content {
+    padding-bottom: 24px;
+  }
+
+  .request-flow-sticky-footer {
+    position: sticky;
+    bottom: 0;
+  }
+}
+
+/* Stage 47 — request card visual polish */
+
+.request-flow-card {
+  display: grid;
+  gap: 8px;
+  width: 116px;
+  min-width: 116px;
+  max-width: 116px;
+  padding: 8px;
+  border: 1px solid #e4e4e7;
+  border-radius: 16px;
+  background: #ffffff;
+}
+
+.request-flow-card-main {
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  text-align: left;
+}
+
+.request-flow-card-image {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  border-radius: 12px;
+}
+
+.request-flow-card-main strong {
+  display: block;
+  min-height: 0;
+  margin-top: 7px;
+  color: #18181b;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.15;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.request-flow-card-main small {
+  display: block;
+  min-height: 0;
+  margin-top: 2px;
+  color: #71717a;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.15;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.request-flow-card > .secondary-button {
+  width: 100%;
+  min-height: 34px;
+  padding: 6px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+}
+
+.request-flow-card-selected {
+  border-color: #2563eb;
+  background: #eff6ff;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14);
+}
+
+.request-flow-card-selected .request-flow-card-main {
+  background: transparent;
+  box-shadow: none;
+}
+
+@media (max-width: 720px) {
+  .request-flow-cards-grid {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 10px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 4px 0 12px;
+  }
+
+  .request-flow-card {
+    flex: 0 0 116px;
+    width: 116px;
+    min-width: 116px;
+    max-width: 116px;
+  }
+
+  .request-flow-card-main {
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+  }
+}
+
+/* Stage 47 — request opponent choice polish */
+
+.request-flow-section:first-child {
+  margin-bottom: 8px;
+}
+
+.request-flow-player {
+  display: inline-grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  width: auto;
+  min-width: 180px;
+  max-width: 260px;
+  min-height: 56px;
+  padding: 10px 12px;
+  border: 1px solid #e4e4e7;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #18181b;
+  text-align: left;
+  cursor: pointer;
+}
+
+.request-flow-player .player-seat-avatar {
+  width: 34px;
+  height: 34px;
+  margin: 0;
+}
+
+.request-flow-player strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #18181b;
+  font-size: 14px;
+  line-height: 1.1;
+}
+
+.request-flow-player span {
+  color: #71717a;
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.request-flow-player-selected {
+  border-color: #2563eb;
+  background: #eff6ff;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14);
+}
+
+.request-flow-player-selected strong,
+.request-flow-player-selected span {
+  color: #1d4ed8;
+}
+
+@media (max-width: 720px) {
+  .request-flow-player {
+    width: 100%;
+    max-width: none;
+    border-radius: 18px;
+  }
+
+  .request-flow-section:first-child {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Stage 47 — request opponent grid fix */
+
+.request-flow-players-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: stretch;
+}
+
+.request-flow-player {
+  flex: 0 0 220px;
+  width: 220px;
+  max-width: 220px;
+}
+
+@media (max-width: 720px) {
+  .request-flow-players-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .request-flow-player {
+    width: 100%;
+    max-width: none;
+    flex-basis: auto;
+  }
+}
+
+/* Stage 47 — request card selection polish */
+
+.request-flow-card-main {
+  position: relative;
+}
+
+.request-flow-card-selected-mark {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 2;
+  display: none;
+  padding: 4px 7px;
+  border-radius: 999px;
+  background: #2563eb;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.request-flow-card-selected .request-flow-card-selected-mark {
+  display: inline-flex;
+}
+
+.request-flow-card-selected {
+  border-color: #2563eb;
+  background: #eff6ff;
+  box-shadow:
+    0 0 0 3px rgba(37, 99, 235, 0.16),
+    0 14px 28px rgba(37, 99, 235, 0.12);
+}
+
+.request-flow-card-selected .secondary-button {
+  border-color: #2563eb;
+  color: #1d4ed8;
+}
+
+.request-flow-card:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+}
+
+.request-flow-card-selected:hover {
+  border-color: #2563eb;
+}
+
+/* Stage 47 — mobile game table layout */
+
+@media (max-width: 720px) {
+  .active-game-shell {
+    width: 100%;
+  }
+
+  .gameplay-table {
+    padding: 16px;
+    border-radius: 20px;
+  }
+
+  .gameplay-table h2 {
+    margin: 0 0 14px;
+    font-size: 28px;
+    line-height: 1.1;
+  }
+
+  .gameplay-table-center {
+    min-height: 430px;
+    padding: 12px;
+    overflow: hidden;
+  }
+
+  .table-surface {
+    inset: 34% 8% 28%;
+    padding: 12px;
+    border-radius: 28px;
+  }
+
+  .table-core {
+    min-width: 136px;
+    padding: 12px;
+  }
+
+  .table-core-label {
+    font-size: 10px;
+  }
+
+  .table-core strong {
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 15px;
+  }
+
+  .table-core-meta span {
+    font-size: 10px;
+  }
+
+  .table-event-strip {
+    width: min(100%, 190px);
+  }
+
+  .table-event-chip {
+    font-size: 10px;
+  }
+
+  .table-completed-quartets {
+    max-width: 190px;
+  }
+
+  .completed-quartet-chip {
+    max-width: 100%;
+    font-size: 10px;
+    overflow-wrap: anywhere;
+  }
+}
+
+@media (max-width: 720px) {
+  .player-seats {
+    width: min(100%, 340px);
+    height: 390px;
+  }
+
+  .player-seat {
+    min-width: 92px;
+    max-width: 108px;
+    padding: 7px;
+    border-radius: 16px;
+  }
+
+  .player-seat-avatar {
+    width: 34px;
+    height: 34px;
+  }
+
+  .player-seat-name {
+    max-width: 90px;
+    font-size: 11px;
+  }
+
+  .player-seat-hand .player-card-backs {
+    min-height: 24px;
+    padding-left: 14px;
+  }
+
+  .player-seat-hand .player-card-back {
+    width: 17px;
+    height: 24px;
+  }
+
+  .player-seat-card-count {
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 720px) {
+  .player-seats-count-2 .player-seat-0 {
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .player-seats-count-2 .player-seat-1 {
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .table-player-count-2 .table-surface {
+    inset: 34% 8% 30%;
+  }
+}
+
+@media (max-width: 720px) {
+  .player-seats-count-3 .player-seat-0 {
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .player-seats-count-3 .player-seat-1 {
+    right: 0;
+    bottom: 0;
+    top: auto;
+    transform: none;
+  }
+
+  .player-seats-count-3 .player-seat-2 {
+    left: 0;
+    bottom: 0;
+    top: auto;
+    transform: none;
+  }
+
+  .table-player-count-3 .table-surface {
+    inset: 34% 8% 30%;
+  }
+}
+
+@media (max-width: 720px) {
+  .player-seats-count-4 .player-seat-0 {
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .player-seats-count-4 .player-seat-1 {
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  .player-seats-count-4 .player-seat-2 {
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .player-seats-count-4 .player-seat-3 {
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  .table-player-count-4 .table-surface {
+    inset: 35% 22% 31%;
+  }
+}
+
+/* Stage 47 — mobile request flow layout */
+
+@media (max-width: 720px) {
+  .modal-backdrop {
+    align-items: stretch;
+    justify-content: stretch;
+    padding: 0;
+  }
+
+  .request-flow-modal {
+    width: 100vw;
+    height: 100dvh;
+    max-height: none;
+    border-radius: 0;
+  }
+
+  .request-flow-header.request-flow-hero {
+    padding: 16px;
+    gap: 12px;
+  }
+
+  .request-flow-close-button {
+    min-height: 44px;
+    border-radius: 14px;
+  }
+
+  .request-flow-hero h2 {
+    font-size: 32px;
+    line-height: 1.05;
+  }
+
+  .request-flow-hero .form-hint {
+    font-size: 15px;
+    line-height: 1.35;
+  }
+
+  .request-flow-content {
+    padding: 14px 16px;
+  }
+
+  .request-flow-section {
+    gap: 12px;
+  }
+
+  .request-flow-section h3 {
+    font-size: 20px;
+    line-height: 1.15;
+  }
+
+  .request-flow-section h3 span {
+    width: 30px;
+    height: 30px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 720px) {
+  .request-flow-players-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .request-flow-player {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    width: 100%;
+    max-width: none;
+    min-height: 58px;
+    padding: 10px 12px;
+    border-radius: 16px;
+  }
+
+  .request-flow-player .player-seat-avatar {
+    width: 34px;
+    height: 34px;
+  }
+
+  .request-flow-player strong {
+    font-size: 15px;
+  }
+
+  .request-flow-player span {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 720px) {
+  .request-flow-cards-grid {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 10px;
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 4px 0 14px;
+    scroll-snap-type: x proximity;
+  }
+
+  .request-flow-card {
+    flex: 0 0 116px;
+    width: 116px;
+    min-width: 116px;
+    max-width: 116px;
+    scroll-snap-align: start;
+  }
+
+  .request-flow-card-main {
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+  }
+
+  .request-flow-card > .secondary-button {
+    min-height: 36px;
+  }
+}
+
+@media (max-width: 720px) {
+  .request-flow-sticky-footer {
+    padding: 10px 16px max(14px, env(safe-area-inset-bottom));
+  }
+
+  .request-flow-submit-button {
+    min-height: 48px;
+    border-radius: 16px;
+  }
+
+  .request-flow-hand-preview {
+    border-radius: 16px;
+  }
+
+  .request-flow-hand-preview summary {
+    padding: 12px;
+    font-size: 17px;
+  }
+
+  .request-flow-hand-cards {
+    gap: 8px;
+    padding: 0 12px 12px;
+  }
+
+  .request-flow-hand-card {
+    flex: 0 0 112px;
+  }
+}
+
+
