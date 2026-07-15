@@ -3549,3 +3549,151 @@ code {
     inset: 35% 22% 31%;
   }
 }
+
+/* Stage 47 — mobile request flow layout */
+
+@media (max-width: 720px) {
+  .modal-backdrop {
+    align-items: stretch;
+    justify-content: stretch;
+    padding: 0;
+  }
+
+  .request-flow-modal {
+    width: 100vw;
+    height: 100dvh;
+    max-height: none;
+    border-radius: 0;
+  }
+
+  .request-flow-header.request-flow-hero {
+    padding: 16px;
+    gap: 12px;
+  }
+
+  .request-flow-close-button {
+    min-height: 44px;
+    border-radius: 14px;
+  }
+
+  .request-flow-hero h2 {
+    font-size: 32px;
+    line-height: 1.05;
+  }
+
+  .request-flow-hero .form-hint {
+    font-size: 15px;
+    line-height: 1.35;
+  }
+
+  .request-flow-content {
+    padding: 14px 16px;
+  }
+
+  .request-flow-section {
+    gap: 12px;
+  }
+
+  .request-flow-section h3 {
+    font-size: 20px;
+    line-height: 1.15;
+  }
+
+  .request-flow-section h3 span {
+    width: 30px;
+    height: 30px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 720px) {
+  .request-flow-players-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .request-flow-player {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    width: 100%;
+    max-width: none;
+    min-height: 58px;
+    padding: 10px 12px;
+    border-radius: 16px;
+  }
+
+  .request-flow-player .player-seat-avatar {
+    width: 34px;
+    height: 34px;
+  }
+
+  .request-flow-player strong {
+    font-size: 15px;
+  }
+
+  .request-flow-player span {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 720px) {
+  .request-flow-cards-grid {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 10px;
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 4px 0 14px;
+    scroll-snap-type: x proximity;
+  }
+
+  .request-flow-card {
+    flex: 0 0 116px;
+    width: 116px;
+    min-width: 116px;
+    max-width: 116px;
+    scroll-snap-align: start;
+  }
+
+  .request-flow-card-main {
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+  }
+
+  .request-flow-card > .secondary-button {
+    min-height: 36px;
+  }
+}
+
+@media (max-width: 720px) {
+  .request-flow-sticky-footer {
+    padding: 10px 16px max(14px, env(safe-area-inset-bottom));
+  }
+
+  .request-flow-submit-button {
+    min-height: 48px;
+    border-radius: 16px;
+  }
+
+  .request-flow-hand-preview {
+    border-radius: 16px;
+  }
+
+  .request-flow-hand-preview summary {
+    padding: 12px;
+    font-size: 17px;
+  }
+
+  .request-flow-hand-cards {
+    gap: 8px;
+    padding: 0 12px 12px;
+  }
+
+  .request-flow-hand-card {
+    flex: 0 0 112px;
+  }
+}
+
+
