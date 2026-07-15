@@ -3222,3 +3222,102 @@ code {
     max-width: none;
   }
 }
+
+/* Stage 47 — request opponent choice polish */
+
+.request-flow-section:first-child {
+  margin-bottom: 8px;
+}
+
+.request-flow-player {
+  display: inline-grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  width: auto;
+  min-width: 180px;
+  max-width: 260px;
+  min-height: 56px;
+  padding: 10px 12px;
+  border: 1px solid #e4e4e7;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #18181b;
+  text-align: left;
+  cursor: pointer;
+}
+
+.request-flow-player .player-seat-avatar {
+  width: 34px;
+  height: 34px;
+  margin: 0;
+}
+
+.request-flow-player strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #18181b;
+  font-size: 14px;
+  line-height: 1.1;
+}
+
+.request-flow-player span {
+  color: #71717a;
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.request-flow-player-selected {
+  border-color: #2563eb;
+  background: #eff6ff;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14);
+}
+
+.request-flow-player-selected strong,
+.request-flow-player-selected span {
+  color: #1d4ed8;
+}
+
+@media (max-width: 720px) {
+  .request-flow-player {
+    width: 100%;
+    max-width: none;
+    border-radius: 18px;
+  }
+
+  .request-flow-section:first-child {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Stage 47 — request opponent grid fix */
+
+.request-flow-players-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: stretch;
+}
+
+.request-flow-player {
+  flex: 0 0 220px;
+  width: 220px;
+  max-width: 220px;
+}
+
+@media (max-width: 720px) {
+  .request-flow-players-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .request-flow-player {
+    width: 100%;
+    max-width: none;
+    flex-basis: auto;
+  }
+}

@@ -57,31 +57,33 @@ export function RequestCardFlow({
         </header>
 
         <div className="request-flow-content">
-          <section className='request-flow-section'>
+          <section className="request-flow-section">
             <h3>
               <span>1</span>
               Выбери соперника
             </h3>
 
-            {targetPlayers.map((player) => (
-              <button
-                className={
-                  player.id === selectedTargetPlayerID
-                    ? 'request-flow-player request-flow-player-selected'
-                    : 'request-flow-player'
-                }
-                key={player.id}
-                type="button"
-                onClick={() => onSelectTargetPlayer(player.id)}
-              >
-                <div className="player-seat-avatar">
-                  {player.name.charAt(0).toUpperCase()}
-                </div>
+            <div className="request-flow-players-grid">
+              {targetPlayers.map((player) => (
+                <button
+                  className={
+                    player.id === selectedTargetPlayerID
+                      ? 'request-flow-player request-flow-player-selected'
+                      : 'request-flow-player'
+                  }
+                  key={player.id}
+                  type="button"
+                  onClick={() => onSelectTargetPlayer(player.id)}
+                >
+                  <div className="player-seat-avatar">
+                    {player.name.charAt(0).toUpperCase()}
+                  </div>
 
-                <strong>{player.name}</strong>
-                <span>{player.card_count} карт</span>
-              </button>
-            ))}
+                  <strong>{player.name}</strong>
+                  <span>{player.card_count} карт</span>
+                </button>
+              ))}
+            </div>
           </section>
 
           {availableRequestCards.length > 0 && (
