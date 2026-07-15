@@ -129,8 +129,17 @@ export function RequestCardFlow({
             </section>
           )}
 
-          {playerHand && (
-            <section className="request-flow-section">
+          <footer className="request-flow-actions request-flow-sticky-footer">
+            <button
+              className="button request-flow-submit-button"
+              type="button"
+              disabled={!canSubmit}
+              onClick={onSubmit}
+            >
+              Спросить карту
+            </button>
+
+            {playerHand && (
               <details className="request-flow-hand-preview">
                 <summary>Моя рука ({playerHand.cards.length} карт)</summary>
 
@@ -143,18 +152,7 @@ export function RequestCardFlow({
                   ))}
                 </div>
               </details>
-            </section>
-          )}
-
-          <footer className="request-flow-actions">
-            <button
-              className="button"
-              type="button"
-              disabled={!canSubmit}
-              onClick={onSubmit}
-            >
-              Спросить карту
-            </button>
+            )}
           </footer>
         </div>
       </section>
