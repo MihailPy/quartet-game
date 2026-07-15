@@ -3367,3 +3367,185 @@ code {
 .request-flow-card-selected:hover {
   border-color: #2563eb;
 }
+
+/* Stage 47 — mobile game table layout */
+
+@media (max-width: 720px) {
+  .active-game-shell {
+    width: 100%;
+  }
+
+  .gameplay-table {
+    padding: 16px;
+    border-radius: 20px;
+  }
+
+  .gameplay-table h2 {
+    margin: 0 0 14px;
+    font-size: 28px;
+    line-height: 1.1;
+  }
+
+  .gameplay-table-center {
+    min-height: 430px;
+    padding: 12px;
+    overflow: hidden;
+  }
+
+  .table-surface {
+    inset: 34% 8% 28%;
+    padding: 12px;
+    border-radius: 28px;
+  }
+
+  .table-core {
+    min-width: 136px;
+    padding: 12px;
+  }
+
+  .table-core-label {
+    font-size: 10px;
+  }
+
+  .table-core strong {
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 15px;
+  }
+
+  .table-core-meta span {
+    font-size: 10px;
+  }
+
+  .table-event-strip {
+    width: min(100%, 190px);
+  }
+
+  .table-event-chip {
+    font-size: 10px;
+  }
+
+  .table-completed-quartets {
+    max-width: 190px;
+  }
+
+  .completed-quartet-chip {
+    max-width: 100%;
+    font-size: 10px;
+    overflow-wrap: anywhere;
+  }
+}
+
+@media (max-width: 720px) {
+  .player-seats {
+    width: min(100%, 340px);
+    height: 390px;
+  }
+
+  .player-seat {
+    min-width: 92px;
+    max-width: 108px;
+    padding: 7px;
+    border-radius: 16px;
+  }
+
+  .player-seat-avatar {
+    width: 34px;
+    height: 34px;
+  }
+
+  .player-seat-name {
+    max-width: 90px;
+    font-size: 11px;
+  }
+
+  .player-seat-hand .player-card-backs {
+    min-height: 24px;
+    padding-left: 14px;
+  }
+
+  .player-seat-hand .player-card-back {
+    width: 17px;
+    height: 24px;
+  }
+
+  .player-seat-card-count {
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 720px) {
+  .player-seats-count-2 .player-seat-0 {
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .player-seats-count-2 .player-seat-1 {
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .table-player-count-2 .table-surface {
+    inset: 34% 8% 30%;
+  }
+}
+
+@media (max-width: 720px) {
+  .player-seats-count-3 .player-seat-0 {
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .player-seats-count-3 .player-seat-1 {
+    right: 0;
+    bottom: 0;
+    top: auto;
+    transform: none;
+  }
+
+  .player-seats-count-3 .player-seat-2 {
+    left: 0;
+    bottom: 0;
+    top: auto;
+    transform: none;
+  }
+
+  .table-player-count-3 .table-surface {
+    inset: 34% 8% 30%;
+  }
+}
+
+@media (max-width: 720px) {
+  .player-seats-count-4 .player-seat-0 {
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .player-seats-count-4 .player-seat-1 {
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  .player-seats-count-4 .player-seat-2 {
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .player-seats-count-4 .player-seat-3 {
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  .table-player-count-4 .table-surface {
+    inset: 35% 22% 31%;
+  }
+}
