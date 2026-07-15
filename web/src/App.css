@@ -3143,7 +3143,6 @@ code {
   max-width: none;
   padding: 0;
   border: 0;
-  border-radius: 12px;
   background: transparent;
   text-align: left;
 }
@@ -3320,4 +3319,51 @@ code {
     max-width: none;
     flex-basis: auto;
   }
+}
+
+/* Stage 47 — request card selection polish */
+
+.request-flow-card-main {
+  position: relative;
+}
+
+.request-flow-card-selected-mark {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 2;
+  display: none;
+  padding: 4px 7px;
+  border-radius: 999px;
+  background: #2563eb;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.request-flow-card-selected .request-flow-card-selected-mark {
+  display: inline-flex;
+}
+
+.request-flow-card-selected {
+  border-color: #2563eb;
+  background: #eff6ff;
+  box-shadow:
+    0 0 0 3px rgba(37, 99, 235, 0.16),
+    0 14px 28px rgba(37, 99, 235, 0.12);
+}
+
+.request-flow-card-selected .secondary-button {
+  border-color: #2563eb;
+  color: #1d4ed8;
+}
+
+.request-flow-card:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+}
+
+.request-flow-card-selected:hover {
+  border-color: #2563eb;
 }
