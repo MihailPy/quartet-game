@@ -13,6 +13,7 @@ import type {
   GameplayResultViewModel,
   GameplayTableViewModel,
   GameplayUIViewModel,
+  GameplayLastActionViewModel,
 } from './types'
 
 export type BuildGameplayUIViewModelInput = {
@@ -21,6 +22,7 @@ export type BuildGameplayUIViewModelInput = {
   socketStatus: string
   publicGameState: PublicGameState | null
   gameFinished: GameFinishedPayload | null
+  lastAction: GameplayLastActionViewModel | null
 }
 
 function normalizeConnectionStatus(
@@ -275,6 +277,7 @@ export function buildGameplayUIViewModel({
   socketStatus,
   publicGameState,
   gameFinished,
+  lastAction,
 }: BuildGameplayUIViewModelInput): GameplayUIViewModel {
   const phase = getGameplayPhase(
     publicGameState,
@@ -329,7 +332,7 @@ export function buildGameplayUIViewModel({
             : 'Текущий ход',
       title: action.title,
       description: action.description,
-      lastAction: null,
+      lastAction,
     },
 
     action,

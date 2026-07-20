@@ -37,6 +37,8 @@ import { RequestCardFlow } from './components/RequestCardFlow'
 import { RoomPanel } from './components/RoomPanel'
 import { ToastContainer } from './components/ToastContainer'
 import { Panel } from './components/ui/Panel'
+import { buildGameplayLastAction } from './gameplay/buildGameplayLastAction'
+import type { GameplayLastActionViewModel } from './gameplay/types'
 import {
   clearSession,
   loadPlayer,
@@ -113,6 +115,8 @@ function App() {
   const hasGameStarted = publicGameState !== null
   const [isGameLogOpen, setIsGameLogOpen] = useState(false)
   const [gameEvents, setGameEvents] = useState<GameEvent[]>([])
+  const [lastGameplayAction, setLastGameplayAction] =
+    useState<GameplayLastActionViewModel | null>(null)
   const [previewCard, setPreviewCard] = useState<PrivateCard | null>(null)
   const [selectedTablePlayerID, setSelectedTablePlayerID] = useState('')
   const selectedTablePlayer = publicGameState?.players.find((p) => p.id === selectedTablePlayerID) ?? null
@@ -138,6 +142,7 @@ function App() {
     setToasts([])
     setAvailableQuartets([])
     setGameEvents([])
+    setLastGameplayAction(null)
   }
 
   function leaveRoom() {
@@ -1051,8 +1056,26 @@ function App() {
 
   async function loadGameEvents(roomID: string) {
     const data = await loadGameEventsRequest(roomID)
+    const events = data?.events ?? []
 
-    setGameEvents(data?.events ?? [])
+    setGameEvents(events)
+
+    const latestAction = [...events]
+      .reverse()
+      .map((event) =>
+        buildGameplayLastAction(event, {
+          getPlayerName,
+          getQuartetTitle,
+        }),
+      )
+      .find(
+        (
+          action,
+        ): action is GameplayLastActionViewModel =>
+          action !== null,
+      )
+
+    setLastGameplayAction(latestAction ?? null)
   }
 
   function formatGameEvent(event: GameEvent): string {
@@ -1155,6 +1178,17 @@ function App() {
     }
 
     return 'Можно начинать игру.'
+  }
+
+  function updateLastGameplayAction(event: GameEvent) {
+    const action = buildGameplayLastAction(event, {
+      getPlayerName,
+      getQuartetTitle,
+    })
+
+    if (action) {
+      setLastGameplayAction(action)
+    }
   }
 
   useEffect(() => {
