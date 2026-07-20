@@ -54,6 +54,9 @@ export function GameplayTable({
     gameState.players.length >= 2 &&
     gameState.players.length <= 4
 
+  const isCompactTable =
+    gameState.players.length >= 5
+
   return (
     <section className="panel gameplay-table">
       <h2>Игровой стол</h2>
@@ -64,6 +67,9 @@ export function GameplayTable({
           `table-player-count-${gameState.players.length}`,
           isStandardTable
             ? 'gameplay-table-center--standard'
+            : '',
+          isCompactTable
+            ? 'gameplay-table-center--compact'
             : '',
         ]
           .filter(Boolean)
@@ -114,9 +120,11 @@ export function GameplayTable({
             return (
               <div
                 className={
-                  seat
-                    ? `player-seat player-seat--${seat}`
-                    : `player-seat player-seat-${index}`
+                  isCompactTable
+                    ? 'player-seat player-seat--compact'
+                    : seat
+                      ? `player-seat player-seat--${seat}`
+                      : `player-seat player-seat-${index}`
                 }
                 key={player.id}
               >
@@ -128,6 +136,7 @@ export function GameplayTable({
                     gameState.completed[player.id]?.length ?? 0
                   }
                   isCurrentTurn={player.id === currentPlayerID}
+                  density={isCompactTable ? 'compact' : 'standard'}
                   onClick={onPlayerClick}
                 />
               </div>

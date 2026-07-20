@@ -4116,3 +4116,112 @@ code {
     position: static;
   }
 }
+
+.gameplay-table-center--compact {
+  display: grid;
+  gap: 18px;
+  padding: 18px;
+  border: 1px dashed #d4d4d8;
+  border-radius: 28px;
+}
+
+.gameplay-table-center--compact .table-surface {
+  position: static;
+  width: 100%;
+  min-height: 240px;
+  padding: 20px;
+  border-radius: 24px;
+}
+
+.gameplay-table-center--compact .player-seats {
+  position: static;
+  display: grid;
+  grid-template-columns: repeat(
+    3,
+    minmax(0, 1fr)
+  );
+  gap: 10px;
+}
+
+.gameplay-table-center--compact .player-seat {
+  position: static;
+  width: auto;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  transform: none;
+}
+
+.gameplay-player-card--compact {
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 8px;
+  min-height: 58px;
+  padding: 8px 9px;
+}
+
+.gameplay-player-card--compact
+  .gameplay-player-card__avatar {
+  width: 34px;
+  height: 34px;
+  font-size: 12px;
+}
+
+.gameplay-player-card--compact
+  .gameplay-player-card__stats {
+  gap: 2px 8px;
+  font-size: 11px;
+}
+
+.gameplay-player-card--compact
+  .gameplay-player-card__turn {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+}
+
+@media (max-width: 900px) {
+  .gameplay-table-center--compact
+    .player-seats {
+    grid-template-columns: repeat(
+      2,
+      minmax(0, 1fr)
+    );
+  }
+}
+
+@media (max-width: 560px) {
+  .gameplay-table-center--compact {
+    gap: 12px;
+    padding: 0;
+    border: 0;
+  }
+
+  .gameplay-table-center--compact
+    .table-surface {
+    min-height: 220px;
+  }
+
+  .gameplay-table-center--compact
+    .player-seats {
+    grid-template-columns: 1fr;
+  }
+
+  .gameplay-player-card--compact {
+    grid-template-columns:
+      40px minmax(0, 1fr) auto;
+    min-height: 64px;
+    padding: 10px 12px;
+  }
+
+  .gameplay-player-card--compact
+    .gameplay-player-card__avatar {
+    width: 40px;
+    height: 40px;
+  }
+
+  .gameplay-player-card--compact
+    .gameplay-player-card__turn {
+    position: static;
+  }
+}

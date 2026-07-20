@@ -4,6 +4,7 @@ type GameplayPlayerCardProps = {
   cardCount: number
   completedQuartetsCount: number
   isCurrentTurn: boolean
+  density?: 'standard' | 'compact'
   onClick?: (playerID: string) => void
 }
 
@@ -13,6 +14,7 @@ export function GameplayPlayerCard({
   cardCount,
   completedQuartetsCount,
   isCurrentTurn,
+  density = 'standard',
   onClick,
 }: GameplayPlayerCardProps) {
   const initials =
@@ -23,13 +25,19 @@ export function GameplayPlayerCard({
       .map((part) => part.charAt(0).toUpperCase())
       .join('') || '?'
 
+  const className = [
+    'gameplay-player-card',
+    `gameplay-player-card--${density}`,
+    isCurrentTurn
+      ? 'gameplay-player-card--current-turn'
+      : '',
+  ]
+    .filter(Boolean)
+    .join(' ')
+
   return (
     <button
-      className={
-        isCurrentTurn
-          ? 'gameplay-player-card gameplay-player-card--current-turn'
-          : 'gameplay-player-card'
-      }
+      className={className}
       type="button"
       onClick={() => onClick?.(playerID)}
     >
