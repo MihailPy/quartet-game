@@ -41,7 +41,7 @@ import { RoomPanel } from './components/RoomPanel'
 import { ToastContainer } from './components/ToastContainer'
 import { Panel } from './components/ui/Panel'
 import { buildGameplayLastAction } from './gameplay/buildGameplayLastAction'
-import type { GameplayLastActionViewModel, GameplayStatusBarViewModel } from './gameplay/types'
+import type { GameplayLastActionViewModel } from './gameplay/types'
 import {
   clearSession,
   loadPlayer,
@@ -124,11 +124,6 @@ function App() {
   const selectedTablePlayer = publicGameState?.players.find((p) => p.id === selectedTablePlayerID) ?? null
   const [isHandOpen, setIsHandOpen] = useState(true)
   const [isRequestFlowOpen, setIsRequestFlowOpen] = useState(false)
-  const canOpenRequestFlow =
-    player !== null &&
-    publicGameState !== null &&
-    gameFinished === null &&
-    currentTurnPlayerID === player.id
 
   function resetGameState() {
     updateDeck(null)
@@ -1491,39 +1486,6 @@ function App() {
   const isEntered = room !== null && player !== null && isCurrentPlayerInRoom()
   const isGamePlaying = publicGameState?.status === 'playing'
 
-  const gameplayStatusBarModel = {
-    roomID: room?.id ?? '',
-    phaseLabel: gameFinished
-      ? 'Игра завершена'
-      : publicGameState?.status === 'playing'
-        ? 'Игра идёт'
-        : 'Загрузка игры',
-    connection: {
-      status:
-        socketStatus === 'connected' ||
-          socketStatus === 'connecting' ||
-          socketStatus === 'reconnecting' ||
-          socketStatus === 'disconnected' ||
-          socketStatus === 'error'
-          ? socketStatus
-          : 'disconnected',
-      label:
-        socketStatus === 'connected'
-          ? 'Подключено'
-          : socketStatus === 'connecting'
-            ? 'Подключение'
-            : socketStatus === 'reconnecting'
-              ? 'Переподключение'
-              : socketStatus === 'error'
-                ? 'Ошибка подключения'
-                : 'Отключено',
-      isProblem:
-        socketStatus === 'reconnecting' ||
-        socketStatus === 'disconnected' ||
-        socketStatus === 'error',
-    },
-  } satisfies GameplayStatusBarViewModel
-
   const gameplayUIViewModel =
     room && player
       ? buildGameplayUIViewModel({
@@ -1657,20 +1619,19 @@ function App() {
                 <div className="active-game-shell">
                   <GameplayLayout
                     statusBar={
-                      <GameplayStatusBar
-                        model={gameplayStatusBarModel}
-                        onCopyRoomID={copyRoomID}
-                        onLeaveRoom={leaveRoom}
-                      />
+                      gameplayUIViewModel ? (
+                        <GameplayStatusBar
+                          model={gameplayUIViewModel.statusBar}
+                          onCopyRoomID={copyRoomID}
+                          onLeaveRoom={leaveRoom}
+                        />
+                      ) : null
                     }
                     table={
                       publicGameState ? (
                         <GameplayTable
                           gameState={publicGameState}
                           currentTurnPlayerID={currentTurnPlayerID}
-                          latestEventTexts={gameEvents
-                            .slice(-2)
-                            .map(formatGameEvent)}
                           onPlayerClick={setSelectedTablePlayerID}
                         />
                       ) : (
@@ -1688,30 +1649,32 @@ function App() {
                       ) : null
                     }
                     action={
-                      canOpenRequestFlow ? (
+                      gameplayUIViewModel?.action.mode === 'request-card' ? (
                         <div className="turn-action-panel">
                           <div className="turn-action-copy">
                             <span className="turn-action-kicker">
                               Твой ход
                             </span>
 
-                            <strong>Сделай запрос карты</strong>
+                            <strong>
+                              {gameplayUIViewModel.action.title}
+                            </strong>
 
                             <p className="form-hint">
-                              Выбери соперника и карту, которую хочешь
-                              получить.
+                              {gameplayUIViewModel.action.description}
                             </p>
                           </div>
 
                           <button
                             className="button turn-action-button"
                             type="button"
+                            disabled={!gameplayUIViewModel.action.canRequestCard}
                             onClick={() => setIsRequestFlowOpen(true)}
                           >
                             Запросить карту
                           </button>
                         </div>
-                      ) : publicGameState && !gameFinished ? (
+                      ) : gameplayUIViewModel?.action.mode === 'waiting' ? (
                         <div className="turn-action-panel turn-action-panel-waiting">
                           <div className="turn-action-copy">
                             <span className="turn-action-kicker">
@@ -1719,12 +1682,11 @@ function App() {
                             </span>
 
                             <strong>
-                              Сейчас ход другого игрока
+                              {gameplayUIViewModel.action.title}
                             </strong>
 
                             <p className="form-hint">
-                              Запрос карты станет доступен, когда ход
-                              перейдёт к тебе.
+                              {gameplayUIViewModel.action.description}
                             </p>
                           </div>
                         </div>

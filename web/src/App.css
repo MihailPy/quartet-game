@@ -2603,14 +2603,6 @@ code {
   gap: 10px;
 }
 
-.table-event-strip {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  width: min(100%, 360px);
-}
-
 .table-event-chip {
   max-width: 100%;
   padding: 6px 10px;
@@ -2625,10 +2617,6 @@ code {
 }
 
 @media (max-width: 720px) {
-  .table-event-strip {
-    width: min(100%, 220px);
-  }
-
   .table-event-chip {
     padding: 5px 8px;
     font-size: 11px;
@@ -3417,10 +3405,6 @@ code {
 
   .table-core-meta span {
     font-size: 10px;
-  }
-
-  .table-event-strip {
-    width: min(100%, 190px);
   }
 
   .table-event-chip {
@@ -4320,5 +4304,142 @@ code {
 
   .gameplay-central-status__title {
     font-size: 19px;
+  }
+}
+
+.gameplay-table-center--compact {
+  align-content: start;
+  min-height: 0;
+}
+
+.gameplay-table-center--compact .player-seats {
+  align-items: stretch;
+  align-content: start;
+}
+
+.gameplay-table-center--compact .player-seat {
+  min-width: 0;
+}
+
+.gameplay-player-card {
+  position: relative;
+}
+
+.gameplay-player-card--compact {
+  width: 100%;
+}
+
+@media (max-width: 560px) {
+  .gameplay-table-center--compact {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 12px;
+    padding: 0;
+  }
+
+  .gameplay-table-center--compact .table-surface {
+    width: 100%;
+    min-height: 220px;
+  }
+
+  .gameplay-table-center--compact .player-seats {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    width: 100%;
+    gap: 10px;
+  }
+
+  .gameplay-table-center--compact .player-seat {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .gameplay-player-card--compact {
+    grid-template-columns: 40px minmax(0, 1fr) auto;
+    width: 100%;
+    min-height: 64px;
+    padding: 10px 12px;
+  }
+
+  .gameplay-player-card--compact
+    .gameplay-player-card__turn {
+    position: static;
+  }
+}
+
+/* Final compact table mobile override */
+
+@media (max-width: 560px) {
+  .gameplay-table-center.gameplay-table-center--compact {
+    position: static;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: auto;
+    min-height: 0;
+    max-height: none;
+    gap: 12px;
+    padding: 0;
+    overflow: visible;
+    border: 0;
+  }
+
+  .gameplay-table-center.gameplay-table-center--compact
+    .table-surface {
+    position: static;
+    inset: auto;
+    order: 1;
+    width: 100%;
+    min-height: 220px;
+    margin: 0;
+    transform: none;
+  }
+
+  .gameplay-table-center.gameplay-table-center--compact
+    .player-seats {
+    position: static;
+    inset: auto;
+    order: 2;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-content: start;
+    width: 100%;
+    height: auto;
+    min-height: 0;
+    gap: 10px;
+    overflow: visible;
+    pointer-events: auto;
+  }
+
+  .gameplay-table-center.gameplay-table-center--compact
+    .player-seat,
+  .gameplay-table-center.gameplay-table-center--compact
+    .player-seat--compact {
+    position: static;
+    inset: auto;
+    display: block;
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+    height: auto;
+    margin: 0;
+    transform: none;
+  }
+
+  .gameplay-table-center.gameplay-table-center--compact
+    .gameplay-player-card--compact {
+    position: relative;
+    display: grid;
+    grid-template-columns: 40px minmax(0, 1fr) auto;
+    width: 100%;
+    min-width: 0;
+    min-height: 64px;
+    padding: 10px 12px;
+  }
+
+  .gameplay-table-center.gameplay-table-center--compact
+    .gameplay-player-card__turn {
+    position: static;
   }
 }

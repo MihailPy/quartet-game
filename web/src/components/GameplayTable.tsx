@@ -4,7 +4,6 @@ import { GameplayPlayerCard } from './GameplayPlayerCard'
 type GameplayTableProps = {
   gameState: PublicGameState | null
   currentTurnPlayerID: string
-  latestEventTexts: string[]
   onPlayerClick?: (playerID: string) => void
 }
 
@@ -26,7 +25,6 @@ function getTableSeat(
 export function GameplayTable({
   gameState,
   currentTurnPlayerID: currentPlayerID,
-  latestEventTexts,
   onPlayerClick,
 }: GameplayTableProps) {
   if (!gameState) {
@@ -85,16 +83,6 @@ export function GameplayTable({
               <span>{completedQuartetsCount} квартетов</span>
             </div>
           </div>
-
-          {latestEventTexts.length > 0 && (
-            <div className="table-event-strip">
-              {latestEventTexts.map((eventText) => (
-                <span className="table-event-chip" key={eventText}>
-                  {eventText}
-                </span>
-              ))}
-            </div>
-          )}
 
           {completedQuartets.length > 0 && (
             <div className="table-completed-quartets">
