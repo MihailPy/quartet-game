@@ -4225,3 +4225,100 @@ code {
     position: static;
   }
 }
+
+.gameplay-central-status {
+  display: grid;
+  gap: 7px;
+  padding: 18px 20px;
+  border: 1px solid #e4e4e7;
+  border-radius: 20px;
+  background: #ffffff;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
+}
+
+.gameplay-central-status--active {
+  border-color: #86efac;
+  background: #f0fdf4;
+}
+
+.gameplay-central-status--warning {
+  border-color: #fde68a;
+  background: #fffbeb;
+}
+
+.gameplay-central-status--finished {
+  border-color: #c4b5fd;
+  background: #f5f3ff;
+}
+
+.gameplay-central-status__eyebrow {
+  color: #71717a;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.gameplay-central-status__title {
+  margin: 0;
+  font-size: 22px;
+  line-height: 1.15;
+}
+
+.gameplay-central-status__description {
+  margin: 0;
+  color: #52525b;
+  line-height: 1.45;
+}
+
+.gameplay-central-status__last-action {
+  display: grid;
+  gap: 3px;
+  margin-top: 5px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.gameplay-central-status__last-action span {
+  color: #71717a;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.gameplay-central-status__result {
+  display: grid;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.gameplay-central-status__scores {
+  display: grid;
+  gap: 6px;
+}
+
+.gameplay-central-status__score {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 7px 9px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.gameplay-central-status__score--winner {
+  background: #ede9fe;
+  color: #5b21b6;
+}
+
+@media (max-width: 560px) {
+  .gameplay-central-status {
+    padding: 15px;
+    border-radius: 16px;
+  }
+
+  .gameplay-central-status__title {
+    font-size: 19px;
+  }
+}

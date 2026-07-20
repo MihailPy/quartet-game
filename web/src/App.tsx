@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
+import { GameplayCentralStatus } from './components/GameplayCentralStatus'
+import { buildGameplayUIViewModel } from './gameplay/buildGameplayUIViewModel'
 import {
   createRoomRequest,
   createUserQuartetRequest,
@@ -1522,6 +1524,18 @@ function App() {
     },
   } satisfies GameplayStatusBarViewModel
 
+  const gameplayUIViewModel =
+    room && player
+      ? buildGameplayUIViewModel({
+        roomID: room.id,
+        currentPlayerID: player.id,
+        socketStatus,
+        publicGameState,
+        gameFinished,
+        lastAction: lastGameplayAction,
+      })
+      : null
+
   return (
     <main className="app">
       <section className="game-page">
@@ -1666,20 +1680,12 @@ function App() {
                       )
                     }
                     centralStatus={
-                      <GamePanel
-                        room={room}
-                        player={player}
-                        publicGameState={publicGameState}
-                        currentTurnPlayerID={currentTurnPlayerID}
-                        temporaryMessages={temporaryMessages}
-                        gameFinished={gameFinished}
-                        socketStatus={socketStatus}
-                        onStartGame={startGame}
-                        canStartGame={canStartGame()}
-                        getPlayerName={getPlayerName}
-                        isStartingGame={isStartingGame}
-                        startGameHint={getStartGameHint()}
-                      />
+                      gameplayUIViewModel ? (
+                        <GameplayCentralStatus
+                          model={gameplayUIViewModel.centralStatus}
+                          result={gameplayUIViewModel.result}
+                        />
+                      ) : null
                     }
                     action={
                       canOpenRequestFlow ? (
