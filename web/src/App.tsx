@@ -28,6 +28,7 @@ import { EntryPanel } from './components/EntryPanel'
 import { GamePanel } from './components/GamePanel'
 import { GameplayHandZone } from './components/GameplayHandZone'
 import { GameplayLayout } from './components/GameplayLayout'
+import { GameplayStatusBar } from './components/GameplayStatusBar'
 import { GameplayTable } from './components/GameplayTable'
 import { HistoryPanel } from './components/HistoryPanel'
 import { PlayerDetailsModal } from './components/PlayerDetailsModal'
@@ -38,7 +39,7 @@ import { RoomPanel } from './components/RoomPanel'
 import { ToastContainer } from './components/ToastContainer'
 import { Panel } from './components/ui/Panel'
 import { buildGameplayLastAction } from './gameplay/buildGameplayLastAction'
-import type { GameplayLastActionViewModel } from './gameplay/types'
+import type { GameplayLastActionViewModel, GameplayStatusBarViewModel } from './gameplay/types'
 import {
   clearSession,
   loadPlayer,
@@ -70,7 +71,6 @@ import {
   buildRequestCardMessage,
   buildRoomWebSocketURL,
 } from './websocket'
-
 type AppView = 'home' | 'account' | 'quartets' | 'history'
 
 function App() {
@@ -1500,6 +1500,39 @@ function App() {
   const isEntered = room !== null && player !== null && isCurrentPlayerInRoom()
   const isGamePlaying = publicGameState?.status === 'playing'
 
+  const gameplayStatusBarModel = {
+    roomID: room?.id ?? '',
+    phaseLabel: gameFinished
+      ? 'Игра завершена'
+      : publicGameState?.status === 'playing'
+        ? 'Игра идёт'
+        : 'Загрузка игры',
+    connection: {
+      status:
+        socketStatus === 'connected' ||
+          socketStatus === 'connecting' ||
+          socketStatus === 'reconnecting' ||
+          socketStatus === 'disconnected' ||
+          socketStatus === 'error'
+          ? socketStatus
+          : 'disconnected',
+      label:
+        socketStatus === 'connected'
+          ? 'Подключено'
+          : socketStatus === 'connecting'
+            ? 'Подключение'
+            : socketStatus === 'reconnecting'
+              ? 'Переподключение'
+              : socketStatus === 'error'
+                ? 'Ошибка подключения'
+                : 'Отключено',
+      isProblem:
+        socketStatus === 'reconnecting' ||
+        socketStatus === 'disconnected' ||
+        socketStatus === 'error',
+    },
+  } satisfies GameplayStatusBarViewModel
+
   return (
     <main className="app">
       <section className="game-page">
@@ -1621,51 +1654,11 @@ function App() {
                 <div className="active-game-shell">
                   <GameplayLayout
                     statusBar={
-                      <div className="active-game-toolbar">
-                        <div className="active-game-room-info">
-                          <span className="active-game-room-label">
-                            Комната
-                          </span>
-
-                          <code className="active-game-room-id">
-                            {room.id}
-                          </code>
-
-                          <button
-                            className="secondary-button active-game-copy-button"
-                            type="button"
-                            onClick={copyRoomID}
-                          >
-                            Копировать ID
-                          </button>
-                        </div>
-
-                        <div
-                          className={
-                            gameFinished
-                              ? 'active-game-status active-game-status-finished'
-                              : 'active-game-status'
-                          }
-                        >
-                          <span className="active-game-status-label">
-                            Статус
-                          </span>
-
-                          <strong>
-                            {gameFinished
-                              ? 'Игра завершена'
-                              : 'Игра идёт'}
-                          </strong>
-                        </div>
-
-                        <button
-                          className="secondary-button active-game-leave-button"
-                          type="button"
-                          onClick={leaveRoom}
-                        >
-                          Выйти
-                        </button>
-                      </div>
+                      <GameplayStatusBar
+                        model={gameplayStatusBarModel}
+                        onCopyRoomID={copyRoomID}
+                        onLeaveRoom={leaveRoom}
+                      />
                     }
                     table={
                       publicGameState ? (

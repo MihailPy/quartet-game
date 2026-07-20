@@ -3755,3 +3755,115 @@ code {
     gap: 12px;
   }
 }
+
+.gameplay-status-bar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 16px;
+  align-items: center;
+  padding: 12px 14px;
+  border: 1px solid #e4e4e7;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+}
+
+.gameplay-status-bar__room {
+  display: flex;
+  min-width: 0;
+  gap: 10px;
+  align-items: center;
+}
+
+.gameplay-status-bar__label {
+  color: #71717a;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.gameplay-status-bar__room-id {
+  display: block;
+  min-width: 0;
+  max-width: 260px;
+  padding: 7px 9px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gameplay-status-bar__copy,
+.gameplay-status-bar__leave {
+  width: auto;
+  min-height: 36px;
+  padding: 7px 11px;
+  white-space: nowrap;
+}
+
+.gameplay-status-bar__state {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.gameplay-status-bar__phase {
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.gameplay-status-bar__connection {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  color: #52525b;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.gameplay-status-bar__connection-dot {
+  width: 8px;
+  height: 8px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: #22c55e;
+}
+
+.gameplay-status-bar__connection--connecting
+  .gameplay-status-bar__connection-dot,
+.gameplay-status-bar__connection--reconnecting
+  .gameplay-status-bar__connection-dot {
+  background: #f59e0b;
+}
+
+.gameplay-status-bar__connection--problem
+  .gameplay-status-bar__connection-dot {
+  background: #ef4444;
+}
+
+@media (max-width: 760px) {
+  .gameplay-status-bar {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .gameplay-status-bar__room {
+    grid-column: 1 / -1;
+    flex-wrap: wrap;
+  }
+
+  .gameplay-status-bar__state {
+    min-width: 0;
+    flex-wrap: wrap;
+    gap: 6px 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .gameplay-status-bar {
+    grid-template-columns: 1fr;
+  }
+
+  .gameplay-status-bar__leave {
+    width: 100%;
+  }
+}
