@@ -1180,17 +1180,6 @@ function App() {
     return 'Можно начинать игру.'
   }
 
-  function updateLastGameplayAction(event: GameEvent) {
-    const action = buildGameplayLastAction(event, {
-      getPlayerName,
-      getQuartetTitle,
-    })
-
-    if (action) {
-      setLastGameplayAction(action)
-    }
-  }
-
   useEffect(() => {
     if (!room || !player) return
 

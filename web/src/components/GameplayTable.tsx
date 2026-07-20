@@ -1,4 +1,5 @@
 import type { PublicGameState } from '../types'
+import { GameplayPlayerCard } from './GameplayPlayerCard'
 
 type GameplayTableProps = {
   gameState: PublicGameState | null
@@ -76,35 +77,21 @@ export function GameplayTable({
 
         <div className={`player-seats player-seats-count-${gameState.players.length}`}>
           {gameState.players.map((player, index) => (
-            <button
-              className={
-                player.id === currentPlayerID
-                  ? `player-seat player-seat-current player-seat-${index}`
-                  : `player-seat player-seat-${index}`
-              }
+            <div
+              className={`player-seat player-seat-${index}`}
               key={player.id}
-              type="button"
-              title={player.name}
-              onClick={() => onPlayerClick?.(player.id)}
             >
-              <div className="player-seat-avatar">
-                {player.name.charAt(0).toUpperCase()}
-              </div>
-
-              <strong className="player-seat-name">{player.name}</strong>
-
-              <div className="player-seat-hand" aria-label={`${player.card_count} карт`}>
-                <div className="player-card-backs">
-                  {Array.from({ length: Math.min(player.card_count, 4) }).map((_, cardIndex) => (
-                    <span className="player-card-back" key={cardIndex} />
-                  ))}
-                </div>
-
-                <span className="player-seat-card-count">
-                  {player.card_count} карт
-                </span>
-              </div>
-            </button>
+              <GameplayPlayerCard
+                playerID={player.id}
+                name={player.name}
+                cardCount={player.card_count}
+                completedQuartetsCount={
+                  gameState.completed[player.id]?.length ?? 0
+                }
+                isCurrentTurn={player.id === currentPlayerID}
+                onClick={onPlayerClick}
+              />
+            </div>
           ))}
         </div>
       </div>
