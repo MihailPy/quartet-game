@@ -1,16 +1,30 @@
 import type { PublicGameState } from '../types'
+import { GameplayPlayerCard } from './GameplayPlayerCard'
 
 type GameplayTableProps = {
   gameState: PublicGameState | null
   currentTurnPlayerID: string
-  latestEventTexts: string[]
   onPlayerClick?: (playerID: string) => void
+}
+
+type TableSeat = 'top' | 'left' | 'right' | 'bottom'
+
+const seatsByPlayerCount: Record<number, TableSeat[]> = {
+  2: ['bottom', 'top'],
+  3: ['bottom', 'left', 'right'],
+  4: ['bottom', 'left', 'top', 'right'],
+}
+
+function getTableSeat(
+  playerCount: number,
+  playerIndex: number,
+): TableSeat | null {
+  return seatsByPlayerCount[playerCount]?.[playerIndex] ?? null
 }
 
 export function GameplayTable({
   gameState,
   currentTurnPlayerID: currentPlayerID,
-  latestEventTexts,
   onPlayerClick,
 }: GameplayTableProps) {
   if (!gameState) {
@@ -34,11 +48,31 @@ export function GameplayTable({
     gameState.players.find((player) => player.id === currentPlayerID)?.name ??
     'неизвестно'
 
+  const isStandardTable =
+    gameState.players.length >= 2 &&
+    gameState.players.length <= 4
+
+  const isCompactTable =
+    gameState.players.length >= 5
+
   return (
     <section className="panel gameplay-table">
       <h2>Игровой стол</h2>
 
-      <div className={`gameplay-table-center table-player-count-${gameState.players.length}`}>
+      <div
+        className={[
+          'gameplay-table-center',
+          `table-player-count-${gameState.players.length}`,
+          isStandardTable
+            ? 'gameplay-table-center--standard'
+            : '',
+          isCompactTable
+            ? 'gameplay-table-center--compact'
+            : '',
+        ]
+          .filter(Boolean)
+          .join(' ')}
+      >
         <div className="table-surface">
           <div className="table-core">
             <span className="table-core-label">Текущий ход</span>
@@ -49,16 +83,6 @@ export function GameplayTable({
               <span>{completedQuartetsCount} квартетов</span>
             </div>
           </div>
-
-          {latestEventTexts.length > 0 && (
-            <div className="table-event-strip">
-              {latestEventTexts.map((eventText) => (
-                <span className="table-event-chip" key={eventText}>
-                  {eventText}
-                </span>
-              ))}
-            </div>
-          )}
 
           {completedQuartets.length > 0 && (
             <div className="table-completed-quartets">
@@ -75,37 +99,37 @@ export function GameplayTable({
         </div>
 
         <div className={`player-seats player-seats-count-${gameState.players.length}`}>
-          {gameState.players.map((player, index) => (
-            <button
-              className={
-                player.id === currentPlayerID
-                  ? `player-seat player-seat-current player-seat-${index}`
-                  : `player-seat player-seat-${index}`
-              }
-              key={player.id}
-              type="button"
-              title={player.name}
-              onClick={() => onPlayerClick?.(player.id)}
-            >
-              <div className="player-seat-avatar">
-                {player.name.charAt(0).toUpperCase()}
+          {gameState.players.map((player, index) => {
+            const seat = getTableSeat(
+              gameState.players.length,
+              index,
+            )
+
+            return (
+              <div
+                className={
+                  isCompactTable
+                    ? 'player-seat player-seat--compact'
+                    : seat
+                      ? `player-seat player-seat--${seat}`
+                      : `player-seat player-seat-${index}`
+                }
+                key={player.id}
+              >
+                <GameplayPlayerCard
+                  playerID={player.id}
+                  name={player.name}
+                  cardCount={player.card_count}
+                  completedQuartetsCount={
+                    gameState.completed[player.id]?.length ?? 0
+                  }
+                  isCurrentTurn={player.id === currentPlayerID}
+                  density={isCompactTable ? 'compact' : 'standard'}
+                  onClick={onPlayerClick}
+                />
               </div>
-
-              <strong className="player-seat-name">{player.name}</strong>
-
-              <div className="player-seat-hand" aria-label={`${player.card_count} карт`}>
-                <div className="player-card-backs">
-                  {Array.from({ length: Math.min(player.card_count, 4) }).map((_, cardIndex) => (
-                    <span className="player-card-back" key={cardIndex} />
-                  ))}
-                </div>
-
-                <span className="player-seat-card-count">
-                  {player.card_count} карт
-                </span>
-              </div>
-            </button>
-          ))}
+            )
+          })}
         </div>
       </div>
     </section>

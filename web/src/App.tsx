@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
+import { GameplayCentralStatus } from './components/GameplayCentralStatus'
+import { buildGameplayUIViewModel } from './gameplay/buildGameplayUIViewModel'
 import {
   createRoomRequest,
   createUserQuartetRequest,
@@ -28,6 +30,7 @@ import { EntryPanel } from './components/EntryPanel'
 import { GamePanel } from './components/GamePanel'
 import { GameplayHandZone } from './components/GameplayHandZone'
 import { GameplayLayout } from './components/GameplayLayout'
+import { GameplayStatusBar } from './components/GameplayStatusBar'
 import { GameplayTable } from './components/GameplayTable'
 import { HistoryPanel } from './components/HistoryPanel'
 import { PlayerDetailsModal } from './components/PlayerDetailsModal'
@@ -37,6 +40,8 @@ import { RequestCardFlow } from './components/RequestCardFlow'
 import { RoomPanel } from './components/RoomPanel'
 import { ToastContainer } from './components/ToastContainer'
 import { Panel } from './components/ui/Panel'
+import { buildGameplayLastAction } from './gameplay/buildGameplayLastAction'
+import type { GameplayLastActionViewModel } from './gameplay/types'
 import {
   clearSession,
   loadPlayer,
@@ -68,7 +73,6 @@ import {
   buildRequestCardMessage,
   buildRoomWebSocketURL,
 } from './websocket'
-
 type AppView = 'home' | 'account' | 'quartets' | 'history'
 
 function App() {
@@ -113,16 +117,13 @@ function App() {
   const hasGameStarted = publicGameState !== null
   const [isGameLogOpen, setIsGameLogOpen] = useState(false)
   const [gameEvents, setGameEvents] = useState<GameEvent[]>([])
+  const [lastGameplayAction, setLastGameplayAction] =
+    useState<GameplayLastActionViewModel | null>(null)
   const [previewCard, setPreviewCard] = useState<PrivateCard | null>(null)
   const [selectedTablePlayerID, setSelectedTablePlayerID] = useState('')
   const selectedTablePlayer = publicGameState?.players.find((p) => p.id === selectedTablePlayerID) ?? null
   const [isHandOpen, setIsHandOpen] = useState(true)
   const [isRequestFlowOpen, setIsRequestFlowOpen] = useState(false)
-  const canOpenRequestFlow =
-    player !== null &&
-    publicGameState !== null &&
-    gameFinished === null &&
-    currentTurnPlayerID === player.id
 
   function resetGameState() {
     updateDeck(null)
@@ -138,6 +139,7 @@ function App() {
     setToasts([])
     setAvailableQuartets([])
     setGameEvents([])
+    setLastGameplayAction(null)
   }
 
   function leaveRoom() {
@@ -1051,8 +1053,26 @@ function App() {
 
   async function loadGameEvents(roomID: string) {
     const data = await loadGameEventsRequest(roomID)
+    const events = data?.events ?? []
 
-    setGameEvents(data?.events ?? [])
+    setGameEvents(events)
+
+    const latestAction = [...events]
+      .reverse()
+      .map((event) =>
+        buildGameplayLastAction(event, {
+          getPlayerName,
+          getQuartetTitle,
+        }),
+      )
+      .find(
+        (
+          action,
+        ): action is GameplayLastActionViewModel =>
+          action !== null,
+      )
+
+    setLastGameplayAction(latestAction ?? null)
   }
 
   function formatGameEvent(event: GameEvent): string {
@@ -1466,6 +1486,18 @@ function App() {
   const isEntered = room !== null && player !== null && isCurrentPlayerInRoom()
   const isGamePlaying = publicGameState?.status === 'playing'
 
+  const gameplayUIViewModel =
+    room && player
+      ? buildGameplayUIViewModel({
+        roomID: room.id,
+        currentPlayerID: player.id,
+        socketStatus,
+        publicGameState,
+        gameFinished,
+        lastAction: lastGameplayAction,
+      })
+      : null
+
   return (
     <main className="app">
       <section className="game-page">
@@ -1585,102 +1617,98 @@ function App() {
 
               {room && room.status === 'playing' && (
                 <div className="active-game-shell">
-                  <div className="active-game-toolbar">
-                    <div className="active-game-room-info">
-                      <span className="active-game-room-label">Комната</span>
-                      <code className="active-game-room-id">{room.id}</code>
-
-                      <button
-                        className="secondary-button active-game-copy-button"
-                        type="button"
-                        onClick={copyRoomID}
-                      >
-                        Копировать ID
-                      </button>
-                    </div>
-
-                    <div className={gameFinished ? 'active-game-status active-game-status-finished' : 'active-game-status'}>
-                      <span className="active-game-status-label">Статус</span>
-                      <strong>{gameFinished ? 'Игра завершена' : 'Игра идёт'}</strong>
-                    </div>
-
-                    <button
-                      className="secondary-button active-game-leave-button"
-                      type="button"
-                      onClick={leaveRoom}
-                    >
-                      Выйти
-                    </button>
-                  </div>
-
-                  <GameplayLayout>
-                    <div className="gameplay-main-zone">
-                      {publicGameState && (
+                  <GameplayLayout
+                    statusBar={
+                      gameplayUIViewModel ? (
+                        <GameplayStatusBar
+                          model={gameplayUIViewModel.statusBar}
+                          onCopyRoomID={copyRoomID}
+                          onLeaveRoom={leaveRoom}
+                        />
+                      ) : null
+                    }
+                    table={
+                      publicGameState ? (
                         <GameplayTable
                           gameState={publicGameState}
                           currentTurnPlayerID={currentTurnPlayerID}
-                          latestEventTexts={gameEvents.slice(-2).map(formatGameEvent)}
                           onPlayerClick={setSelectedTablePlayerID}
                         />
-                      )}
-
-                      {canOpenRequestFlow && (
+                      ) : (
+                        <div className="gameplay-shell-placeholder">
+                          Загружаем игровой стол…
+                        </div>
+                      )
+                    }
+                    centralStatus={
+                      gameplayUIViewModel ? (
+                        <GameplayCentralStatus
+                          model={gameplayUIViewModel.centralStatus}
+                          result={gameplayUIViewModel.result}
+                        />
+                      ) : null
+                    }
+                    action={
+                      gameplayUIViewModel?.action.mode === 'request-card' ? (
                         <div className="turn-action-panel">
                           <div className="turn-action-copy">
-                            <span className="turn-action-kicker">Твой ход</span>
-                            <strong>Сделай запрос карты</strong>
+                            <span className="turn-action-kicker">
+                              Твой ход
+                            </span>
+
+                            <strong>
+                              {gameplayUIViewModel.action.title}
+                            </strong>
+
                             <p className="form-hint">
-                              Выбери соперника и карту, которую хочешь получить.
+                              {gameplayUIViewModel.action.description}
                             </p>
                           </div>
 
                           <button
                             className="button turn-action-button"
                             type="button"
+                            disabled={!gameplayUIViewModel.action.canRequestCard}
                             onClick={() => setIsRequestFlowOpen(true)}
                           >
                             Запросить карту
                           </button>
                         </div>
-                      )}
-
-                      {publicGameState && !canOpenRequestFlow && !gameFinished && (
+                      ) : gameplayUIViewModel?.action.mode === 'waiting' ? (
                         <div className="turn-action-panel turn-action-panel-waiting">
                           <div className="turn-action-copy">
-                            <span className="turn-action-kicker">Ожидание</span>
-                            <strong>Сейчас ход другого игрока</strong>
+                            <span className="turn-action-kicker">
+                              Ожидание
+                            </span>
+
+                            <strong>
+                              {gameplayUIViewModel.action.title}
+                            </strong>
+
                             <p className="form-hint">
-                              Запрос карты станет доступен, когда ход перейдёт к тебе.
+                              {gameplayUIViewModel.action.description}
                             </p>
                           </div>
                         </div>
-                      )}
-
-                      <GamePanel
-                        room={room}
+                      ) : null
+                    }
+                    hand={
+                      <GameplayHandZone
+                        isHandOpen={isHandOpen}
                         player={player}
-                        publicGameState={publicGameState}
-                        currentTurnPlayerID={currentTurnPlayerID}
-                        temporaryMessages={temporaryMessages}
-                        gameFinished={gameFinished}
-                        socketStatus={socketStatus}
-                        onStartGame={startGame}
-                        canStartGame={canStartGame()}
-                        getPlayerName={getPlayerName}
-                        isStartingGame={isStartingGame}
-                        startGameHint={getStartGameHint()}
+                        playerHand={
+                          hasGameStarted && room && isGamePlaying
+                            ? playerHand
+                            : null
+                        }
+                        getQuartetTitle={getQuartetTitle}
+                        onToggleHand={() =>
+                          setIsHandOpen((current) => !current)
+                        }
+                        onCardPreview={setPreviewCard}
                       />
-                    </div>
-
-                    <GameplayHandZone
-                      isHandOpen={isHandOpen}
-                      player={player}
-                      playerHand={hasGameStarted && room && isGamePlaying ? playerHand : null}
-                      getQuartetTitle={getQuartetTitle}
-                      onToggleHand={() => setIsHandOpen((current) => !current)}
-                      onCardPreview={setPreviewCard}
-                    />
-                  </GameplayLayout>
+                    }
+                  />
                 </div>
               )}
 
