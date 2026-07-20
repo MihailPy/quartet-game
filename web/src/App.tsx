@@ -1619,77 +1619,71 @@ function App() {
 
               {room && room.status === 'playing' && (
                 <div className="active-game-shell">
-                  <div className="active-game-toolbar">
-                    <div className="active-game-room-info">
-                      <span className="active-game-room-label">Комната</span>
-                      <code className="active-game-room-id">{room.id}</code>
+                  <GameplayLayout
+                    statusBar={
+                      <div className="active-game-toolbar">
+                        <div className="active-game-room-info">
+                          <span className="active-game-room-label">
+                            Комната
+                          </span>
 
-                      <button
-                        className="secondary-button active-game-copy-button"
-                        type="button"
-                        onClick={copyRoomID}
-                      >
-                        Копировать ID
-                      </button>
-                    </div>
+                          <code className="active-game-room-id">
+                            {room.id}
+                          </code>
 
-                    <div className={gameFinished ? 'active-game-status active-game-status-finished' : 'active-game-status'}>
-                      <span className="active-game-status-label">Статус</span>
-                      <strong>{gameFinished ? 'Игра завершена' : 'Игра идёт'}</strong>
-                    </div>
+                          <button
+                            className="secondary-button active-game-copy-button"
+                            type="button"
+                            onClick={copyRoomID}
+                          >
+                            Копировать ID
+                          </button>
+                        </div>
 
-                    <button
-                      className="secondary-button active-game-leave-button"
-                      type="button"
-                      onClick={leaveRoom}
-                    >
-                      Выйти
-                    </button>
-                  </div>
+                        <div
+                          className={
+                            gameFinished
+                              ? 'active-game-status active-game-status-finished'
+                              : 'active-game-status'
+                          }
+                        >
+                          <span className="active-game-status-label">
+                            Статус
+                          </span>
 
-                  <GameplayLayout>
-                    <div className="gameplay-main-zone">
-                      {publicGameState && (
+                          <strong>
+                            {gameFinished
+                              ? 'Игра завершена'
+                              : 'Игра идёт'}
+                          </strong>
+                        </div>
+
+                        <button
+                          className="secondary-button active-game-leave-button"
+                          type="button"
+                          onClick={leaveRoom}
+                        >
+                          Выйти
+                        </button>
+                      </div>
+                    }
+                    table={
+                      publicGameState ? (
                         <GameplayTable
                           gameState={publicGameState}
                           currentTurnPlayerID={currentTurnPlayerID}
-                          latestEventTexts={gameEvents.slice(-2).map(formatGameEvent)}
+                          latestEventTexts={gameEvents
+                            .slice(-2)
+                            .map(formatGameEvent)}
                           onPlayerClick={setSelectedTablePlayerID}
                         />
-                      )}
-
-                      {canOpenRequestFlow && (
-                        <div className="turn-action-panel">
-                          <div className="turn-action-copy">
-                            <span className="turn-action-kicker">Твой ход</span>
-                            <strong>Сделай запрос карты</strong>
-                            <p className="form-hint">
-                              Выбери соперника и карту, которую хочешь получить.
-                            </p>
-                          </div>
-
-                          <button
-                            className="button turn-action-button"
-                            type="button"
-                            onClick={() => setIsRequestFlowOpen(true)}
-                          >
-                            Запросить карту
-                          </button>
+                      ) : (
+                        <div className="gameplay-shell-placeholder">
+                          Загружаем игровой стол…
                         </div>
-                      )}
-
-                      {publicGameState && !canOpenRequestFlow && !gameFinished && (
-                        <div className="turn-action-panel turn-action-panel-waiting">
-                          <div className="turn-action-copy">
-                            <span className="turn-action-kicker">Ожидание</span>
-                            <strong>Сейчас ход другого игрока</strong>
-                            <p className="form-hint">
-                              Запрос карты станет доступен, когда ход перейдёт к тебе.
-                            </p>
-                          </div>
-                        </div>
-                      )}
-
+                      )
+                    }
+                    centralStatus={
                       <GamePanel
                         room={room}
                         player={player}
@@ -1704,17 +1698,67 @@ function App() {
                         isStartingGame={isStartingGame}
                         startGameHint={getStartGameHint()}
                       />
-                    </div>
+                    }
+                    action={
+                      canOpenRequestFlow ? (
+                        <div className="turn-action-panel">
+                          <div className="turn-action-copy">
+                            <span className="turn-action-kicker">
+                              Твой ход
+                            </span>
 
-                    <GameplayHandZone
-                      isHandOpen={isHandOpen}
-                      player={player}
-                      playerHand={hasGameStarted && room && isGamePlaying ? playerHand : null}
-                      getQuartetTitle={getQuartetTitle}
-                      onToggleHand={() => setIsHandOpen((current) => !current)}
-                      onCardPreview={setPreviewCard}
-                    />
-                  </GameplayLayout>
+                            <strong>Сделай запрос карты</strong>
+
+                            <p className="form-hint">
+                              Выбери соперника и карту, которую хочешь
+                              получить.
+                            </p>
+                          </div>
+
+                          <button
+                            className="button turn-action-button"
+                            type="button"
+                            onClick={() => setIsRequestFlowOpen(true)}
+                          >
+                            Запросить карту
+                          </button>
+                        </div>
+                      ) : publicGameState && !gameFinished ? (
+                        <div className="turn-action-panel turn-action-panel-waiting">
+                          <div className="turn-action-copy">
+                            <span className="turn-action-kicker">
+                              Ожидание
+                            </span>
+
+                            <strong>
+                              Сейчас ход другого игрока
+                            </strong>
+
+                            <p className="form-hint">
+                              Запрос карты станет доступен, когда ход
+                              перейдёт к тебе.
+                            </p>
+                          </div>
+                        </div>
+                      ) : null
+                    }
+                    hand={
+                      <GameplayHandZone
+                        isHandOpen={isHandOpen}
+                        player={player}
+                        playerHand={
+                          hasGameStarted && room && isGamePlaying
+                            ? playerHand
+                            : null
+                        }
+                        getQuartetTitle={getQuartetTitle}
+                        onToggleHand={() =>
+                          setIsHandOpen((current) => !current)
+                        }
+                        onCardPreview={setPreviewCard}
+                      />
+                    }
+                  />
                 </div>
               )}
 

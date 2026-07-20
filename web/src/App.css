@@ -3696,4 +3696,62 @@ code {
   }
 }
 
+.gameplay-shell {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 16px;
+  width: 100%;
+  min-width: 0;
+}
 
+.gameplay-shell-status,
+.gameplay-shell-main,
+.gameplay-shell-table,
+.gameplay-shell-central-status,
+.gameplay-shell-action,
+.gameplay-shell-hand {
+  min-width: 0;
+}
+
+.gameplay-shell-main {
+  display: grid;
+  grid-template-areas:
+    "table"
+    "status"
+    "action";
+  gap: 16px;
+}
+
+.gameplay-shell-table {
+  grid-area: table;
+}
+
+.gameplay-shell-central-status {
+  grid-area: status;
+}
+
+.gameplay-shell-action {
+  grid-area: action;
+}
+
+.gameplay-shell-placeholder {
+  display: grid;
+  min-height: 320px;
+  place-items: center;
+  padding: 24px;
+  border: 1px dashed #d4d4d8;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.72);
+  color: #71717a;
+  text-align: center;
+}
+
+@media (max-width: 720px) {
+  .gameplay-shell {
+    gap: 12px;
+  }
+
+  .gameplay-shell-main {
+    gap: 12px;
+  }
+}
