@@ -69,7 +69,6 @@ export function PlayerHandPanel({
                     <CardImage imageUrl={card.image_url} title={card.title} />
 
                     <strong>{card.title}</strong>
-                    <small>{card.id}</small>
                   </button>
                 ))}
               </div>
