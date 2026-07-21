@@ -31,8 +31,6 @@ export function CardPreviewModal({
           </p>
 
           <h2>{card.title}</h2>
-
-          <small>{card.id}</small>
         </div>
 
         <button className="button" type="button" onClick={onClose}>

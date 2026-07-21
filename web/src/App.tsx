@@ -1,6 +1,4 @@
 import { useEffect, useRef, useState } from 'react'
-import { GameplayCentralStatus } from './components/GameplayCentralStatus'
-import { buildGameplayUIViewModel } from './gameplay/buildGameplayUIViewModel'
 import {
   createRoomRequest,
   createUserQuartetRequest,
@@ -13,7 +11,6 @@ import {
   loadGameStateRequest,
   loadPlayerHandRequest,
   loadRoomRequest,
-  loadUserHistoryRequest,
   loadUserQuartetsRequest,
   loadUserRequest,
   loginUserRequest,
@@ -28,6 +25,7 @@ import { AccountPanel } from './components/AccountPanel'
 import { CardPreviewModal } from './components/CardPreviewModal'
 import { EntryPanel } from './components/EntryPanel'
 import { GamePanel } from './components/GamePanel'
+import { GameplayCentralStatus } from './components/GameplayCentralStatus'
 import { GameplayHandZone } from './components/GameplayHandZone'
 import { GameplayLayout } from './components/GameplayLayout'
 import { GameplayStatusBar } from './components/GameplayStatusBar'
@@ -41,6 +39,7 @@ import { RoomPanel } from './components/RoomPanel'
 import { ToastContainer } from './components/ToastContainer'
 import { Panel } from './components/ui/Panel'
 import { buildGameplayLastAction } from './gameplay/buildGameplayLastAction'
+import { buildGameplayUIViewModel } from './gameplay/buildGameplayUIViewModel'
 import type { GameplayLastActionViewModel } from './gameplay/types'
 import {
   clearSession,
@@ -90,7 +89,7 @@ function App() {
   const [playerHand, setPlayerHand] = useState<PlayerHandPayload | null>(null)
   const [targetPlayerID, setTargetPlayerID] = useState<string>('')
   const [selectedCardID, setSelectedCardID] = useState<string>('')
-  const [currentTurnPlayerID, setCurrentTurnPlayerID] = useState<string>('')
+  const currentTurnPlayerID = publicGameState?.current_player_id ?? ''
   const [gameFinished, setGameFinished] = useState<GameFinishedPayload | null>(null)
   const [temporaryMessages, setTemporaryMessages] = useState<TemporaryMessage[]>([])
   const [toasts, setToasts] = useState<ToastMessage[]>([])
@@ -131,7 +130,6 @@ function App() {
     setPlayerHand(null)
     setTargetPlayerID('')
     setSelectedCardID('')
-    setCurrentTurnPlayerID('')
     setGameFinished(null)
     setTemporaryMessages([])
     setError('')
@@ -316,7 +314,6 @@ function App() {
 
       updateRoom(data.room)
       setPublicGameState(data.state)
-      setCurrentTurnPlayerID(data.state.current_player_id)
 
       await loadDeck(data.room.id)
     } catch (err) {
@@ -482,6 +479,13 @@ function App() {
     )
   }
 
+  function getRenderPlayerName(playerID: string): string {
+    return (
+      room?.players.find((roomPlayer) => roomPlayer.id === playerID)?.name ??
+      playerID
+    )
+  }
+
   function getQuartetTitle(quartetID: string): string {
     const currentDeck = deckRef.current as unknown as {
       Quartets?: { ID?: string; Title?: string; id?: string; title?: string }[]
@@ -530,7 +534,7 @@ function App() {
       return crypto.randomUUID()
     }
 
-    return `${Date.now()}-${Math.random().toString(16).slice(2)}`
+    return `temporary-${crypto.getRandomValues(new Uint32Array(1))[0]}`
   }
 
   function showToast(text: string, type: ToastType = 'info') {
@@ -668,14 +672,12 @@ function App() {
 
     if (!data) {
       setPublicGameState(null)
-      setCurrentTurnPlayerID('')
       setGameFinished(null)
       showTemporaryMessage('Не удалось восстановить состояние игры после reconnect.')
       return
     }
 
     setPublicGameState(data)
-    setCurrentTurnPlayerID(data.current_player_id)
     void loadGameEvents(roomID)
 
     if (data.status === 'finished') {
@@ -824,12 +826,6 @@ function App() {
     saveUser(null)
     setUserHistory([])
     showToast('Вы вышли из аккаунта.', 'info')
-  }
-
-  async function loadUserHistory(userID: string) {
-    const data = await loadUserHistoryRequest(userID)
-
-    setUserHistory(data?.records ?? [])
   }
 
   async function loadUserQuartets(userID: string) {
@@ -1075,66 +1071,23 @@ function App() {
     setLastGameplayAction(latestAction ?? null)
   }
 
-  function formatGameEvent(event: GameEvent): string {
+  function formatRenderGameEvent(event: GameEvent): string {
     switch (event.type) {
       case 'game_started':
         return 'Игра началась.'
 
       case 'card_requested':
-        return `${getPlayerName(event.actor_id)} запросил карту у ${getPlayerName(event.target_id)}.`
+        return `${getRenderPlayerName(event.actor_id)} запросил карту у ${getRenderPlayerName(event.target_id)}.`
 
-      case 'card_request_succeeded': {
-        const cardTitle = getEventPayloadString(event, 'card_title', 'карта')
+      case 'card_request_succeeded':
+        return `Запрос успешен.`
 
-        return `Запрос успешен: ${cardTitle} передана игроку ${getPlayerName(event.actor_id)}.`
-      }
-
-      case 'card_request_failed': {
-        const cardTitle = getEventPayloadString(event, 'card_title', 'запрошенной карты')
-
-        return `У ${getPlayerName(event.target_id)} нет карты ${cardTitle}.`
-      }
-
-      case 'quartet_completed': {
-        const quartetID = getEventPayloadString(event, 'quartet_id', '')
-        const quartetTitle = quartetID ? getQuartetTitle(quartetID) : 'квартет'
-
-        return `${getPlayerName(event.actor_id)} собрал квартет “${quartetTitle}”.`
-      }
-
-      case 'turn_changed':
-        return `Ход перешёл к ${getPlayerName(event.target_id)}.`
-
-      case 'game_finished': {
-        const winnerIDs = event.payload.winner_ids
-
-        if (Array.isArray(winnerIDs) && winnerIDs.length > 0) {
-          const winnerNames = winnerIDs
-            .filter((winnerID): winnerID is string => typeof winnerID === 'string')
-            .map(getPlayerName)
-            .join(', ')
-
-          const winnerLabel = winnerIDs.length > 1 ? 'Победители' : 'Победитель'
-
-          return `Игра завершена. ${winnerLabel}: ${winnerNames}.`
-        }
-
-        return 'Игра завершена.'
-      }
+      case 'card_request_failed':
+        return `Карта не найдена.`
 
       default:
         return event.type
     }
-  }
-
-  function getEventPayloadString(
-    event: GameEvent,
-    key: string,
-    fallback: string,
-  ): string {
-    const value = event.payload[key]
-
-    return typeof value === 'string' && value ? value : fallback
   }
 
   function formatEventTime(timestamp: string): string {
@@ -1186,6 +1139,7 @@ function App() {
     const socket = new WebSocket(socketUrl)
 
     socketRef.current = socket
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSocketStatus('connecting')
 
     socket.onopen = () => {
@@ -1220,7 +1174,6 @@ function App() {
           const payload = message.payload as PublicGameState
 
           setPublicGameState(payload)
-          setCurrentTurnPlayerID(payload.current_player_id)
         }
 
         if (message.type === 'turn_changed') {
@@ -1228,7 +1181,16 @@ function App() {
             current_player_id: string
           }
 
-          setCurrentTurnPlayerID(payload.current_player_id)
+          setPublicGameState((prev) => {
+            if (!prev) {
+              return prev
+            }
+
+            return {
+              ...prev,
+              current_player_id: payload.current_player_id,
+            }
+          })
 
           const playerName = getPlayerName(payload.current_player_id)
           const messageText =
@@ -1265,7 +1227,16 @@ function App() {
           setError('')
           setTargetPlayerID('')
           setSelectedCardID('')
-          setCurrentTurnPlayerID(payload.next_player_id)
+          setPublicGameState((prev) => {
+            if (!prev) {
+              return prev
+            }
+
+            return {
+              ...prev,
+              current_player_id: payload.next_player_id,
+            }
+          })
 
           if (payload.success) {
             const resultMessage = `Карта “${cardTitle}” найдена. Игрок продолжает ход.`
@@ -1434,54 +1405,38 @@ function App() {
     void restoreSession()
   }, [])
 
-  useEffect(() => {
-    if (!targetPlayerID) {
-      return
-    }
-
-    const targetPlayer = publicGameState?.players.find(
-      (gamePlayer) => gamePlayer.id === targetPlayerID,
-    )
-
-    if (!targetPlayer || targetPlayer.card_count === 0) {
-      setTargetPlayerID('')
-    }
-  }, [publicGameState, targetPlayerID])
-
   const availableRequestCards = getAvailableRequestCards()
-
-  useEffect(() => {
-    if (!selectedCardID) {
-      return
-    }
-
-    const selectedCardIsAvailable = availableRequestCards.some(
+  const availableTargetPlayerID =
+    publicGameState?.players.some(
+      (gamePlayer) =>
+        gamePlayer.id === targetPlayerID &&
+        gamePlayer.card_count > 0,
+    )
+      ? targetPlayerID
+      : ''
+  const availableSelectedCardID =
+    availableRequestCards.some(
       (card) => card.id === selectedCardID,
     )
-
-    if (!selectedCardIsAvailable) {
-      setSelectedCardID('')
-    }
-  }, [availableRequestCards, selectedCardID])
+      ? selectedCardID
+      : ''
 
   useEffect(() => {
-    if (!room || room.status === 'playing') {
+    if (!room) {
       return
     }
 
-    void loadAvailableQuartets(room.id, room.owner_player_id)
-  }, [room?.id, room?.owner_player_id, room?.status])
-
-  useEffect(() => {
-    if (!user) {
-      setUserHistory([])
-      setUserQuartets([])
-      return
+    const load = async () => {
+      await loadAvailableQuartets(
+        room.id,
+        room.owner_player_id,
+      )
     }
 
-    void loadUserHistory(user.id)
-    void loadUserQuartets(user.id)
-  }, [user?.id])
+    void load()
+  }, [
+    room,
+  ])
 
   const isEntered = room !== null && player !== null && isCurrentPlayerInRoom()
   const isGamePlaying = publicGameState?.status === 'playing'
@@ -1497,6 +1452,8 @@ function App() {
         lastAction: lastGameplayAction,
       })
       : null
+
+  const reversedGameEvents = [...gameEvents].reverse()
 
   return (
     <main className="app">
@@ -1727,18 +1684,21 @@ function App() {
                 <RequestCardFlow
                   players={publicGameState.players}
                   currentPlayerID={player?.id ?? ''}
-                  selectedTargetPlayerID={targetPlayerID}
+                  selectedTargetPlayerID={availableTargetPlayerID}
                   onSelectTargetPlayer={setTargetPlayerID}
                   onClose={() => setIsRequestFlowOpen(false)}
                   availableRequestCards={availableRequestCards}
-                  selectedCardID={selectedCardID}
+                  selectedCardID={availableSelectedCardID}
                   onSelectCard={setSelectedCardID}
                   onPreviewCard={previewRequestCard}
                   onSubmit={() => {
                     requestCard()
                     setIsRequestFlowOpen(false)
                   }}
-                  canSubmit={targetPlayerID !== '' && selectedCardID !== ''}
+                  canSubmit={
+                    availableTargetPlayerID !== '' &&
+                    availableSelectedCardID !== ''
+                  }
                   playerHand={playerHand}
                   getQuartetTitle={getQuartetTitle}
                 />
@@ -1812,14 +1772,14 @@ function App() {
                       <p className="form-hint">Событий пока нет.</p>
                     ) : (
                       <div className="game-log-list">
-                        {[...gameEvents].reverse().map((event) => (
+                        {reversedGameEvents.map((event) => (
                           <div className="game-log-item" key={event.id}>
                             <span className="game-log-time">
                               [{formatEventTime(event.created_at)}]
                             </span>
 
                             <span className="game-log-message">
-                              {formatGameEvent(event)}
+                              {formatRenderGameEvent(event)}
                             </span>
                           </div>
                         ))}

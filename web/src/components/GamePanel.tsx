@@ -57,8 +57,7 @@ export function GamePanel({
 }: GamePanelProps) {
 
   const isCurrentPlayerTurn = player !== null && currentTurnPlayerID === player.id
-  const turnPlayerID = currentTurnPlayerID || publicGameState?.current_player_id || ''
-  const turnPlayerName = turnPlayerID ? getPlayerName(turnPlayerID) : ''
+  const turnPlayerName = currentTurnPlayerID ? getPlayerName(currentTurnPlayerID) : ''
 
   const winnerNames =
     gameFinished?.winners.map(getPlayerName).join(', ') ?? ''
