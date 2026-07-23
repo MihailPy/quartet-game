@@ -38,6 +38,7 @@ import { RequestCardFlow } from './components/RequestCardFlow'
 import { RoomPanel } from './components/RoomPanel'
 import { ToastContainer } from './components/ToastContainer'
 import { Panel } from './components/ui/Panel'
+import { buildGameplayHandModel } from './gameplay/buildGameplayHandModel'
 import { buildGameplayLastAction } from './gameplay/buildGameplayLastAction'
 import { buildGameplayUIViewModel } from './gameplay/buildGameplayUIViewModel'
 import type { GameplayLastActionViewModel } from './gameplay/types'
@@ -1421,6 +1422,16 @@ function App() {
       ? selectedCardID
       : ''
 
+  const gameplayHandModel =
+    deck && playerHand
+      ? buildGameplayHandModel({
+        deck,
+        playerHand,
+        availableRequestCards,
+        canRequestCard: true,
+      })
+      : []
+
   useEffect(() => {
     if (!room) {
       return
@@ -1665,6 +1676,7 @@ function App() {
                         onCardPreview={setPreviewCard}
                         selectedCardID={selectedCardID}
                         onSelectCard={setSelectedCardID}
+                        gameplayHandModel={gameplayHandModel}
                       />
                     }
                   />

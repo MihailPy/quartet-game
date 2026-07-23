@@ -1,5 +1,6 @@
+import type { GameplayHandQuartetViewModel, Player, PlayerHandPayload, PrivateCard } from '../types'
 import { PlayerHandPanel } from './PlayerHandPanel'
-import type { Player, PlayerHandPayload, PrivateCard } from '../types'
+import { GameplayQuartetCard } from './GameplayQuartetCard'
 
 type GameplayHandZoneProps = {
   isHandOpen: boolean
@@ -10,6 +11,7 @@ type GameplayHandZoneProps = {
   onCardPreview: (card: PrivateCard) => void
   selectedCardID: string
   onSelectCard: (cardID: string) => void
+  gameplayHandModel: GameplayHandQuartetViewModel[]
 }
 
 export function GameplayHandZone({
@@ -21,6 +23,7 @@ export function GameplayHandZone({
   onCardPreview,
   selectedCardID,
   onSelectCard,
+  gameplayHandModel,
 }: GameplayHandZoneProps) {
   if (!playerHand) {
     return null
@@ -43,6 +46,14 @@ export function GameplayHandZone({
           onSelectCard={onSelectCard}
         />
       )}
+      {gameplayHandModel.map((quartet) => (
+        <GameplayQuartetCard
+          key={quartet.quartetID}
+          quartet={quartet}
+          selectedCardID={selectedCardID}
+          onSelectCard={onSelectCard}
+        />
+      ))}
     </div>
   )
 }
