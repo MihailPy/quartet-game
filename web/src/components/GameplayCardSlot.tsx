@@ -3,10 +3,14 @@ import { CardImage } from './CardImage'
 
 type GameplayCardSlotProps = {
   slot: GameplayHandCardSlotViewModel
+  isSelected: boolean
+  onSelect: (cardID: string) => void
 }
 
 export function GameplayCardSlot({
   slot,
+  isSelected,
+  onSelect,
 }: GameplayCardSlotProps) {
   return (
     <div
@@ -16,23 +20,33 @@ export function GameplayCardSlot({
           : 'gameplay-card-slot gameplay-card-slot-missing'
       }
     >
-      <CardImage
-        imageUrl={slot.imageURL}
-        title={slot.title}
-      />
+      {slot.ownership === 'missing' ? (
+        <button
+          type="button"
+          disabled={!slot.isSelectable}
+          className={
+            isSelected
+              ? 'gameplay-card-slot selected'
+              : 'gameplay-card-slot'
+          }
+          onClick={() => onSelect(slot.cardID)}
+        >
+          <CardImage
+            imageUrl={slot.imageURL}
+            title={slot.title}
+          />
 
-      <strong>{slot.title}</strong>
+          <strong>{slot.title}</strong>
+        </button>
+      ) : (
+        <div className="gameplay-card-slot">
+          <CardImage
+            imageUrl={slot.imageURL}
+            title={slot.title}
+          />
 
-      {slot.ownership === 'missing' && (
-        <span>
-          Нужно получить
-        </span>
-      )}
-
-      {slot.disabledReason && (
-        <small>
-          {slot.disabledReason}
-        </small>
+          <strong>{slot.title}</strong>
+        </div>
       )}
     </div>
   )

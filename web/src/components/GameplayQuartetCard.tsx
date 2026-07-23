@@ -3,10 +3,14 @@ import { GameplayCardSlot } from './GameplayCardSlot'
 
 type GameplayQuartetCardProps = {
   quartet: GameplayHandQuartetViewModel
+  selectedCardID: string
+  onSelectCard: (cardID: string) => void
 }
 
 export function GameplayQuartetCard({
   quartet,
+  selectedCardID,
+  onSelectCard,
 }: GameplayQuartetCardProps) {
   return (
     <section className="gameplay-quartet-card">
@@ -27,8 +31,9 @@ export function GameplayQuartetCard({
       <div className="gameplay-quartet-slots">
         {quartet.slots.map((slot) => (
           <GameplayCardSlot
-            key={slot.cardID}
             slot={slot}
+            isSelected={slot.cardID === selectedCardID}
+            onSelect={onSelectCard}
           />
         ))}
       </div>

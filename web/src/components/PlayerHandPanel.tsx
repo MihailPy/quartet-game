@@ -6,6 +6,8 @@ type PlayerHandPanelProps = {
   playerHand: PlayerHandPayload | null
   getQuartetTitle: (quartetID: string) => string
   onCardPreview?: (card: PrivateCard) => void
+  selectedCardID: string
+  onSelectCard: (cardID: string) => void
 }
 
 export function PlayerHandPanel({
@@ -13,6 +15,8 @@ export function PlayerHandPanel({
   playerHand,
   getQuartetTitle,
   onCardPreview,
+  selectedCardID,
+  onSelectCard,
 }: PlayerHandPanelProps) {
   const cardsByQuartet =
     playerHand?.cards.reduce<Record<string, typeof playerHand.cards>>(
@@ -59,18 +63,26 @@ export function PlayerHandPanel({
               )}
 
               <div className="cards-list">
-                {cards.map((card) => (
-                  <button
-                    className="card"
-                    key={card.id}
-                    type="button"
-                    onClick={() => onCardPreview?.(card)}
-                  >
-                    <CardImage imageUrl={card.image_url} title={card.title} />
+                {cards.map((card) => {
+                  const isSelected = selectedCardID === card.id
 
-                    <strong>{card.title}</strong>
-                  </button>
-                ))}
+                  return (
+                    <button
+                      className={
+                        isSelected
+                          ? 'card selected'
+                          : 'card'
+                      }
+                      key={card.id}
+                      type="button"
+                      onClick={() => onCardPreview?.(card)}
+                    >
+                      <CardImage imageUrl={card.image_url} title={card.title} />
+
+                      <strong>{card.title}</strong>
+                    </button>
+                  )
+                })}
               </div>
             </div>
           ))}

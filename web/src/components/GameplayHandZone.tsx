@@ -8,6 +8,8 @@ type GameplayHandZoneProps = {
   getQuartetTitle: (quartetID: string) => string
   onToggleHand: () => void
   onCardPreview: (card: PrivateCard) => void
+  selectedCardID: string
+  onSelectCard: (cardID: string) => void
 }
 
 export function GameplayHandZone({
@@ -17,6 +19,8 @@ export function GameplayHandZone({
   getQuartetTitle,
   onToggleHand,
   onCardPreview,
+  selectedCardID,
+  onSelectCard,
 }: GameplayHandZoneProps) {
   if (!playerHand) {
     return null
@@ -35,6 +39,8 @@ export function GameplayHandZone({
           playerHand={playerHand}
           getQuartetTitle={getQuartetTitle}
           onCardPreview={onCardPreview}
+          selectedCardID={selectedCardID}
+          onSelectCard={onSelectCard}
         />
       )}
     </div>

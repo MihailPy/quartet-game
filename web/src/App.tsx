@@ -1663,6 +1663,8 @@ function App() {
                           setIsHandOpen((current) => !current)
                         }
                         onCardPreview={setPreviewCard}
+                        selectedCardID={selectedCardID}
+                        onSelectCard={setSelectedCardID}
                       />
                     }
                   />
