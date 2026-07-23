@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { InlineRequestPanel } from './components/InlineRequestPanel'
 import {
   createRoomRequest,
   createUserQuartetRequest,
@@ -1422,6 +1423,11 @@ function App() {
       ? selectedCardID
       : ''
 
+  const selectedRequestCard =
+    availableRequestCards.find(
+      (card) => card.id === availableSelectedCardID,
+    ) ?? null
+
   const gameplayHandModel =
     deck && playerHand
       ? buildGameplayHandModel({
@@ -1618,30 +1624,39 @@ function App() {
                     }
                     action={
                       gameplayUIViewModel?.action.mode === 'request-card' ? (
-                        <div className="turn-action-panel">
-                          <div className="turn-action-copy">
-                            <span className="turn-action-kicker">
-                              Твой ход
-                            </span>
+                        selectedRequestCard &&
+                          publicGameState &&
+                          room &&
+                          player ? (
+                          <InlineRequestPanel
+                            selectedCard={selectedRequestCard}
+                            players={publicGameState.players}
+                            roomPlayers={room.players}
+                            currentPlayerID={player.id}
+                            targetPlayerID={availableTargetPlayerID}
+                            onSelectTargetPlayer={setTargetPlayerID}
+                            onClearCard={() => {
+                              setSelectedCardID('')
+                              setTargetPlayerID('')
+                            }}
+                          />
+                        ) : (
+                          <div className="turn-action-panel">
+                            <div className="turn-action-copy">
+                              <span className="turn-action-kicker">
+                                Твой ход
+                              </span>
 
-                            <strong>
-                              {gameplayUIViewModel.action.title}
-                            </strong>
+                              <strong>
+                                Выбери недостающую карту
+                              </strong>
 
-                            <p className="form-hint">
-                              {gameplayUIViewModel.action.description}
-                            </p>
+                              <p className="form-hint">
+                                Нажми на доступную недостающую карту в своей руке.
+                              </p>
+                            </div>
                           </div>
-
-                          <button
-                            className="button turn-action-button"
-                            type="button"
-                            disabled={!gameplayUIViewModel.action.canRequestCard}
-                            onClick={() => setIsRequestFlowOpen(true)}
-                          >
-                            Запросить карту
-                          </button>
-                        </div>
+                        )
                       ) : gameplayUIViewModel?.action.mode === 'waiting' ? (
                         <div className="turn-action-panel turn-action-panel-waiting">
                           <div className="turn-action-copy">
