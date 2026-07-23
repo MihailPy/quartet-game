@@ -4443,3 +4443,9 @@ code {
     position: static;
   }
 }
+
+.gameplay-quartet-slots {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}

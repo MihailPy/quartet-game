@@ -1,7 +1,7 @@
 APP_NAME=quartet-game
 MAIN_PATH=./cmd/api
 DATABASE_URL=postgres://quartet_user:quartet_password@localhost:5432/quartet_game?sslmode=disable
-ALLOWED_ORIGINS=http://192.168.1.21:5173,http://localhost:5173
+ALLOWED_ORIGINS=http://192.168.1.17:5173,http://localhost:5173
 
 .PHONY: run test fmt tidy build clean migrate-up migrate-down migrate-force
 
@@ -43,4 +43,4 @@ web-dev-host:
 	cd web && npm run dev -- --host 0.0.0.0
 
 web-test:
-	cd web && npm run build
+	cd web && npm run lint && npm run build
