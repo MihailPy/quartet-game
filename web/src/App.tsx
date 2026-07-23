@@ -1408,18 +1408,28 @@ function App() {
   }, [])
 
   const availableRequestCards = getAvailableRequestCards()
+
+  const canSelectRequestCard =
+    publicGameState?.status === 'playing' &&
+    player?.id === publicGameState.current_player_id &&
+    gameFinished === null
+
   const availableTargetPlayerID =
-    publicGameState?.players.some(
-      (gamePlayer) =>
-        gamePlayer.id === targetPlayerID &&
-        gamePlayer.card_count > 0,
-    )
+    player &&
+      publicGameState?.players.some(
+        (gamePlayer) =>
+          gamePlayer.id !== player.id &&
+          gamePlayer.id === targetPlayerID &&
+          gamePlayer.card_count > 0,
+      )
       ? targetPlayerID
       : ''
+
   const availableSelectedCardID =
-    availableRequestCards.some(
-      (card) => card.id === selectedCardID,
-    )
+    canSelectRequestCard &&
+      availableRequestCards.some(
+        (card) => card.id === selectedCardID,
+      )
       ? selectedCardID
       : ''
 
@@ -1434,7 +1444,7 @@ function App() {
         deck,
         playerHand,
         availableRequestCards,
-        canRequestCard: true,
+        canRequestCard: canSelectRequestCard,
       })
       : []
 
@@ -1689,7 +1699,7 @@ function App() {
                           setIsHandOpen((current) => !current)
                         }
                         onCardPreview={setPreviewCard}
-                        selectedCardID={selectedCardID}
+                        selectedCardID={availableSelectedCardID}
                         onSelectCard={setSelectedCardID}
                         gameplayHandModel={gameplayHandModel}
                       />

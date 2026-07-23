@@ -43,7 +43,6 @@ export function GameplayHandZone({
           getQuartetTitle={getQuartetTitle}
           onCardPreview={onCardPreview}
           selectedCardID={selectedCardID}
-          onSelectCard={onSelectCard}
         />
       )}
       {gameplayHandModel.map((quartet) => (

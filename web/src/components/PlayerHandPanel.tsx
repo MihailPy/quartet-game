@@ -7,7 +7,6 @@ type PlayerHandPanelProps = {
   getQuartetTitle: (quartetID: string) => string
   onCardPreview?: (card: PrivateCard) => void
   selectedCardID: string
-  onSelectCard: (cardID: string) => void
 }
 
 export function PlayerHandPanel({
@@ -16,7 +15,6 @@ export function PlayerHandPanel({
   getQuartetTitle,
   onCardPreview,
   selectedCardID,
-  onSelectCard,
 }: PlayerHandPanelProps) {
   const cardsByQuartet =
     playerHand?.cards.reduce<Record<string, typeof playerHand.cards>>(
