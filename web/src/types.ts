@@ -168,3 +168,22 @@ export type GameEvent = {
 export type GameEventsResponse = {
   events: GameEvent[]
 }
+
+export type GameplayHandCardSlotViewModel = {
+  cardID: string
+  quartetID: string
+  title: string
+  imageURL?: string
+  ownership: 'owned' | 'missing'
+  isSelectable: boolean
+  disabledReason?: string
+}
+
+export type GameplayHandQuartetViewModel = {
+  quartetID: string
+  title: string
+  ownedCount: number
+  totalCount: number
+  isCompleted: boolean
+  slots: GameplayHandCardSlotViewModel[]
+}
